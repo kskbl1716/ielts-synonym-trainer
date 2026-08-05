@@ -1,7 +1,11 @@
 ﻿const fs = require('fs');
-const h = fs.readFileSync('outputs/index.html','utf8');
-const i = h.indexOf('<script>');
-const j = h.indexOf('</script>', i);
-if(i<0||j<0) throw new Error('script block not found');
-fs.writeFileSync('work/check-v4.js', h.slice(i+8, j), 'utf8');
-console.log('extracted', j-i-8, 'bytes');
+const html = fs.readFileSync('outputs/index.html', 'utf8');
+const m = html.match(/const WORDS = (\[.*?\]);/s);
+if (!m) { console.error('WORDS not found'); process.exit(1); }
+// eslint-disable-next-line no-eval
+const words = eval(m[1]);
+const list = words.map(w => String(w.w).trim()).filter(Boolean);
+const uniq = [...new Set(list.map(x => x.toLowerCase()))];
+console.log('total entries:', words.length, '| unique lowercase:', uniq.length);
+fs.writeFileSync('work/.existing-words.txt', list.join('\n') + '\n', 'utf8');
+console.log('written work/.existing-words.txt with', list.length, 'lines');

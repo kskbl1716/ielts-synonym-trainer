@@ -62,7 +62,21 @@ function renderLearnList(){
       w.s.some(s=>s.toLowerCase().includes(q)) || w.e.toLowerCase().includes(q);
   });
   const box = $('#learn-list');
-  if(!list.length){ box.innerHTML = '<div class="empty">没有匹配的单词，换个关键词试试～</div>'; return; }
+  if(!list.length){
+    const hasFilter = (typeof learnZone==='undefined' ? 'all' : learnZone)!=='all' || (typeof learnTopic==='undefined' ? 'all' : learnTopic)!=='all';
+    if(q){
+      box.innerHTML = '<div class="empty">没有找到与「<b>'+escapeHtml(learnQuery.trim())+'</b>」匹配的单词'+(hasFilter?'（当前还有专区 / 主题筛选）':'')+'<br><button class="btn btn-primary btn-sm empty-btn" id="learn-clear-search" type="button">✕ 清除搜索</button></div>';
+    } else if(hasFilter){
+      box.innerHTML = '<div class="empty">当前筛选条件下没有单词（专区 × 主题无交集）<br><button class="btn btn-primary btn-sm empty-btn" id="learn-clear-filter" type="button">✕ 清除筛选</button></div>';
+    } else {
+      box.innerHTML = '<div class="empty">词库还没有单词～</div>';
+    }
+    const bs = box.querySelector('#learn-clear-search');
+    if(bs) bs.addEventListener('click', ()=>{ const inp=$('#learn-search'); if(inp) inp.value=''; learnQuery=''; renderLearnList(); });
+    const bf = box.querySelector('#learn-clear-filter');
+    if(bf) bf.addEventListener('click', ()=>{ learnZone='all'; learnTopic='all'; renderLearn(); });
+    return;
+  }
   box.innerHTML = list.map(w=>{
     const syn = w.s.map(s=>'<button class="syn-chip'+(dictOf(s)?' linkable':'')+'" data-w="'+escapeHtml(s)+'" data-speak="'+escapeHtml(s)+'">'+escapeHtml(s)+(dictOf(s)?' 📖':'')+'</button>').join('');
     const m = isMastered(w.w) ? '<span class="done">✅ 已掌握</span>' : '';

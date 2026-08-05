@@ -261,7 +261,17 @@
   }
   function onAuth(event, session){
     sessionUser = session ? session.user : null;
-    if(sessionUser) setTimeout(loadFromCloud, 250);
+    window.__CURRENT_USER_EMAIL__ = sessionUser ? (sessionUser.email || '') : '';
+    if(sessionUser){
+      setTimeout(loadFromCloud, 250);
+      var si = document.getElementById('learn-search');
+      var em = sessionUser.email || '';
+      if(si && si.value && em && si.value.trim().toLowerCase() === em.toLowerCase()){
+        si.value = '';
+        if(typeof learnQuery !== 'undefined') learnQuery = '';
+        if(typeof renderLearnList === 'function') renderLearnList();
+      }
+    }
     renderAuthUI();
     renderCloudCard();
   }
