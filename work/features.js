@@ -543,3 +543,73 @@ switchView = function(name){
   renderPracticeSetup();
   renderHeaderStats();
 })();
+/* ================= v8: 意见反馈（直达站长邮箱） ================= */
+var FEEDBACK_EMAIL = '2012837089@qq.com';
+function renderFeedbackPanel(){
+  const sec = $('#view-settings');
+  if(!sec || $('#feedback-panel')) return;
+  const panel = document.createElement('div');
+  panel.className = 'panel';
+  panel.id = 'feedback-panel';
+  panel.innerHTML =
+    '<h3>💬 意见反馈</h3>'+
+    '<div class="set-row"><div class="set-label">反馈类型</div><div class="set-control"><select id="fb-type" class="fb-select">'+
+      '<option value="建议">💡 功能建议</option><option value="Bug">🐞 Bug 反馈</option><option value="词库">📚 词库问题</option><option value="其他">📝 其他</option>'+
+    '</select></div></div>'+
+    '<div class="set-row"><div class="set-label">反馈内容</div><div class="set-control"><textarea id="fb-content" rows="4" placeholder="请描述你的建议或遇到的问题…（必填）"></textarea></div></div>'+
+    '<div class="set-row"><div class="set-label">联系方式</div><div class="set-control"><input id="fb-contact" type="text" placeholder="选填：邮箱 / QQ / 微信，方便我回复你"></div></div>'+
+    '<div class="set-row"><div class="set-label"></div><div class="set-control">'+
+      '<button class="btn btn-primary btn-sm" id="fb-send">📨 发送反馈</button>'+
+      '<span class="fb-status" id="fb-status"></span>'+
+    '</div></div>'+
+    '<div class="set-hint">反馈将发送到站长邮箱（'+FEEDBACK_EMAIL+'）。首次发送会收到一封激活确认邮件，点开确认后，之后的反馈就能直接送达；网络不通时可用「📧 邮件直发」兜底。</div>';
+  const about = sec.querySelector('#set-about');
+  const anchor = about ? about.closest('.panel') : null;
+  if(anchor) sec.insertBefore(panel, anchor); else sec.appendChild(panel);
+  const fb = $('#fb-send');
+  if(fb) fb.addEventListener('click', submitFeedback);
+  const fbc = $('#fb-content');
+  if(fbc) fbc.addEventListener('keydown', e=>{ if(e.key==='Enter' && (e.ctrlKey||e.metaKey)) submitFeedback(); });
+}
+function submitFeedback(){
+  const contentEl = $('#fb-content'), typeEl = $('#fb-type'), contactEl = $('#fb-contact'), st = $('#fb-status');
+  const content = contentEl ? contentEl.value : '';
+  const type = typeEl ? typeEl.value : '其他';
+  const contact = contactEl ? contactEl.value : '';
+  const setSt = (txt, cls, extraLink)=>{
+    if(!st) return;
+    st.textContent = '';
+    st.className = 'fb-status'+(cls?' '+cls:'');
+    if(txt) st.appendChild(document.createTextNode(txt));
+    if(extraLink){ st.appendChild(document.createTextNode(' ')); const a=document.createElement('a'); a.href=extraLink; a.textContent='📧 邮件直发'; a.style.color='var(--accent,#2563eb)'; st.appendChild(a); }
+  };
+  if(!content.trim()){ setSt('请先填写反馈内容', 'bad'); return; }
+  const btn = $('#fb-send');
+  if(btn){ btn.disabled = true; btn.textContent = '发送中…'; }
+  const mailto = 'mailto:'+FEEDBACK_EMAIL+'?subject='+encodeURIComponent('【雅思训练器反馈】'+type)+'&body='+encodeURIComponent(content+'\n\n联系方式：'+(contact||'未填写'));
+  const body = new FormData();
+  body.append('_subject','【雅思训练器反馈】'+type);
+  body.append('_template','table');
+  body.append('_captcha','false');
+  body.append('反馈类型',type);
+  body.append('反馈内容',content);
+  body.append('联系方式',contact||'未填写');
+  fetch('https://formsubmit.co/ajax/'+FEEDBACK_EMAIL,{method:'POST',body:body})
+    .then(r=>r.json().catch(()=>({})))
+    .then(res=>{
+      if(btn){ btn.disabled=false; btn.textContent='📨 发送反馈'; }
+      if(res && (res.success==='true' || res.success===true)){
+        setSt('✅ 发送成功！感谢你的反馈 💚','ok');
+        if(contentEl) contentEl.value='';
+        if(contactEl) contactEl.value='';
+      } else {
+        setSt('⚠️ '+(res && (res.message||res.error) ? String(res.message||res.error).replace(/<[^>]*>/g,'') : '发送失败，请重试'),'bad',mailto);
+      }
+    })
+    .catch(()=>{
+      if(btn){ btn.disabled=false; btn.textContent='📨 发送反馈'; }
+      setSt('⚠️ 网络发送失败，请用邮件直发','bad',mailto);
+    });
+}
+const _rsV8 = renderSettings;
+renderSettings = function(){ _rsV8(); renderFeedbackPanel(); };
