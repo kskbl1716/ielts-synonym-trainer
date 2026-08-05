@@ -1,0 +1,6 @@
+--- start mcq ---
+{"id":9003,"result":{"result":{"type":"object","value":{"opts":4,"correct":"worn out","fbCount":1,"nrCount":1}}}}
+--- click correct + dump ---
+{"id":9003,"result":{"result":{"type":"object","value":{"score":1,"fbClass":"feedback","fbHtml":"","nrHidden":true,"fbCount":1,"fbParent":"q-card"}}}}
+--- click next + click wrong ---
+{"id":9003,"result":{"result":{"type":"object","value":{"score":1,"fbClass":"feedback","wrongs":1,"wb":1}}}}

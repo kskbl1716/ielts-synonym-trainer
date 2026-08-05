@@ -1,0 +1,8 @@
+--- flash-start raw ---
+{"id":9001,"result":{"result":{"type":"object","value":{"a":1}}}}
+--- flash state ---
+{"id":9001,"result":{"result":{"type":"object","value":{"gameHidden":false,"listLen":173,"idx":0}}}}
+--- mcq-start raw ---
+{"id":9001,"result":{"result":{"type":"object","value":{"b":2}}}}
+--- practice state ---
+{"id":9001,"result":{"result":{"type":"object","value":{"gameHidden":false,"prac":{"type":"mcq","idx":0,"len":10},"opts":4}}}}

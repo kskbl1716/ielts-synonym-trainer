@@ -1,0 +1,4 @@
+﻿# Chrome 测试临时目录（不上传）
+work/chrome-*/
+# 测试截图
+work/*.png

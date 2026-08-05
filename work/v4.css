@@ -1,0 +1,41 @@
+/* ===== v4: 设置 + 专区 + 新模式 ===== */
+.set-row{display:flex;gap:14px;padding:10px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.set-row:last-child{border-bottom:none}
+.set-label{width:110px;flex:none;font-size:13.5px;font-weight:600;color:var(--ink);padding-top:8px}
+.set-control{flex:1;min-width:220px}
+.set-hint{font-size:12px;color:var(--muted);margin-top:8px}
+.data-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.about-line{font-size:13.5px;color:var(--ink);line-height:1.8}
+#set-goal-presets .btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+#learn-zones,#flash-zones,#p-zones{margin-bottom:10px}
+.dict-row{display:flex;gap:10px;margin-bottom:4px;flex-wrap:wrap}
+.dict-row input{flex:1;min-width:220px;padding:12px 14px;border:1.5px solid var(--line);border-radius:11px;font-size:16px;background:var(--card);color:var(--ink);letter-spacing:.5px}
+.dict-row input:focus{outline:none;border-color:var(--primary)}
+.dict-row input:disabled{opacity:.6;background:#f0f3f7}
+html[data-theme="dark"]{
+  --bg:#0f1722; --card:#182230; --ink:#e7eef7; --muted:#94a5b9;
+  --primary:#5b9cf5; --primary-d:#3d7fe0; --primary-l:#1d2c40;
+  --amber:#f2a93b; --amber-l:#33291a; --green:#3ecf85; --green-l:#143326; --red:#ef6b6b; --red-l:#3a1c1f;
+  --line:#27344a; --shadow:0 6px 18px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+html[data-theme="dark"] body{background:#0b111c}
+html[data-theme="dark"] .topbar{background:linear-gradient(120deg,#0b2444,#123a6b 60%,#1e5aa8)}
+html[data-theme="dark"] .tab{color:#93a4b8}
+html[data-theme="dark"] .chip,.type-card,.opt,.wb-item,.m-card{background:#1d2938;color:var(--ink)}
+html[data-theme="dark"] .search-wrap input,.goal-custom input,.dict-row input{background:#1d2938;color:var(--ink)}
+html[data-theme="dark"] .cal-cell{background:#1d2938;color:var(--ink)}
+html[data-theme="dark"] .checkin-now{background:#16202e;border-color:#2a3a52}
+html[data-theme="dark"] .tip{background:#2a2415;border-color:#4a3c1d;color:#f0d9a8}
+html[data-theme="dark"] .tip b{color:#ffd97a}
+html[data-theme="dark"] .q-prompt{color:#c3d0de}
+html[data-theme="dark"] .feedback .transcript{color:#b6c4d4}
+html[data-theme="dark"] .wc-ex{color:#c3d0de}
+html[data-theme="dark"] .wm-def{color:#d5e0eb}
+html[data-theme="dark"] .wc-meta{color:#8fa1b6}
+html[data-theme="dark"] .dict-row input:disabled{background:#141d2a}
+html[data-theme="dark"] .btn-ghost{background:#1d2938;color:var(--ink);border-color:var(--line)}
+html[data-theme="dark"] .btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+html[data-theme="dark"] .cal-cell.checked{background:linear-gradient(135deg,#34c98b,#1fa875)}
+html[data-font="s"] body{font-size:13.5px}
+html[data-font="l"] body{font-size:16.5px}

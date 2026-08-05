@@ -1,0 +1,4 @@
+--- e2e flash-start exact expr ---
+{"id":9002,"result":{"result":{"type":"object","subtype":"error","className":"SyntaxError","description":"SyntaxError: Invalid or unexpected token","objectId":"-2779957236721636115.3.1"},"exceptionDetails":{"exceptionId":14,"text":"Uncaught","lineNumber":0,"columnNumber":29,"scriptId":"34","exception":{"type":"object","subtype":"error","className":"SyntaxError","description":"SyntaxError: Invalid or unexpected token","objectId":"-2779957236721636115.3.2"}}}}
+--- e2e mcq-correct context ---
+{"id":9002,"result":{"result":{"type":"object","value":{"gameHidden":false,"opts":4,"hasPrac":true}}}}

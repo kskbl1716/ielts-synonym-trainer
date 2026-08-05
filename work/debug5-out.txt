@@ -1,0 +1,6 @@
+--- start mcq, answer q1 wrong ---
+{"id":9005,"result":{"result":{"type":"object","value":{"score":0,"wb":1}}}}
+--- q2 correct + finish ---
+{"id":9005,"result":{"result":{"type":"object","value":{"score":1,"wrongs":1,"resHidden":false}}}}
+--- result page wrong items ---
+{"id":9005,"result":{"result":{"type":"object","value":{"count":1,"sample":"resource \u8d44\u6e90\u4f60\u9009 demand \u2192 \u6b63\u786e reserve","resTitle":"\u7ec3\u4e60\u5b8c\u6210\uff01","resScore":"\u5f97\u5206 1 / 2"}}}}

@@ -1,0 +1,6 @@
+--- quit + fresh mcq ---
+{"id":9004,"result":{"result":{"type":"object","value":{"q":{"type":"mcq","fwd":true,"correct":"eating habits","opts":["shipping","dispatch","eating habits","postage"],"shown":"diet","w":"diet","cn":"\u996e\u98df","e":"Good nutrition is important for young children.","k":"nutrition"}}}}}
+--- answer with try/catch ---
+{"id":9004,"result":{"result":{"type":"object","value":{"threw":true,"msg":"Cannot read properties of undefined (reading 'replace')","stack":"TypeError: Cannot read properties of undefined (reading 'replace')\n    at escapeHtml (http://127.0.0.1:8123/index.html:574:34)\n    at answer (http://127.0.0.1:8123/index.html:899:75)\n    at <anonymous>:1:113\n    at <anonymous>:1:315"}}}}
+--- highlight direct test ---
+{"id":9004,"result":{"result":{"type":"object","value":{"ok":true,"h":"Good <mark>nutrition</mark> is important for young children."}}}}

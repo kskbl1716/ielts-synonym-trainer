@@ -1,0 +1,20 @@
+﻿const fs = require('fs');
+const { DICT, NEW } = require('C:/Users/哈哈哈/Documents/Codex/2026-08-04/zu/work/dict-data.js');
+const { V4NEW } = require('C:/Users/哈哈哈/Documents/Codex/2026-08-04/zu/work/v4-words.js');
+const app = fs.readFileSync('C:/Users/哈哈哈/Documents/Codex/2026-08-04/zu/work/app.js','utf8');
+const start = app.indexOf('const WORDS = [');
+const end = app.indexOf('];', start);
+const block = app.slice(app.indexOf('[', start)+1, end);
+function extractEntries(src){ const out=[]; let cur='',depth=0,inStr=false,esc=false; for(const ch of src){ if(inStr){cur+=ch; if(esc){esc=false;continue;} if(ch==='\\'){esc=true;continue;} if(ch==="'"){inStr=false;} continue;} if(ch==="'"){inStr=true;cur+=ch;continue;} if(ch==='{'){if(depth===0)cur='';depth++;cur+=ch;continue;} if(ch==='}'){depth--;cur+=ch;if(depth===0){out.push(cur);cur='';}continue;} if(depth===0)continue; cur+=ch;} return out; }
+const entries = extractEntries(block);
+const existing = entries.map(l => eval('(' + l.trim().replace(/,\s*$/,'') + ')'));
+const all = new Set([...existing, ...NEW].map(w=>w.w));
+const dups = V4NEW.filter(w=>all.has(w.w));
+const dupsInV4 = V4NEW.filter((w,i)=>V4NEW.findIndex(x=>x.w===w.w)!==i);
+const bad = V4NEW.filter(w=>!w.t||!w.w||!w.c||!w.e||!w.k||!w.p||!w.pos||!w.d||!w.z||!w.s||!w.s.length || !w.e.toLowerCase().includes(w.k.toLowerCase()) || !['l','w'].includes(w.z));
+console.log('V4NEW total:', V4NEW.length);
+console.log('dups vs existing:', dups.map(w=>w.w).join(', ') || '(none)');
+console.log('dups inside V4NEW:', dupsInV4.map(w=>w.w).join(', ') || '(none)');
+console.log('bad entries:', bad.length, bad.slice(0,10).map(w=>w.w).join(', '));
+const zc = V4NEW.reduce((a,w)=>{a[w.z]=(a[w.z]||0)+1;return a;},{});
+console.log('zones:', JSON.stringify(zc));

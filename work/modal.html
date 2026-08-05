@@ -1,0 +1,29 @@
+  <!-- ============ 单词详情弹窗 v2 ============ -->
+  <div id="word-modal" class="modal-mask hidden" role="dialog" aria-modal="true" aria-label="单词详情">
+    <div class="modal">
+      <button class="modal-close" id="wm-close" aria-label="关闭">✕</button>
+      <div id="wm-word-head" class="wm-head"></div>
+      <div id="wm-body"></div>
+      <div class="wm-foot">
+        <button class="btn btn-ghost btn-sm" id="wm-wb">☆ 加入生词本</button>
+        <button class="btn btn-primary btn-sm" id="wm-ok">完成</button>
+      </div>
+    </div>
+  </div>
+  <!-- ============ 邮箱登录 v6 ============ -->
+  <div id="login-modal" class="modal-mask hidden" role="dialog" aria-modal="true" aria-label="邮箱登录">
+    <div class="modal auth-modal">
+      <button class="modal-close" id="lm-close" aria-label="关闭">✕</button>
+      <h2 class="auth-title" id="lm-title">👤 登录</h2>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="lm-tab-login" type="button">登录</button>
+        <button class="auth-tab" id="lm-tab-reg" type="button">注册</button>
+      </div>
+      <input type="email" id="lm-email" placeholder="邮箱地址" autocomplete="email">
+      <input type="password" id="lm-pass" placeholder="密码（至少 6 位）" autocomplete="current-password">
+      <div id="lm-msg" class="auth-msg"></div>
+      <button class="btn btn-primary auth-submit" id="lm-submit" type="button">登 录</button>
+      <button class="btn btn-ghost btn-sm auth-forgot" id="lm-forgot" type="button">忘记密码？</button>
+      <div class="auth-hint">登录后进度自动云端备份，换设备不丢失</div>
+    </div>
+  </div>

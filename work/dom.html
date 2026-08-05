@@ -1,0 +1,1061 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雅思听力同义替换训练营</title>
+<meta name="description" content="训练雅思听力同义替换词：词库、闪卡、选择题、配对题、听力题，本地保存进度。">
+<link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;text y='.9em' font-size='90'&gt;🎧&lt;/text&gt;&lt;/svg&gt;">
+<style>
+:root{
+  --bg:#eef3f9; --card:#ffffff; --ink:#21303f; --muted:#6b7a8c;
+  --primary:#1e5aa8; --primary-d:#143f7a; --primary-l:#eaf1fb;
+  --amber:#f2a93b; --amber-l:#fdf3e0;
+  --green:#2e9e5b; --green-l:#e6f6ec; --red:#d94f4f; --red-l:#fdeaea;
+  --line:#e3eaf3; --radius:14px;
+  --shadow:0 6px 18px rgba(31,90,165,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;line-height:1.55}
+button{font-family:inherit;cursor:pointer}
+input{font-family:inherit}
+mark{background:var(--amber-l);color:#8a5b00;border-radius:4px;padding:0 3px;font-weight:600}
+
+/* ---------- 顶部 ---------- */
+.topbar{background:linear-gradient(120deg,#123a6b,#1e5aa8 60%,#2f7fd6);color:#fff;padding:18px 20px 14px}
+.topbar-inner{max-width:980px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-size:21px;font-weight:800;letter-spacing:.5px}
+.brand small{display:block;font-size:12px;font-weight:400;opacity:.85;margin-top:3px}
+.streak{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);padding:7px 14px;border-radius:999px;font-size:13px;white-space:nowrap}
+
+/* ---------- 导航 ---------- */
+.tabs{display:flex;gap:4px;max-width:980px;margin:0 auto;padding:0 16px}
+.tab{flex:1;border:none;background:transparent;color:#5b6b7c;font-size:15px;font-weight:600;padding:13px 0 12px;border-bottom:3px solid transparent;transition:.15s}
+.tab:hover{color:var(--primary)}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* ---------- 布局 ---------- */
+main{max-width:980px;margin:0 auto;padding:18px 16px 40px}
+.view{display:none}
+.view.active{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+footer{max-width:980px;margin:0 auto;padding:0 16px 30px;color:var(--muted);font-size:12.5px;text-align:center}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:14px}
+.panel h3{font-size:14px;color:var(--muted);margin:0 0 10px;font-weight:600}
+.hidden{display:none!important}
+
+/* ---------- 提示横幅 ---------- */
+.tip{background:linear-gradient(120deg,var(--amber-l),#fff8e8);border:1px solid #f4ddab;border-radius:var(--radius);padding:13px 15px;font-size:13.5px;margin-bottom:14px;color:#6b4a06}
+.tip b{color:#8a5b00}
+
+/* ---------- 词库 ---------- */
+.toolbar{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:6px 13px;font-size:13px;transition:.15s}
+.chip i{font-style:normal;color:var(--muted);font-size:11px;margin-left:4px}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+.chip.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.chip.on i{color:rgba(255,255,255,.8)}
+.search-wrap input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;background:#fff;color:var(--ink)}
+.search-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(30,90,168,.12)}
+.word-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.word-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;display:flex;flex-direction:column;gap:9px;transition:.15s}
+.word-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(31,90,165,.12)}
+.wc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.wc-word{font-size:19px;font-weight:800;color:var(--primary-d)}
+.wc-cn{font-size:12.5px;color:var(--muted);font-weight:500;display:block;margin-top:1px}
+.icon-btn{border:none;background:var(--primary-l);border-radius:9px;padding:6px 9px;font-size:15px;transition:.15s}
+.icon-btn:hover{background:#dbe8fb}
+.wc-syn{display:flex;flex-wrap:wrap;gap:6px}
+.syn-chip{background:var(--primary-l);color:var(--primary-d);border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;transition:.15s}
+.syn-chip:hover{background:var(--primary);color:#fff}
+.wc-ex{font-size:13.5px;color:#3d4d5e;background:#f7fafd;border:1px solid var(--line);border-radius:9px;padding:8px 11px}
+.wc-meta{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted)}
+.wc-meta .done{color:var(--green);font-weight:600}
+.empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:14px}
+
+/* ---------- 闪卡 ---------- */
+.flash-stage{perspective:1200px;max-width:560px;margin:18px auto}
+.flash-card{position:relative;width:100%;height:300px;transform-style:preserve-3d;transition:transform .5s;cursor:pointer}
+.flash-card.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:26px;text-align:center}
+.face.back{transform:rotateY(180deg)}
+.f-word{font-size:34px;font-weight:800;color:var(--primary-d);word-break:break-word}
+.f-cn{font-size:14px;color:var(--muted)}
+.f-hint{font-size:12px;color:var(--muted);position:absolute;bottom:14px}
+.f-syns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.f-syns .syn-chip{font-size:14px;padding:5px 14px}
+.f-ex{font-size:14.5px;color:#3d4d5e;background:#f7fafd;border:1px solid var(--line);border-radius:10px;padding:10px 14px;max-width:90%}
+.flash-progress{max-width:560px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
+.flash-actions{max-width:560px;margin:16px auto 0;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.btn{border:none;border-radius:11px;padding:11px 18px;font-size:15px;font-weight:600;transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-d)}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:#237a46}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{background:#b93b3b}
+.btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+.btn-sm{padding:8px 14px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.flash-end{text-align:center;padding:30px 10px}
+.flash-end .big{font-size:44px}
+.flash-end h2{margin:10px 0 6px}
+.flash-end p{color:var(--muted);margin-bottom:18px}
+
+/* ---------- 练习 ---------- */
+.type-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.type-card{position:relative;border:1.5px solid var(--line);border-radius:12px;padding:12px 13px;cursor:pointer;transition:.15s;background:#fff}
+.type-card:hover{border-color:var(--primary)}
+.type-card.sel{border-color:var(--primary);background:var(--primary-l)}
+.type-card .t-icon{font-size:22px}
+.type-card .t-name{font-weight:700;font-size:14px;margin-top:4px}
+.type-card .t-desc{font-size:11.5px;color:var(--muted);margin-top:2px}
+.type-card input{position:absolute;opacity:0}
+.quiz-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.quiz-progress{flex:1;min-width:160px;height:8px;background:#e3eaf3;border-radius:99px;overflow:hidden}
+.quiz-progress .fill{height:100%;background:linear-gradient(90deg,var(--primary),#4a9ae0);border-radius:99px;transition:width .3s}
+.quiz-meta{font-size:13px;color:var(--muted);white-space:nowrap}
+.quiz-meta b{color:var(--primary)}
+.q-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;max-width:640px;margin:0 auto}
+.q-word{font-size:26px;font-weight:800;color:var(--primary-d);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.q-cn{font-size:14px;color:var(--muted);font-weight:500}
+.q-prompt{margin:10px 0 16px;font-size:14.5px;color:#3d4d5e}
+.q-prompt b{color:var(--ink)}
+.listen-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.listen-btn{background:var(--primary);color:#fff;border:none;border-radius:999px;padding:11px 20px;font-size:15px;font-weight:700;transition:.15s}
+.listen-btn:hover{background:var(--primary-d)}
+.listen-btn.playing{background:var(--amber)}
+.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.opt{border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:13px 15px;font-size:15.5px;font-weight:600;text-align:left;transition:.15s}
+.opt:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+.opt .k{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:var(--primary-l);color:var(--primary-d);font-size:12px;font-weight:800;margin-right:9px}
+.opt.correct{border-color:var(--green);background:var(--green-l);color:#1d6b3f}
+.opt.correct .k{background:var(--green);color:#fff}
+.opt.wrong{border-color:var(--red);background:var(--red-l);color:#a63a3a}
+.opt.wrong .k{background:var(--red);color:#fff}
+.opt:disabled{cursor:default}
+.feedback{margin-top:14px;font-size:14px;border-radius:10px;padding:11px 14px;display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--green-l);color:#1d6b3f}
+.feedback.bad{background:var(--red-l);color:#a63a3a}
+.feedback .transcript{margin-top:8px;font-size:13px;color:#3d4d5e}
+.next-row{margin-top:14px;display:flex;justify-content:flex-end;gap:8px}
+.quit-btn{background:none;border:1px solid var(--line);border-radius:9px;padding:6px 12px;font-size:13px;color:var(--muted)}
+.quit-btn:hover{color:var(--red);border-color:var(--red)}
+
+/* ---------- 配对题 ---------- */
+.match-wrap{max-width:640px;margin:0 auto}
+.match-head{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:12px}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.match-col{display:flex;flex-direction:column;gap:9px}
+.m-col-title{font-size:12px;color:var(--muted);text-align:center;margin-bottom:2px}
+.m-card{border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:11px 13px;font-size:14.5px;font-weight:600;text-align:center;transition:.12s}
+.m-card:hover{border-color:var(--primary)}
+.m-card.sel{border-color:var(--amber);background:var(--amber-l);box-shadow:0 0 0 3px rgba(242,169,59,.18)}
+.m-card.done{border-color:var(--green);background:var(--green-l);color:#1d6b3f;opacity:.75;cursor:default}
+.m-card.wrong{border-color:var(--red);background:var(--red-l);animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* ---------- 结果 ---------- */
+.result-box{max-width:560px;margin:0 auto;text-align:center;padding:30px 18px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.result-box .big{font-size:52px}
+.result-box h2{margin:10px 0 4px}
+.result-box .score-line{font-size:17px;font-weight:700;color:var(--primary);margin-bottom:4px}
+.result-box .sub{color:var(--muted);font-size:13.5px;margin-bottom:18px}
+.stat-chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+.stat-chips div{background:#f7fafd;border:1px solid var(--line);border-radius:10px;padding:8px 16px;font-size:13px}
+.stat-chips b{display:block;font-size:17px;color:var(--primary)}
+.wrong-list{text-align:left;margin:0 0 18px;max-height:240px;overflow:auto}
+.wrong-list h4{font-size:13px;color:var(--muted);margin-bottom:8px}
+.wrong-item{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px dashed var(--line);padding:8px 2px;font-size:13.5px}
+.wrong-item .wa{font-weight:700;color:var(--red)}
+.wrong-item .wb{color:var(--green);font-weight:700}
+.wrong-item .wc{color:var(--muted);font-size:12px}
+.result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* ---------- 统计 ---------- */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.stat-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;text-align:center}
+.stat-card .num{font-size:26px;font-weight:800;color:var(--primary)}
+.stat-card .lbl{font-size:12px;color:var(--muted);margin-top:2px}
+.topic-bar{display:grid;grid-template-columns:90px 1fr 64px;align-items:center;gap:10px;padding:7px 0;font-size:13px}
+.topic-bar .tn{color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topic-bar .track{height:8px;background:#e3eaf3;border-radius:99px;overflow:hidden}
+.topic-bar .fill{height:100%;background:linear-gradient(90deg,var(--green),#5cc98a);border-radius:99px}
+.topic-bar .pct{text-align:right;color:var(--muted);font-size:12px;white-space:nowrap}
+.wordbook-list{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow:auto}
+.wb-item{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:9px 13px;font-size:13.5px;background:#fff}
+.wb-item .wb-word{font-weight:800;color:var(--primary-d);min-width:86px}
+.wb-item .wb-cn{color:var(--muted);font-size:12px;min-width:52px}
+.wb-item .wb-syn{flex:1;display:flex;flex-wrap:wrap;gap:5px}
+.wb-item .wb-syn span{background:var(--primary-l);color:var(--primary-d);border-radius:999px;padding:2px 8px;font-size:11.5px;font-weight:600}
+.rm-btn{border:none;background:var(--red-l);color:var(--red);border-radius:8px;padding:4px 9px;font-size:12px}
+.rm-btn:hover{background:var(--red);color:#fff}
+.danger-zone{border-top:1px dashed var(--line);margin-top:14px;padding-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+
+/* ---------- Toast ---------- */
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#22303f;color:#fff;padding:10px 20px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:640px){
+  .word-grid{grid-template-columns:1fr}
+  .match-grid{grid-template-columns:1fr}
+  .flash-card{height:270px}
+  .tabs{padding:0 8px}
+  .tab{font-size:13.5px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">🎧 雅思听力同义替换训练营
+      <small>题干换说法，答案照样拿分 · IELTS Listening Synonym Trainer</small>
+    </div>
+    <div class="streak" id="streak-badge">🔥 连续 0 天 · 今日 0/30 词</div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-view="learn">📖 词库</button>
+  <button class="tab" data-view="flash">🃏 闪卡</button>
+  <button class="tab" data-view="practice">✍️ 练习</button>
+  <button class="tab" data-view="stats">📊 统计</button>
+</nav>
+
+<main>
+  <!-- ============ 词库 ============ -->
+  <section id="view-learn" class="view active">
+    <div class="tip">💡 <b>雅思听力核心技巧：同义替换。</b>题目里的词，往往不会原样出现在录音里。例如题干写 <b>important</b>，录音里可能说 <b>crucial</b>。多积累同义词组，才能"听出答案"。</div>
+    <div class="toolbar">
+      <div class="chips" id="learn-topics"><button class="chip on" data-t="all">📚 全部 <i>173</i></button><button class="chip " data-t="core">⭐ 高频通用 <i>30</i></button><button class="chip " data-t="edu">🎓 教育学习 <i>16</i></button><button class="chip " data-t="work">💼 工作职场 <i>14</i></button><button class="chip " data-t="travel">✈️ 旅行交通 <i>16</i></button><button class="chip " data-t="health">💪 健康运动 <i>16</i></button><button class="chip " data-t="env">🌿 环境能源 <i>16</i></button><button class="chip " data-t="living">🏠 生活住宿 <i>16</i></button><button class="chip " data-t="academic">🔬 学术研究 <i>16</i></button><button class="chip " data-t="shopping">🛒 购物消费 <i>16</i></button><button class="chip " data-t="feelings">😊 情感态度 <i>17</i></button></div>
+      <div class="search-wrap">
+        <input id="learn-search" type="search" placeholder="🔍 搜索单词 / 同义词 / 中文释义…">
+      </div>
+    </div>
+    <div class="word-grid" id="learn-list"><div class="word-card"><div class="wc-top"><div><div class="wc-word">important</div><div class="wc-cn">重要的</div></div><button class="icon-btn" data-speak="important">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="crucial">crucial</button><button class="syn-chip" data-speak="vital">vital</button><button class="syn-chip" data-speak="essential">essential</button><button class="syn-chip" data-speak="significant">significant</button></div><p class="wc-ex">It is <mark>crucial</mark> to book your tickets well in advance.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">improve</div><div class="wc-cn">改善，提高</div></div><button class="icon-btn" data-speak="improve">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="enhance">enhance</button><button class="syn-chip" data-speak="boost">boost</button><button class="syn-chip" data-speak="upgrade">upgrade</button></div><p class="wc-ex">The new software will <mark>enhance</mark> the overall efficiency of the office.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">problem</div><div class="wc-cn">问题</div></div><button class="icon-btn" data-speak="problem">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="issue">issue</button><button class="syn-chip" data-speak="difficulty">difficulty</button><button class="syn-chip" data-speak="challenge">challenge</button></div><p class="wc-ex">The main <mark>issue</mark> is the lack of affordable housing.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">increase</div><div class="wc-cn">增加</div></div><button class="icon-btn" data-speak="increase">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="rise">rise</button><button class="syn-chip" data-speak="grow">grow</button><button class="syn-chip" data-speak="climb">climb</button></div><p class="wc-ex">The number of international students has continued to <mark>rise</mark> sharply.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">decrease</div><div class="wc-cn">减少</div></div><button class="icon-btn" data-speak="decrease">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="decline">decline</button><button class="syn-chip" data-speak="drop">drop</button><button class="syn-chip" data-speak="fall">fall</button><button class="syn-chip" data-speak="reduce">reduce</button></div><p class="wc-ex">Sales are expected to <mark>decline</mark> by ten percent this year.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">expensive</div><div class="wc-cn">昂贵的</div></div><button class="icon-btn" data-speak="expensive">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="costly">costly</button><button class="syn-chip" data-speak="pricey">pricey</button></div><p class="wc-ex">The accommodation was quite <mark>costly</mark> for a student.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">cheap</div><div class="wc-cn">便宜的</div></div><button class="icon-btn" data-speak="cheap">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="inexpensive">inexpensive</button><button class="syn-chip" data-speak="affordable">affordable</button></div><p class="wc-ex">The course offers <mark>affordable</mark> study materials.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">big</div><div class="wc-cn">大的</div></div><button class="icon-btn" data-speak="big">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="large">large</button><button class="syn-chip" data-speak="huge">huge</button><button class="syn-chip" data-speak="massive">massive</button><button class="syn-chip" data-speak="considerable">considerable</button></div><p class="wc-ex">A <mark>huge</mark> number of people attended the opening ceremony.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">small</div><div class="wc-cn">小的</div></div><button class="icon-btn" data-speak="small">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="tiny">tiny</button><button class="syn-chip" data-speak="minor">minor</button><button class="syn-chip" data-speak="slight">slight</button></div><p class="wc-ex">There was a <mark>slight</mark> delay at the start of the session.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">need</div><div class="wc-cn">需要</div></div><button class="icon-btn" data-speak="need">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="require">require</button><button class="syn-chip" data-speak="demand">demand</button><button class="syn-chip" data-speak="call for">call for</button></div><p class="wc-ex">This role will <mark>require</mark> a strong command of English.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">show</div><div class="wc-cn">显示，表明</div></div><button class="icon-btn" data-speak="show">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="demonstrate">demonstrate</button><button class="syn-chip" data-speak="indicate">indicate</button><button class="syn-chip" data-speak="reveal">reveal</button></div><p class="wc-ex">The data seems to <mark>indicate</mark> a clear upward trend.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">get</div><div class="wc-cn">获得</div></div><button class="icon-btn" data-speak="get">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="obtain">obtain</button><button class="syn-chip" data-speak="acquire">acquire</button><button class="syn-chip" data-speak="receive">receive</button></div><p class="wc-ex">Students can <mark>obtain</mark> a discount with their university card.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">buy</div><div class="wc-cn">购买</div></div><button class="icon-btn" data-speak="buy">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="purchase">purchase</button><button class="syn-chip" data-speak="acquire">acquire</button></div><p class="wc-ex">You can <mark>purchase</mark> tickets at the main entrance.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">help</div><div class="wc-cn">帮助</div></div><button class="icon-btn" data-speak="help">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="assist">assist</button><button class="syn-chip" data-speak="support">support</button><button class="syn-chip" data-speak="aid">aid</button></div><p class="wc-ex">Staff are available to <mark>assist</mark> you at any time.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">start</div><div class="wc-cn">开始</div></div><button class="icon-btn" data-speak="start">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="begin">begin</button><button class="syn-chip" data-speak="commence">commence</button><button class="syn-chip" data-speak="launch">launch</button></div><p class="wc-ex">The lecture will <mark>commence</mark> at nine o'clock sharp.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">finish</div><div class="wc-cn">完成</div></div><button class="icon-btn" data-speak="finish">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="complete">complete</button><button class="syn-chip" data-speak="conclude">conclude</button><button class="syn-chip" data-speak="finalize">finalize</button></div><p class="wc-ex">All participants must <mark>complete</mark> the form before the deadline.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">choose</div><div class="wc-cn">选择</div></div><button class="icon-btn" data-speak="choose">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="select">select</button><button class="syn-chip" data-speak="pick">pick</button><button class="syn-chip" data-speak="opt for">opt for</button></div><p class="wc-ex">You may <mark>select</mark> any three modules from the list.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">change</div><div class="wc-cn">改变</div></div><button class="icon-btn" data-speak="change">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="alter">alter</button><button class="syn-chip" data-speak="modify">modify</button><button class="syn-chip" data-speak="adjust">adjust</button></div><p class="wc-ex">We may need to <mark>adjust</mark> the timetable.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">enough</div><div class="wc-cn">足够的</div></div><button class="icon-btn" data-speak="enough">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="sufficient">sufficient</button><button class="syn-chip" data-speak="adequate">adequate</button></div><p class="wc-ex">Make sure you bring <mark>sufficient</mark> warm clothing for the trip.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">many</div><div class="wc-cn">许多</div></div><button class="icon-btn" data-speak="many">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="numerous">numerous</button><button class="syn-chip" data-speak="a large number of">a large number of</button></div><p class="wc-ex"><mark>Numerous</mark> studies have confirmed the benefits of exercise.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">most</div><div class="wc-cn">大多数</div></div><button class="icon-btn" data-speak="most">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="the majority of">the majority of</button></div><p class="wc-ex">The <mark>majority</mark> of respondents agreed with the statement.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">also</div><div class="wc-cn">此外</div></div><button class="icon-btn" data-speak="also">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="in addition">in addition</button><button class="syn-chip" data-speak="moreover">moreover</button><button class="syn-chip" data-speak="furthermore">furthermore</button></div><p class="wc-ex"><mark>In addition</mark>, the course includes weekly tutorials.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">because</div><div class="wc-cn">因为</div></div><button class="icon-btn" data-speak="because">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="due to">due to</button><button class="syn-chip" data-speak="owing to">owing to</button><button class="syn-chip" data-speak="since">since</button></div><p class="wc-ex">The event was postponed <mark>due to</mark> heavy rain.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">so</div><div class="wc-cn">因此</div></div><button class="icon-btn" data-speak="so">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="therefore">therefore</button><button class="syn-chip" data-speak="consequently">consequently</button><button class="syn-chip" data-speak="as a result">as a result</button></div><p class="wc-ex"><mark>Therefore</mark>, we strongly recommend booking early.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">but</div><div class="wc-cn">但是</div></div><button class="icon-btn" data-speak="but">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="however">however</button><button class="syn-chip" data-speak="nevertheless">nevertheless</button><button class="syn-chip" data-speak="whereas">whereas</button></div><p class="wc-ex"><mark>However</mark>, the price does not include meals.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">maybe</div><div class="wc-cn">也许</div></div><button class="icon-btn" data-speak="maybe">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="perhaps">perhaps</button><button class="syn-chip" data-speak="possibly">possibly</button><button class="syn-chip" data-speak="potentially">potentially</button></div><p class="wc-ex"><mark>Perhaps</mark> we could arrange a meeting earlier in the week.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">about</div><div class="wc-cn">大约</div></div><button class="icon-btn" data-speak="about">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="approximately">approximately</button><button class="syn-chip" data-speak="around">around</button><button class="syn-chip" data-speak="roughly">roughly</button></div><p class="wc-ex">The journey takes <mark>approximately</mark> two hours by train.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">very</div><div class="wc-cn">非常</div></div><button class="icon-btn" data-speak="very">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="extremely">extremely</button><button class="syn-chip" data-speak="particularly">particularly</button><button class="syn-chip" data-speak="remarkably">remarkably</button></div><p class="wc-ex">The building is <mark>particularly</mark> impressive at night.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">often</div><div class="wc-cn">经常</div></div><button class="icon-btn" data-speak="often">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="frequently">frequently</button><button class="syn-chip" data-speak="regularly">regularly</button><button class="syn-chip" data-speak="commonly">commonly</button></div><p class="wc-ex">The buses run <mark>frequently</mark> during the rush hour.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">rarely</div><div class="wc-cn">很少</div></div><button class="icon-btn" data-speak="rarely">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="seldom">seldom</button><button class="syn-chip" data-speak="hardly ever">hardly ever</button></div><p class="wc-ex">Such opportunities <mark>seldom</mark> come along.</p><div class="wc-meta"><span>⭐ 高频通用</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">course</div><div class="wc-cn">课程</div></div><button class="icon-btn" data-speak="course">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="programme">programme</button><button class="syn-chip" data-speak="module">module</button><button class="syn-chip" data-speak="class">class</button></div><p class="wc-ex">The <mark>programme</mark> covers both theory and practical work.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">subject</div><div class="wc-cn">学科，主题</div></div><button class="icon-btn" data-speak="subject">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="topic">topic</button><button class="syn-chip" data-speak="discipline">discipline</button><button class="syn-chip" data-speak="field">field</button></div><p class="wc-ex">Her main <mark>field</mark> of research is marine biology.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">teacher</div><div class="wc-cn">老师</div></div><button class="icon-btn" data-speak="teacher">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="instructor">instructor</button><button class="syn-chip" data-speak="tutor">tutor</button><button class="syn-chip" data-speak="lecturer">lecturer</button></div><p class="wc-ex">Each student is assigned a personal <mark>tutor</mark>.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">student</div><div class="wc-cn">学生</div></div><button class="icon-btn" data-speak="student">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="learner">learner</button><button class="syn-chip" data-speak="pupil">pupil</button><button class="syn-chip" data-speak="trainee">trainee</button></div><p class="wc-ex">The centre welcomes <mark>learner</mark>s of all levels.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">homework</div><div class="wc-cn">作业</div></div><button class="icon-btn" data-speak="homework">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="assignment">assignment</button><button class="syn-chip" data-speak="coursework">coursework</button></div><p class="wc-ex">The <mark>assignment</mark> must be submitted online by Friday.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">exam</div><div class="wc-cn">考试</div></div><button class="icon-btn" data-speak="exam">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="test">test</button><button class="syn-chip" data-speak="assessment">assessment</button><button class="syn-chip" data-speak="evaluation">evaluation</button></div><p class="wc-ex">The final <mark>assessment</mark> counts for fifty percent of the grade.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">score</div><div class="wc-cn">分数</div></div><button class="icon-btn" data-speak="score">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="mark">mark</button><button class="syn-chip" data-speak="grade">grade</button><button class="syn-chip" data-speak="result">result</button></div><p class="wc-ex">She received a high <mark>mark</mark> in the writing test.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">degree</div><div class="wc-cn">学位，证书</div></div><button class="icon-btn" data-speak="degree">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="qualification">qualification</button><button class="syn-chip" data-speak="diploma">diploma</button><button class="syn-chip" data-speak="certificate">certificate</button></div><p class="wc-ex">A recognised <mark>qualification</mark> is essential for the post.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">university</div><div class="wc-cn">大学</div></div><button class="icon-btn" data-speak="university">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="college">college</button><button class="syn-chip" data-speak="institution">institution</button><button class="syn-chip" data-speak="campus">campus</button></div><p class="wc-ex">The <mark>campus</mark> offers excellent sports facilities.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">lesson</div><div class="wc-cn">课</div></div><button class="icon-btn" data-speak="lesson">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="class">class</button><button class="syn-chip" data-speak="session">session</button><button class="syn-chip" data-speak="tutorial">tutorial</button></div><p class="wc-ex">The first <mark>session</mark> is a general introduction to the course.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">learn</div><div class="wc-cn">学习</div></div><button class="icon-btn" data-speak="learn">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="study">study</button><button class="syn-chip" data-speak="pick up">pick up</button><button class="syn-chip" data-speak="master">master</button></div><p class="wc-ex">You will <mark>pick up</mark> useful skills during the work placement.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">revise</div><div class="wc-cn">复习</div></div><button class="icon-btn" data-speak="revise">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="review">review</button><button class="syn-chip" data-speak="go over">go over</button><button class="syn-chip" data-speak="refresh">refresh</button></div><p class="wc-ex">Use the weekend to <mark>go over</mark> your lecture notes.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">difficult</div><div class="wc-cn">困难的</div></div><button class="icon-btn" data-speak="difficult">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="hard">hard</button><button class="syn-chip" data-speak="challenging">challenging</button><button class="syn-chip" data-speak="tough">tough</button></div><p class="wc-ex">The second part of the test is quite <mark>challenging</mark>.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">easy</div><div class="wc-cn">容易的</div></div><button class="icon-btn" data-speak="easy">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="simple">simple</button><button class="syn-chip" data-speak="straightforward">straightforward</button></div><p class="wc-ex">The application form is <mark>straightforward</mark> to complete.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">compulsory</div><div class="wc-cn">必修的，强制的</div></div><button class="icon-btn" data-speak="compulsory">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="mandatory">mandatory</button><button class="syn-chip" data-speak="required">required</button><button class="syn-chip" data-speak="obligatory">obligatory</button></div><p class="wc-ex">Attendance at the laboratory sessions is <mark>mandatory</mark>.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">knowledge</div><div class="wc-cn">知识</div></div><button class="icon-btn" data-speak="knowledge">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="understanding">understanding</button><button class="syn-chip" data-speak="awareness">awareness</button><button class="syn-chip" data-speak="familiarity">familiarity</button></div><p class="wc-ex">The course builds a solid <mark>understanding</mark> of the subject.</p><div class="wc-meta"><span>🎓 教育学习</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">job</div><div class="wc-cn">工作</div></div><button class="icon-btn" data-speak="job">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="work">work</button><button class="syn-chip" data-speak="employment">employment</button><button class="syn-chip" data-speak="occupation">occupation</button><button class="syn-chip" data-speak="position">position</button></div><p class="wc-ex">He found full-time <mark>employment</mark> in a local law firm.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">salary</div><div class="wc-cn">薪水</div></div><button class="icon-btn" data-speak="salary">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="wage">wage</button><button class="syn-chip" data-speak="income">income</button><button class="syn-chip" data-speak="pay">pay</button><button class="syn-chip" data-speak="earnings">earnings</button></div><p class="wc-ex">The starting <mark>pay</mark> is above the national average.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">company</div><div class="wc-cn">公司</div></div><button class="icon-btn" data-speak="company">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="firm">firm</button><button class="syn-chip" data-speak="business">business</button><button class="syn-chip" data-speak="enterprise">enterprise</button><button class="syn-chip" data-speak="corporation">corporation</button></div><p class="wc-ex">She runs her own small <mark>business</mark> from home.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">employee</div><div class="wc-cn">员工</div></div><button class="icon-btn" data-speak="employee">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="staff">staff</button><button class="syn-chip" data-speak="worker">worker</button><button class="syn-chip" data-speak="workforce">workforce</button></div><p class="wc-ex">All <mark>staff</mark> must attend the safety briefing.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">manager</div><div class="wc-cn">经理</div></div><button class="icon-btn" data-speak="manager">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="supervisor">supervisor</button><button class="syn-chip" data-speak="director">director</button><button class="syn-chip" data-speak="head">head</button></div><p class="wc-ex">Please report to your <mark>supervisor</mark> before noon.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">meeting</div><div class="wc-cn">会议</div></div><button class="icon-btn" data-speak="meeting">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="conference">conference</button><button class="syn-chip" data-speak="session">session</button><button class="syn-chip" data-speak="appointment">appointment</button></div><p class="wc-ex">The <mark>conference</mark> will be held in the main hall.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">retire</div><div class="wc-cn">退休</div></div><button class="icon-btn" data-speak="retire">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="leave work">leave work</button><button class="syn-chip" data-speak="give up work">give up work</button><button class="syn-chip" data-speak="stop working">stop working</button></div><p class="wc-ex">He plans to <mark>give up work</mark> when he turns sixty.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">hire</div><div class="wc-cn">雇用</div></div><button class="icon-btn" data-speak="hire">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="recruit">recruit</button><button class="syn-chip" data-speak="employ">employ</button><button class="syn-chip" data-speak="take on">take on</button></div><p class="wc-ex">The firm hopes to <mark>recruit</mark> new graduates this summer.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">fire</div><div class="wc-cn">解雇</div></div><button class="icon-btn" data-speak="fire">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="dismiss">dismiss</button><button class="syn-chip" data-speak="sack">sack</button><button class="syn-chip" data-speak="lay off">lay off</button></div><p class="wc-ex">The company may have to <mark>lay off</mark> some workers.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">promotion</div><div class="wc-cn">晋升</div></div><button class="icon-btn" data-speak="promotion">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="advancement">advancement</button><button class="syn-chip" data-speak="career progression">career progression</button><button class="syn-chip" data-speak="rise">rise</button></div><p class="wc-ex">The scheme supports <mark>career progression</mark> within the company.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">experience</div><div class="wc-cn">经验</div></div><button class="icon-btn" data-speak="experience">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="background">background</button><button class="syn-chip" data-speak="track record">track record</button><button class="syn-chip" data-speak="expertise">expertise</button></div><p class="wc-ex">Applicants need a strong <mark>track record</mark> in sales.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">skill</div><div class="wc-cn">技能</div></div><button class="icon-btn" data-speak="skill">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="ability">ability</button><button class="syn-chip" data-speak="expertise">expertise</button><button class="syn-chip" data-speak="competence">competence</button></div><p class="wc-ex">She has the right <mark>expertise</mark> for the job.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">colleague</div><div class="wc-cn">同事</div></div><button class="icon-btn" data-speak="colleague">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="co-worker">co-worker</button><button class="syn-chip" data-speak="workmate">workmate</button><button class="syn-chip" data-speak="teammate">teammate</button></div><p class="wc-ex">Her <mark>co-worker</mark>s are very supportive.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">office</div><div class="wc-cn">办公室</div></div><button class="icon-btn" data-speak="office">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="workplace">workplace</button><button class="syn-chip" data-speak="premises">premises</button><button class="syn-chip" data-speak="site">site</button></div><p class="wc-ex">The new <mark>premises</mark> are close to the railway station.</p><div class="wc-meta"><span>💼 工作职场</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">travel</div><div class="wc-cn">旅行</div></div><button class="icon-btn" data-speak="travel">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="journey">journey</button><button class="syn-chip" data-speak="trip">trip</button><button class="syn-chip" data-speak="commute">commute</button></div><p class="wc-ex">The <mark>journey</mark> took much longer than we expected.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">arrive</div><div class="wc-cn">到达</div></div><button class="icon-btn" data-speak="arrive">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="reach">reach</button><button class="syn-chip" data-speak="get to">get to</button><button class="syn-chip" data-speak="turn up">turn up</button></div><p class="wc-ex">We expect to <mark>reach</mark> the hotel before midnight.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">leave</div><div class="wc-cn">离开</div></div><button class="icon-btn" data-speak="leave">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="depart">depart</button><button class="syn-chip" data-speak="set off">set off</button><button class="syn-chip" data-speak="go away">go away</button></div><p class="wc-ex">The coach will <mark>depart</mark> at six in the morning.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">return</div><div class="wc-cn">返回</div></div><button class="icon-btn" data-speak="return">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="come back">come back</button><button class="syn-chip" data-speak="go back">go back</button></div><p class="wc-ex">We plan to <mark>come back</mark> from the trip on Sunday.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">book</div><div class="wc-cn">预订</div></div><button class="icon-btn" data-speak="book">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="reserve">reserve</button><button class="syn-chip" data-speak="make a reservation">make a reservation</button></div><p class="wc-ex">You can <mark>reserve</mark> a seat on the train online.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">ticket</div><div class="wc-cn">票</div></div><button class="icon-btn" data-speak="ticket">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="fare">fare</button><button class="syn-chip" data-speak="pass">pass</button><button class="syn-chip" data-speak="admission">admission</button></div><p class="wc-ex">The train <mark>fare</mark> includes a reserved seat.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">near</div><div class="wc-cn">附近</div></div><button class="icon-btn" data-speak="near">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="close to">close to</button><button class="syn-chip" data-speak="nearby">nearby</button><button class="syn-chip" data-speak="adjacent">adjacent</button></div><p class="wc-ex">The hostel is <mark>close to</mark> the city centre.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">far</div><div class="wc-cn">远的</div></div><button class="icon-btn" data-speak="far">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="distant">distant</button><button class="syn-chip" data-speak="remote">remote</button><button class="syn-chip" data-speak="out of the way">out of the way</button></div><p class="wc-ex">The farm is quite <mark>remote</mark> from the nearest village.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">fast</div><div class="wc-cn">快的</div></div><button class="icon-btn" data-speak="fast">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="rapid">rapid</button><button class="syn-chip" data-speak="quick">quick</button><button class="syn-chip" data-speak="speedy">speedy</button></div><p class="wc-ex">The <mark>rapid</mark> growth of the city has caused traffic problems.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">slow</div><div class="wc-cn">慢的</div></div><button class="icon-btn" data-speak="slow">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="gradual">gradual</button><button class="syn-chip" data-speak="unhurried">unhurried</button><button class="syn-chip" data-speak="leisurely">leisurely</button></div><p class="wc-ex">There has been a <mark>gradual</mark> improvement in the service.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">busy</div><div class="wc-cn">繁忙的</div></div><button class="icon-btn" data-speak="busy">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="crowded">crowded</button><button class="syn-chip" data-speak="congested">congested</button><button class="syn-chip" data-speak="packed">packed</button></div><p class="wc-ex">The roads are <mark>congested</mark> during the rush hour.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">free</div><div class="wc-cn">空闲的，免费的</div></div><button class="icon-btn" data-speak="free">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="available">available</button><button class="syn-chip" data-speak="vacant">vacant</button><button class="syn-chip" data-speak="spare">spare</button></div><p class="wc-ex">Is the doctor <mark>available</mark> this afternoon?</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">luggage</div><div class="wc-cn">行李</div></div><button class="icon-btn" data-speak="luggage">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="baggage">baggage</button><button class="syn-chip" data-speak="bags">bags</button><button class="syn-chip" data-speak="belongings">belongings</button></div><p class="wc-ex">Passengers must collect their <mark>baggage</mark> downstairs.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">vehicle</div><div class="wc-cn">交通工具</div></div><button class="icon-btn" data-speak="vehicle">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="car">car</button><button class="syn-chip" data-speak="transport">transport</button><button class="syn-chip" data-speak="means of transport">means of transport</button></div><p class="wc-ex">Cycling is a popular means of <mark>transport</mark> in the city.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">route</div><div class="wc-cn">路线</div></div><button class="icon-btn" data-speak="route">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="way">way</button><button class="syn-chip" data-speak="path">path</button><button class="syn-chip" data-speak="itinerary">itinerary</button></div><p class="wc-ex">The tour <mark>itinerary</mark> includes three famous museums.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">postpone</div><div class="wc-cn">推迟</div></div><button class="icon-btn" data-speak="postpone">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="put off">put off</button><button class="syn-chip" data-speak="delay">delay</button><button class="syn-chip" data-speak="defer">defer</button></div><p class="wc-ex">The flight was <mark>put off</mark> until the next morning.</p><div class="wc-meta"><span>✈️ 旅行交通</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">ill</div><div class="wc-cn">生病的</div></div><button class="icon-btn" data-speak="ill">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="sick">sick</button><button class="syn-chip" data-speak="unwell">unwell</button><button class="syn-chip" data-speak="poorly">poorly</button></div><p class="wc-ex">Several children were off school because they felt <mark>unwell</mark>.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">tired</div><div class="wc-cn">疲惫的</div></div><button class="icon-btn" data-speak="tired">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="exhausted">exhausted</button><button class="syn-chip" data-speak="worn out">worn out</button><button class="syn-chip" data-speak="fatigued">fatigued</button></div><p class="wc-ex">She felt <mark>exhausted</mark> after the long flight.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">healthy</div><div class="wc-cn">健康的</div></div><button class="icon-btn" data-speak="healthy">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="fit">fit</button><button class="syn-chip" data-speak="in good shape">in good shape</button></div><p class="wc-ex">Swimming keeps him <mark>fit</mark> all year round.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">exercise</div><div class="wc-cn">锻炼</div></div><button class="icon-btn" data-speak="exercise">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="physical activity">physical activity</button><button class="syn-chip" data-speak="workout">workout</button><button class="syn-chip" data-speak="training">training</button></div><p class="wc-ex">Regular <mark>physical activity</mark> can reduce stress.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">diet</div><div class="wc-cn">饮食</div></div><button class="icon-btn" data-speak="diet">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="eating habits">eating habits</button><button class="syn-chip" data-speak="nutrition">nutrition</button></div><p class="wc-ex">Good <mark>nutrition</mark> is important for young children.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">medicine</div><div class="wc-cn">药物</div></div><button class="icon-btn" data-speak="medicine">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="medication">medication</button><button class="syn-chip" data-speak="drug">drug</button><button class="syn-chip" data-speak="treatment">treatment</button></div><p class="wc-ex">The doctor prescribed some <mark>medication</mark> for the cough.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">injury</div><div class="wc-cn">受伤</div></div><button class="icon-btn" data-speak="injury">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="wound">wound</button><button class="syn-chip" data-speak="damage">damage</button><button class="syn-chip" data-speak="harm">harm</button></div><p class="wc-ex">The fall caused serious <mark>damage</mark> to his knee.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">recover</div><div class="wc-cn">康复</div></div><button class="icon-btn" data-speak="recover">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="get better">get better</button><button class="syn-chip" data-speak="heal">heal</button><button class="syn-chip" data-speak="pull through">pull through</button></div><p class="wc-ex">It took her several weeks to <mark>get better</mark>.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">pain</div><div class="wc-cn">疼痛</div></div><button class="icon-btn" data-speak="pain">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="ache">ache</button><button class="syn-chip" data-speak="discomfort">discomfort</button><button class="syn-chip" data-speak="soreness">soreness</button></div><p class="wc-ex">She complained of a sharp <mark>ache</mark> in her back.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">stress</div><div class="wc-cn">压力</div></div><button class="icon-btn" data-speak="stress">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="pressure">pressure</button><button class="syn-chip" data-speak="strain">strain</button><button class="syn-chip" data-speak="tension">tension</button></div><p class="wc-ex">Students often feel under <mark>pressure</mark> during exams.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">relax</div><div class="wc-cn">放松</div></div><button class="icon-btn" data-speak="relax">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="unwind">unwind</button><button class="syn-chip" data-speak="take it easy">take it easy</button><button class="syn-chip" data-speak="de-stress">de-stress</button></div><p class="wc-ex">A hot bath helps me <mark>unwind</mark> after work.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">sleep</div><div class="wc-cn">睡觉</div></div><button class="icon-btn" data-speak="sleep">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="rest">rest</button><button class="syn-chip" data-speak="doze">doze</button><button class="syn-chip" data-speak="nap">nap</button></div><p class="wc-ex">Take a short <mark>nap</mark> during the break.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">strong</div><div class="wc-cn">强壮的</div></div><button class="icon-btn" data-speak="strong">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="powerful">powerful</button><button class="syn-chip" data-speak="robust">robust</button><button class="syn-chip" data-speak="sturdy">sturdy</button></div><p class="wc-ex">A <mark>robust</mark> immune system can fight off infections.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">weak</div><div class="wc-cn">虚弱的</div></div><button class="icon-btn" data-speak="weak">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="fragile">fragile</button><button class="syn-chip" data-speak="feeble">feeble</button><button class="syn-chip" data-speak="vulnerable">vulnerable</button></div><p class="wc-ex">The patient is still quite <mark>fragile</mark> after the operation.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">cure</div><div class="wc-cn">治疗</div></div><button class="icon-btn" data-speak="cure">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="treat">treat</button><button class="syn-chip" data-speak="heal">heal</button><button class="syn-chip" data-speak="remedy">remedy</button></div><p class="wc-ex">Doctors are working to <mark>treat</mark> the disease.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">prevent</div><div class="wc-cn">预防</div></div><button class="icon-btn" data-speak="prevent">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="stop">stop</button><button class="syn-chip" data-speak="avoid">avoid</button><button class="syn-chip" data-speak="guard against">guard against</button></div><p class="wc-ex">Regular checks can help <mark>stop</mark> the disease spreading.</p><div class="wc-meta"><span>💪 健康运动</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">environment</div><div class="wc-cn">环境</div></div><button class="icon-btn" data-speak="environment">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="surroundings">surroundings</button><button class="syn-chip" data-speak="nature">nature</button></div><p class="wc-ex">We should protect the natural <mark>surroundings</mark> of the area.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">pollution</div><div class="wc-cn">污染</div></div><button class="icon-btn" data-speak="pollution">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="contamination">contamination</button></div><p class="wc-ex">Air <mark>contamination</mark> is a major concern for residents.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">waste</div><div class="wc-cn">垃圾</div></div><button class="icon-btn" data-speak="waste">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="rubbish">rubbish</button><button class="syn-chip" data-speak="garbage">garbage</button><button class="syn-chip" data-speak="litter">litter</button></div><p class="wc-ex">Visitors are asked not to leave <mark>litter</mark> on the beach.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">recycle</div><div class="wc-cn">回收利用</div></div><button class="icon-btn" data-speak="recycle">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="reuse">reuse</button><button class="syn-chip" data-speak="reprocess">reprocess</button></div><p class="wc-ex">The bottles can be <mark>reuse</mark>d many times.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">energy</div><div class="wc-cn">能源</div></div><button class="icon-btn" data-speak="energy">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="power">power</button><button class="syn-chip" data-speak="fuel">fuel</button></div><p class="wc-ex">The building runs entirely on solar <mark>power</mark>.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">climate</div><div class="wc-cn">气候</div></div><button class="icon-btn" data-speak="climate">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="weather patterns">weather patterns</button><button class="syn-chip" data-speak="weather conditions">weather conditions</button></div><p class="wc-ex">The <mark>weather patterns</mark> have become less predictable.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">damage</div><div class="wc-cn">破坏</div></div><button class="icon-btn" data-speak="damage">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="harm">harm</button><button class="syn-chip" data-speak="destroy">destroy</button><button class="syn-chip" data-speak="ruin">ruin</button></div><p class="wc-ex">The flood may <mark>destroy</mark> several bridges in the region.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">protect</div><div class="wc-cn">保护</div></div><button class="icon-btn" data-speak="protect">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="preserve">preserve</button><button class="syn-chip" data-speak="conserve">conserve</button><button class="syn-chip" data-speak="safeguard">safeguard</button></div><p class="wc-ex">We must <mark>preserve</mark> the wetlands for future generations.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">reduce</div><div class="wc-cn">减少</div></div><button class="icon-btn" data-speak="reduce">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="cut down on">cut down on</button><button class="syn-chip" data-speak="lower">lower</button><button class="syn-chip" data-speak="decrease">decrease</button></div><p class="wc-ex">The scheme aims to <mark>cut down on</mark> plastic waste.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">plant</div><div class="wc-cn">植物</div></div><button class="icon-btn" data-speak="plant">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="vegetation">vegetation</button><button class="syn-chip" data-speak="flora">flora</button></div><p class="wc-ex">The region is rich in native <mark>vegetation</mark>.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">animal</div><div class="wc-cn">动物</div></div><button class="icon-btn" data-speak="animal">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="creature">creature</button><button class="syn-chip" data-speak="wildlife">wildlife</button><button class="syn-chip" data-speak="species">species</button></div><p class="wc-ex">The island is home to many rare <mark>species</mark>.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">resource</div><div class="wc-cn">资源</div></div><button class="icon-btn" data-speak="resource">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="supply">supply</button><button class="syn-chip" data-speak="material">material</button><button class="syn-chip" data-speak="reserve">reserve</button></div><p class="wc-ex">The country has large coal <mark>reserve</mark>s.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">growth</div><div class="wc-cn">增长</div></div><button class="icon-btn" data-speak="growth">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="expansion">expansion</button><button class="syn-chip" data-speak="development">development</button></div><p class="wc-ex">Rapid urban <mark>expansion</mark> has affected local wildlife.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">shortage</div><div class="wc-cn">短缺</div></div><button class="icon-btn" data-speak="shortage">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="lack">lack</button><button class="syn-chip" data-speak="scarcity">scarcity</button><button class="syn-chip" data-speak="deficit">deficit</button></div><p class="wc-ex">The region suffers from a <mark>lack</mark> of clean water.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">solve</div><div class="wc-cn">解决</div></div><button class="icon-btn" data-speak="solve">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="resolve">resolve</button><button class="syn-chip" data-speak="tackle">tackle</button><button class="syn-chip" data-speak="deal with">deal with</button></div><p class="wc-ex">New technology may help <mark>tackle</mark> the problem.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">eco-friendly</div><div class="wc-cn">环保的</div></div><button class="icon-btn" data-speak="eco-friendly">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="environmentally friendly">environmentally friendly</button><button class="syn-chip" data-speak="sustainable">sustainable</button><button class="syn-chip" data-speak="green">green</button></div><p class="wc-ex">The hotel uses <mark>sustainable</mark> materials.</p><div class="wc-meta"><span>🌿 环境能源</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">house</div><div class="wc-cn">房子</div></div><button class="icon-btn" data-speak="house">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="home">home</button><button class="syn-chip" data-speak="accommodation">accommodation</button><button class="syn-chip" data-speak="property">property</button></div><p class="wc-ex">The <mark>accommodation</mark> includes heating and water bills.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">room</div><div class="wc-cn">房间</div></div><button class="icon-btn" data-speak="room">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="space">space</button><button class="syn-chip" data-speak="studio">studio</button><button class="syn-chip" data-speak="chamber">chamber</button></div><p class="wc-ex">The <mark>studio</mark> is furnished and ready to move in.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">rent</div><div class="wc-cn">租</div></div><button class="icon-btn" data-speak="rent">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="lease">lease</button><button class="syn-chip" data-speak="hire">hire</button><button class="syn-chip" data-speak="let">let</button></div><p class="wc-ex">The flat is available to <mark>lease</mark> from September.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">landlord</div><div class="wc-cn">房东</div></div><button class="icon-btn" data-speak="landlord">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="owner">owner</button><button class="syn-chip" data-speak="property owner">property owner</button></div><p class="wc-ex">Contact the <mark>owner</mark> if the heater breaks down.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">bill</div><div class="wc-cn">账单</div></div><button class="icon-btn" data-speak="bill">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="charge">charge</button><button class="syn-chip" data-speak="fee">fee</button><button class="syn-chip" data-speak="payment">payment</button></div><p class="wc-ex">The <mark>charge</mark> covers electricity and water.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">pay</div><div class="wc-cn">支付</div></div><button class="icon-btn" data-speak="pay">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="cover">cover</button><button class="syn-chip" data-speak="fund">fund</button><button class="syn-chip" data-speak="meet the cost">meet the cost</button></div><p class="wc-ex">The grant will <mark>cover</mark> your tuition fees.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">save</div><div class="wc-cn">节省</div></div><button class="icon-btn" data-speak="save">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="economize">economize</button><button class="syn-chip" data-speak="cut back">cut back</button></div><p class="wc-ex">We need to <mark>cut back</mark> on heating costs.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">quiet</div><div class="wc-cn">安静的</div></div><button class="icon-btn" data-speak="quiet">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="peaceful">peaceful</button><button class="syn-chip" data-speak="calm">calm</button><button class="syn-chip" data-speak="tranquil">tranquil</button></div><p class="wc-ex">The village is <mark>peaceful</mark> and safe at night.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">noisy</div><div class="wc-cn">吵闹的</div></div><button class="icon-btn" data-speak="noisy">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="loud">loud</button><button class="syn-chip" data-speak="deafening">deafening</button></div><p class="wc-ex">The room faces a <mark>loud</mark> main road.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">spacious</div><div class="wc-cn">宽敞的</div></div><button class="icon-btn" data-speak="spacious">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="roomy">roomy</button><button class="syn-chip" data-speak="generous">generous</button><button class="syn-chip" data-speak="large">large</button></div><p class="wc-ex">The apartment has <mark>generous</mark> storage space.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">cramped</div><div class="wc-cn">狭小的</div></div><button class="icon-btn" data-speak="cramped">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="tiny">tiny</button><button class="syn-chip" data-speak="poky">poky</button><button class="syn-chip" data-speak="small">small</button></div><p class="wc-ex">The kitchen is quite <mark>poky</mark>.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">comfortable</div><div class="wc-cn">舒适的</div></div><button class="icon-btn" data-speak="comfortable">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="cosy">cosy</button><button class="syn-chip" data-speak="snug">snug</button><button class="syn-chip" data-speak="pleasant">pleasant</button></div><p class="wc-ex">The beds are <mark>cosy</mark> and the rooms are warm.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">convenient</div><div class="wc-cn">方便的</div></div><button class="icon-btn" data-speak="convenient">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="handy">handy</button><button class="syn-chip" data-speak="accessible">accessible</button><button class="syn-chip" data-speak="practical">practical</button></div><p class="wc-ex">The shop is <mark>handy</mark> for daily essentials.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">remote</div><div class="wc-cn">偏远的</div></div><button class="icon-btn" data-speak="remote">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="isolated">isolated</button><button class="syn-chip" data-speak="out of the way">out of the way</button><button class="syn-chip" data-speak="secluded">secluded</button></div><p class="wc-ex">The cottage is <mark>isolated</mark> but very beautiful.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">facilities</div><div class="wc-cn">设施</div></div><button class="icon-btn" data-speak="facilities">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="amenities">amenities</button><button class="syn-chip" data-speak="services">services</button><button class="syn-chip" data-speak="equipment">equipment</button></div><p class="wc-ex">The gym offers excellent <mark>amenities</mark>.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">repair</div><div class="wc-cn">修理</div></div><button class="icon-btn" data-speak="repair">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="fix">fix</button><button class="syn-chip" data-speak="mend">mend</button><button class="syn-chip" data-speak="restore">restore</button></div><p class="wc-ex">The technician will <mark>fix</mark> the boiler tomorrow.</p><div class="wc-meta"><span>🏠 生活住宿</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">research</div><div class="wc-cn">研究</div></div><button class="icon-btn" data-speak="research">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="investigation">investigation</button><button class="syn-chip" data-speak="study">study</button><button class="syn-chip" data-speak="survey">survey</button></div><p class="wc-ex">The <mark>investigation</mark> focused on local history.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">data</div><div class="wc-cn">数据</div></div><button class="icon-btn" data-speak="data">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="information">information</button><button class="syn-chip" data-speak="figures">figures</button><button class="syn-chip" data-speak="statistics">statistics</button></div><p class="wc-ex">The <mark>figures</mark> suggest a steady rise in demand.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">method</div><div class="wc-cn">方法</div></div><button class="icon-btn" data-speak="method">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="approach">approach</button><button class="syn-chip" data-speak="technique">technique</button><button class="syn-chip" data-speak="way">way</button></div><p class="wc-ex">The <mark>approach</mark> proved highly effective.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">experiment</div><div class="wc-cn">实验</div></div><button class="icon-btn" data-speak="experiment">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="test">test</button><button class="syn-chip" data-speak="trial">trial</button><button class="syn-chip" data-speak="pilot">pilot</button></div><p class="wc-ex">The <mark>trial</mark> ran for six months.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">result</div><div class="wc-cn">结果</div></div><button class="icon-btn" data-speak="result">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="outcome">outcome</button><button class="syn-chip" data-speak="finding">finding</button><button class="syn-chip" data-speak="conclusion">conclusion</button></div><p class="wc-ex">The <mark>finding</mark>s will be published next month.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">cause</div><div class="wc-cn">导致</div></div><button class="icon-btn" data-speak="cause">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="lead to">lead to</button><button class="syn-chip" data-speak="result in">result in</button><button class="syn-chip" data-speak="give rise to">give rise to</button></div><p class="wc-ex">Lack of sleep can <mark>lead to</mark> poor concentration.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">effect</div><div class="wc-cn">影响</div></div><button class="icon-btn" data-speak="effect">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="impact">impact</button><button class="syn-chip" data-speak="influence">influence</button><button class="syn-chip" data-speak="consequence">consequence</button></div><p class="wc-ex">The policy had a significant <mark>impact</mark> on prices.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">example</div><div class="wc-cn">例子</div></div><button class="icon-btn" data-speak="example">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="instance">instance</button><button class="syn-chip" data-speak="case">case</button><button class="syn-chip" data-speak="illustration">illustration</button></div><p class="wc-ex">For <mark>instance</mark>, the course includes fieldwork.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">reason</div><div class="wc-cn">原因</div></div><button class="icon-btn" data-speak="reason">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="factor">factor</button><button class="syn-chip" data-speak="explanation">explanation</button><button class="syn-chip" data-speak="motive">motive</button></div><p class="wc-ex">The main <mark>factor</mark> was the cost of travel.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">suggest</div><div class="wc-cn">表明</div></div><button class="icon-btn" data-speak="suggest">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="indicate">indicate</button><button class="syn-chip" data-speak="imply">imply</button><button class="syn-chip" data-speak="point to">point to</button></div><p class="wc-ex">The evidence may <mark>point to</mark> a link between diet and health.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">prove</div><div class="wc-cn">证明</div></div><button class="icon-btn" data-speak="prove">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="demonstrate">demonstrate</button><button class="syn-chip" data-speak="confirm">confirm</button><button class="syn-chip" data-speak="verify">verify</button></div><p class="wc-ex">The results <mark>confirm</mark> the original hypothesis.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">examine</div><div class="wc-cn">检查，研究</div></div><button class="icon-btn" data-speak="examine">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="investigate">investigate</button><button class="syn-chip" data-speak="analyse">analyse</button><button class="syn-chip" data-speak="look into">look into</button></div><p class="wc-ex">The team will <mark>analyse</mark> samples from the river.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">measure</div><div class="wc-cn">测量，评估</div></div><button class="icon-btn" data-speak="measure">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="assess">assess</button><button class="syn-chip" data-speak="gauge">gauge</button><button class="syn-chip" data-speak="evaluate">evaluate</button></div><p class="wc-ex">Researchers will <mark>assess</mark> the impact on local wildlife.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">compare</div><div class="wc-cn">比较</div></div><button class="icon-btn" data-speak="compare">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="contrast">contrast</button><button class="syn-chip" data-speak="weigh up">weigh up</button></div><p class="wc-ex">The study will <mark>contrast</mark> urban and rural schools.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">similar</div><div class="wc-cn">相似的</div></div><button class="icon-btn" data-speak="similar">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="alike">alike</button><button class="syn-chip" data-speak="comparable">comparable</button><button class="syn-chip" data-speak="analogous">analogous</button></div><p class="wc-ex">The two reports are broadly <mark>comparable</mark>.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">conclusion</div><div class="wc-cn">结论</div></div><button class="icon-btn" data-speak="conclusion">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="summary">summary</button><button class="syn-chip" data-speak="outcome">outcome</button><button class="syn-chip" data-speak="verdict">verdict</button></div><p class="wc-ex">In <mark>summary</mark>, the project was a success.</p><div class="wc-meta"><span>🔬 学术研究</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">price</div><div class="wc-cn">价格</div></div><button class="icon-btn" data-speak="price">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="cost">cost</button><button class="syn-chip" data-speak="charge">charge</button><button class="syn-chip" data-speak="fee">fee</button></div><p class="wc-ex">The <mark>cost</mark> includes a three-year warranty.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">discount</div><div class="wc-cn">折扣</div></div><button class="icon-btn" data-speak="discount">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="reduction">reduction</button><button class="syn-chip" data-speak="concession">concession</button><button class="syn-chip" data-speak="deal">deal</button></div><p class="wc-ex">Students get a ten percent <mark>reduction</mark>.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">refund</div><div class="wc-cn">退款</div></div><button class="icon-btn" data-speak="refund">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="reimbursement">reimbursement</button><button class="syn-chip" data-speak="money back">money back</button></div><p class="wc-ex">You can get your <mark>money back</mark> within thirty days.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">receipt</div><div class="wc-cn">收据</div></div><button class="icon-btn" data-speak="receipt">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="invoice">invoice</button><button class="syn-chip" data-speak="proof of purchase">proof of purchase</button></div><p class="wc-ex">Keep the <mark>invoice</mark> in case you need to return the item.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">available</div><div class="wc-cn">有货的</div></div><button class="icon-btn" data-speak="available">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="in stock">in stock</button><button class="syn-chip" data-speak="on sale">on sale</button><button class="syn-chip" data-speak="obtainable">obtainable</button></div><p class="wc-ex">The item is <mark>in stock</mark> at the main store.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">unavailable</div><div class="wc-cn">缺货的</div></div><button class="icon-btn" data-speak="unavailable">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="out of stock">out of stock</button><button class="syn-chip" data-speak="sold out">sold out</button></div><p class="wc-ex">The larger size is currently <mark>sold out</mark>.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">offer</div><div class="wc-cn">提供</div></div><button class="icon-btn" data-speak="offer">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="provide">provide</button><button class="syn-chip" data-speak="supply">supply</button><button class="syn-chip" data-speak="give">give</button></div><p class="wc-ex">The store will <mark>provide</mark> free delivery on large orders.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">customer</div><div class="wc-cn">顾客</div></div><button class="icon-btn" data-speak="customer">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="client">client</button><button class="syn-chip" data-speak="buyer">buyer</button><button class="syn-chip" data-speak="consumer">consumer</button></div><p class="wc-ex">Regular <mark>client</mark>s receive a loyalty card.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">queue</div><div class="wc-cn">排队</div></div><button class="icon-btn" data-speak="queue">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="line">line</button><button class="syn-chip" data-speak="wait">wait</button><button class="syn-chip" data-speak="stand in line">stand in line</button></div><p class="wc-ex">Visitors had to <mark>stand in line</mark> for tickets.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">popular</div><div class="wc-cn">受欢迎的</div></div><button class="icon-btn" data-speak="popular">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="well-liked">well-liked</button><button class="syn-chip" data-speak="in demand">in demand</button><button class="syn-chip" data-speak="sought-after">sought-after</button></div><p class="wc-ex">The course is highly <mark>sought-after</mark>.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">trendy</div><div class="wc-cn">时尚的</div></div><button class="icon-btn" data-speak="trendy">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="fashionable">fashionable</button><button class="syn-chip" data-speak="stylish">stylish</button><button class="syn-chip" data-speak="modern">modern</button></div><p class="wc-ex">The café has a <mark>stylish</mark> interior.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">bargain</div><div class="wc-cn">便宜货，划算</div></div><button class="icon-btn" data-speak="bargain">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="good value">good value</button><button class="syn-chip" data-speak="deal">deal</button><button class="syn-chip" data-speak="steal">steal</button></div><p class="wc-ex">This jacket was really <mark>good value</mark> for money.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">delivery</div><div class="wc-cn">配送</div></div><button class="icon-btn" data-speak="delivery">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="shipping">shipping</button><button class="syn-chip" data-speak="postage">postage</button><button class="syn-chip" data-speak="dispatch">dispatch</button></div><p class="wc-ex"><mark>Shipping</mark> is free for orders over thirty pounds.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">quality</div><div class="wc-cn">质量</div></div><button class="icon-btn" data-speak="quality">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="standard">standard</button><button class="syn-chip" data-speak="grade">grade</button><button class="syn-chip" data-speak="calibre">calibre</button></div><p class="wc-ex">The products are of a high <mark>standard</mark>.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">guarantee</div><div class="wc-cn">保修</div></div><button class="icon-btn" data-speak="guarantee">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="warranty">warranty</button><button class="syn-chip" data-speak="assurance">assurance</button></div><p class="wc-ex">The camera comes with a two-year <mark>warranty</mark>.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">afford</div><div class="wc-cn">负担得起</div></div><button class="icon-btn" data-speak="afford">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="pay for">pay for</button><button class="syn-chip" data-speak="manage">manage</button><button class="syn-chip" data-speak="cover the cost">cover the cost</button></div><p class="wc-ex">Not all families can <mark>pay for</mark> private lessons.</p><div class="wc-meta"><span>🛒 购物消费</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">happy</div><div class="wc-cn">高兴的</div></div><button class="icon-btn" data-speak="happy">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="delighted">delighted</button><button class="syn-chip" data-speak="pleased">pleased</button><button class="syn-chip" data-speak="content">content</button></div><p class="wc-ex">She was <mark>delighted</mark> with the final results.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">sad</div><div class="wc-cn">难过的</div></div><button class="icon-btn" data-speak="sad">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="upset">upset</button><button class="syn-chip" data-speak="miserable">miserable</button><button class="syn-chip" data-speak="down">down</button></div><p class="wc-ex">He felt <mark>miserable</mark> about missing the deadline.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">angry</div><div class="wc-cn">生气的</div></div><button class="icon-btn" data-speak="angry">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="annoyed">annoyed</button><button class="syn-chip" data-speak="furious">furious</button><button class="syn-chip" data-speak="irritated">irritated</button></div><p class="wc-ex">Residents were <mark>furious</mark> about the noise.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">worried</div><div class="wc-cn">担心的</div></div><button class="icon-btn" data-speak="worried">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="anxious">anxious</button><button class="syn-chip" data-speak="concerned">concerned</button><button class="syn-chip" data-speak="nervous">nervous</button></div><p class="wc-ex">Parents are <mark>concerned</mark> about the changes.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">surprised</div><div class="wc-cn">惊讶的</div></div><button class="icon-btn" data-speak="surprised">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="astonished">astonished</button><button class="syn-chip" data-speak="amazed">amazed</button><button class="syn-chip" data-speak="stunned">stunned</button></div><p class="wc-ex">I was <mark>amazed</mark> by the size of the library.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">confused</div><div class="wc-cn">困惑的</div></div><button class="icon-btn" data-speak="confused">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="puzzled">puzzled</button><button class="syn-chip" data-speak="bewildered">bewildered</button><button class="syn-chip" data-speak="unsure">unsure</button></div><p class="wc-ex">Tourists were <mark>puzzled</mark> by the signs.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">interested</div><div class="wc-cn">感兴趣的</div></div><button class="icon-btn" data-speak="interested">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="keen">keen</button><button class="syn-chip" data-speak="enthusiastic">enthusiastic</button><button class="syn-chip" data-speak="fascinated">fascinated</button></div><p class="wc-ex">She is <mark>keen</mark> to learn more about local history.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">bored</div><div class="wc-cn">无聊的</div></div><button class="icon-btn" data-speak="bored">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="uninterested">uninterested</button><button class="syn-chip" data-speak="fed up">fed up</button><button class="syn-chip" data-speak="tired of">tired of</button></div><p class="wc-ex">He is <mark>fed up</mark> with the same routine.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">excited</div><div class="wc-cn">兴奋的</div></div><button class="icon-btn" data-speak="excited">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="thrilled">thrilled</button><button class="syn-chip" data-speak="eager">eager</button><button class="syn-chip" data-speak="exhilarated">exhilarated</button></div><p class="wc-ex">The children were <mark>thrilled</mark> about the trip.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">afraid</div><div class="wc-cn">害怕的</div></div><button class="icon-btn" data-speak="afraid">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="scared">scared</button><button class="syn-chip" data-speak="frightened">frightened</button><button class="syn-chip" data-speak="terrified">terrified</button></div><p class="wc-ex">She is <mark>frightened</mark> of flying.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">grateful</div><div class="wc-cn">感激的</div></div><button class="icon-btn" data-speak="grateful">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="thankful">thankful</button><button class="syn-chip" data-speak="appreciative">appreciative</button></div><p class="wc-ex">We are <mark>thankful</mark> for your generous support.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">confident</div><div class="wc-cn">自信的</div></div><button class="icon-btn" data-speak="confident">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="sure">sure</button><button class="syn-chip" data-speak="certain">certain</button><button class="syn-chip" data-speak="self-assured">self-assured</button></div><p class="wc-ex">She felt <mark>certain</mark> about her answer.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">doubtful</div><div class="wc-cn">怀疑的</div></div><button class="icon-btn" data-speak="doubtful">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="uncertain">uncertain</button><button class="syn-chip" data-speak="unsure">unsure</button><button class="syn-chip" data-speak="sceptical">sceptical</button></div><p class="wc-ex">Experts are <mark>sceptical</mark> about the claims.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">prefer</div><div class="wc-cn">更喜欢</div></div><button class="icon-btn" data-speak="prefer">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="favour">favour</button><button class="syn-chip" data-speak="would rather">would rather</button><button class="syn-chip" data-speak="like better">like better</button></div><p class="wc-ex">Most students <mark>favour</mark> online lectures.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">agree</div><div class="wc-cn">同意</div></div><button class="icon-btn" data-speak="agree">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="consent">consent</button><button class="syn-chip" data-speak="concur">concur</button><button class="syn-chip" data-speak="be in favour of">be in favour of</button></div><p class="wc-ex">Most members will <mark>be in favour of</mark> the proposal.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">disagree</div><div class="wc-cn">反对</div></div><button class="icon-btn" data-speak="disagree">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="oppose">oppose</button><button class="syn-chip" data-speak="object to">object to</button><button class="syn-chip" data-speak="be against">be against</button></div><p class="wc-ex">Some residents <mark>object to</mark> the new plan.</p><div class="wc-meta"><span>😊 情感态度</span></div></div><div class="word-card"><div class="wc-top"><div><div class="wc-word">refuse</div><div class="wc-cn">拒绝</div></div><button class="icon-btn" data-speak="refuse">🔊</button></div><div class="wc-syn"><button class="syn-chip" data-speak="decline">decline</button><button class="syn-chip" data-speak="reject">reject</button><button class="syn-chip" data-speak="turn down">turn down</button></div><p class="wc-ex">She may <mark>turn down</mark> the offer of a job.</p><div class="wc-meta"><span>😊 情感态度</span></div></div></div>
+  </section>
+
+  <!-- ============ 闪卡 ============ -->
+  <section id="view-flash" class="view">
+    <div class="panel">
+      <h3>1. 选择主题</h3>
+      <div class="chips" id="flash-topics"><button class="chip on" data-t="all">📚 全部</button><button class="chip " data-t="core">⭐ 高频通用</button><button class="chip " data-t="edu">🎓 教育学习</button><button class="chip " data-t="work">💼 工作职场</button><button class="chip " data-t="travel">✈️ 旅行交通</button><button class="chip " data-t="health">💪 健康运动</button><button class="chip " data-t="env">🌿 环境能源</button><button class="chip " data-t="living">🏠 生活住宿</button><button class="chip " data-t="academic">🔬 学术研究</button><button class="chip " data-t="shopping">🛒 购物消费</button><button class="chip " data-t="feelings">😊 情感态度</button></div>
+      <h3 style="margin-top:14px">2. 出题方向</h3>
+      <div class="chips" id="flash-dirs">
+        <button class="chip on" data-dir="forward">正向 · 看单词想同义</button>
+        <button class="chip" data-dir="reverse">反向 · 看同义想单词</button>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:10px">
+        <button class="btn btn-primary" id="flash-start">开始闪卡</button>
+        <button class="btn btn-ghost" id="flash-skip-start">跳过</button>
+      </div>
+    </div>
+    <div id="flash-game" class="hidden">
+      <div class="flash-progress"><span id="flash-pos"></span><span id="flash-count"></span></div>
+      <div class="flash-stage">
+        <div class="flash-card" id="flash-card">
+          <div class="face front" id="flash-front"></div>
+          <div class="face back" id="flash-back"></div>
+        </div>
+      </div>
+      <div class="flash-actions">
+        <button class="btn btn-ghost" id="flash-speak">🔊 发音</button>
+        <button class="btn btn-red" id="flash-no">✗ 不认识</button>
+        <button class="btn btn-green" id="flash-yes">✓ 认识</button>
+      </div>
+    </div>
+    <div id="flash-end" class="hidden flash-end">
+      <div class="big">🎉</div>
+      <h2>本组完成！</h2>
+      <p id="flash-end-msg"></p>
+      <div class="result-actions">
+        <button class="btn btn-primary" id="flash-again">再练一组</button>
+        <button class="btn btn-ghost" id="flash-back">返回设置</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 练习 ============ -->
+  <section id="view-practice" class="view">
+    <div class="panel" id="practice-setup">
+      <h3>1. 选择主题 <span style="font-weight:400;color:var(--muted)">（不选 = 全部）</span></h3>
+      <div class="chips" id="p-topics"><button class="chip on" data-t="all">📚 全部</button><button class="chip " data-t="core">⭐ 高频通用</button><button class="chip " data-t="edu">🎓 教育学习</button><button class="chip " data-t="work">💼 工作职场</button><button class="chip " data-t="travel">✈️ 旅行交通</button><button class="chip " data-t="health">💪 健康运动</button><button class="chip " data-t="env">🌿 环境能源</button><button class="chip " data-t="living">🏠 生活住宿</button><button class="chip " data-t="academic">🔬 学术研究</button><button class="chip " data-t="shopping">🛒 购物消费</button><button class="chip " data-t="feelings">😊 情感态度</button></div>
+      <h3 style="margin-top:16px">2. 练习题型</h3>
+      <div class="type-cards" id="p-types">
+        <label class="type-card sel"><input type="radio" name="ptype" value="mcq" checked=""><span class="t-icon">🔤</span><div class="t-name">选择题</div><div class="t-desc">看单词，选出同义词</div></label>
+        <label class="type-card"><input type="radio" name="ptype" value="match"><span class="t-icon">🧩</span><div class="t-name">配对题</div><div class="t-desc">单词 ↔ 同义词配对</div></label>
+        <label class="type-card"><input type="radio" name="ptype" value="listen"><span class="t-icon">🔊</span><div class="t-name">听力题</div><div class="t-desc">听句子，抓同义词</div></label>
+      </div>
+      <h3 style="margin-top:16px">3. 出题方向 <span style="font-weight:400;color:var(--muted)">（仅选择题）</span></h3>
+      <div class="chips" id="p-dirs">
+        <button class="chip on" data-dir="forward">正向</button>
+        <button class="chip" data-dir="reverse">反向</button>
+        <button class="chip" data-dir="mixed">混合</button>
+      </div>
+      <h3 style="margin-top:16px">4. 题目数量</h3>
+      <div class="chips" id="p-counts">
+        <button class="chip" data-n="5">5 题</button>
+        <button class="chip on" data-n="10">10 题</button>
+        <button class="chip" data-n="15">15 题</button>
+        <button class="chip" data-n="20">20 题</button>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" id="p-start">🚀 开始练习</button>
+      </div>
+    </div>
+
+    <div id="practice-game" class="hidden">
+      <div class="quiz-top">
+        <div class="quiz-progress"><div class="fill" id="quiz-fill"></div></div>
+        <div class="quiz-meta"><span id="quiz-pos"></span> · 得分 <b id="quiz-score">0</b></div>
+        <button class="quit-btn" id="quiz-quit">✕ 退出</button>
+      </div>
+      <div id="quiz-body"></div>
+    </div>
+
+    <div id="practice-result" class="hidden result-box">
+      <div class="big" id="res-emoji">🎉</div>
+      <h2 id="res-title">完成！</h2>
+      <div class="score-line" id="res-score"></div>
+      <div class="sub" id="res-sub"></div>
+      <div class="stat-chips" id="res-chips"></div>
+      <div class="wrong-list" id="res-wrong"></div>
+      <div class="result-actions">
+        <button class="btn btn-primary" id="res-again">再练一组</button>
+        <button class="btn btn-ghost" id="res-back">返回设置</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 统计 ============ -->
+  <section id="view-stats" class="view">
+    <div class="stat-grid" id="stat-cards"></div>
+    <div class="panel">
+      <h3>📈 主题进度 <span style="font-weight:400;color:var(--muted)">（每词练过 ≥4 次且错 ≤1 次记为掌握）</span></h3>
+      <div id="topic-progress"></div>
+    </div>
+    <div class="panel">
+      <h3>📌 生词本 / 易错词 <span id="wb-count" style="font-weight:400;color:var(--muted)"></span></h3>
+      <div class="wordbook-list" id="wordbook-list"></div>
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" id="review-start">🔁 复习生词本</button>
+        <button class="btn btn-ghost btn-sm" id="wordbook-clear">清空生词本</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>⚙️ 数据</h3>
+      <div class="danger-zone">
+        <button class="btn btn-red btn-sm" id="reset-all">重置全部数据</button>
+        <span style="font-size:12px;color:var(--muted);align-self:center">数据仅保存在本机浏览器（localStorage），清除浏览器数据会丢失进度。</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>📖 建议使用 Chrome / Edge 获得最佳语音体验 · 数据保存在本地浏览器 · 词库将持续扩充</footer>
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+/* ===DATA1=== *//* ================= 词库数据 ================= */
+const TOPICS = [
+  {id:'core',     name:'高频通用',  icon:'⭐'},
+  {id:'edu',      name:'教育学习',  icon:'🎓'},
+  {id:'work',     name:'工作职场',  icon:'💼'},
+  {id:'travel',   name:'旅行交通',  icon:'✈️'},
+  {id:'health',   name:'健康运动',  icon:'💪'},
+  {id:'env',      name:'环境能源',  icon:'🌿'},
+  {id:'living',   name:'生活住宿',  icon:'🏠'},
+  {id:'academic', name:'学术研究',  icon:'🔬'},
+  {id:'shopping', name:'购物消费',  icon:'🛒'},
+  {id:'feelings', name:'情感态度',  icon:'😊'}
+];
+
+// t=主题 w=单词 s=同义词组 c=中文释义 e=例句 k=例句中关键词(同义词)
+const WORDS = [
+{t:'core',w:'important',s:['crucial','vital','essential','significant'],c:'重要的',e:'It is crucial to book your tickets well in advance.',k:'crucial'},
+{t:'core',w:'improve',s:['enhance','boost','upgrade'],c:'改善，提高',e:'The new software will enhance the overall efficiency of the office.',k:'enhance'},
+{t:'core',w:'problem',s:['issue','difficulty','challenge'],c:'问题',e:'The main issue is the lack of affordable housing.',k:'issue'},
+{t:'core',w:'increase',s:['rise','grow','climb'],c:'增加',e:'The number of international students has continued to rise sharply.',k:'rise'},
+{t:'core',w:'decrease',s:['decline','drop','fall','reduce'],c:'减少',e:'Sales are expected to decline by ten percent this year.',k:'decline'},
+{t:'core',w:'expensive',s:['costly','pricey'],c:'昂贵的',e:'The accommodation was quite costly for a student.',k:'costly'},
+{t:'core',w:'cheap',s:['inexpensive','affordable'],c:'便宜的',e:'The course offers affordable study materials.',k:'affordable'},
+{t:'core',w:'big',s:['large','huge','massive','considerable'],c:'大的',e:'A huge number of people attended the opening ceremony.',k:'huge'},
+{t:'core',w:'small',s:['tiny','minor','slight'],c:'小的',e:'There was a slight delay at the start of the session.',k:'slight'},
+{t:'core',w:'need',s:['require','demand','call for'],c:'需要',e:'This role will require a strong command of English.',k:'require'},
+{t:'core',w:'show',s:['demonstrate','indicate','reveal'],c:'显示，表明',e:'The data seems to indicate a clear upward trend.',k:'indicate'},
+{t:'core',w:'get',s:['obtain','acquire','receive'],c:'获得',e:'Students can obtain a discount with their university card.',k:'obtain'},
+{t:'core',w:'buy',s:['purchase','acquire'],c:'购买',e:'You can purchase tickets at the main entrance.',k:'purchase'},
+{t:'core',w:'help',s:['assist','support','aid'],c:'帮助',e:'Staff are available to assist you at any time.',k:'assist'},
+{t:'core',w:'start',s:['begin','commence','launch'],c:'开始',e:'The lecture will commence at nine o\'clock sharp.',k:'commence'},
+{t:'core',w:'finish',s:['complete','conclude','finalize'],c:'完成',e:'All participants must complete the form before the deadline.',k:'complete'},
+{t:'core',w:'choose',s:['select','pick','opt for'],c:'选择',e:'You may select any three modules from the list.',k:'select'},
+{t:'core',w:'change',s:['alter','modify','adjust'],c:'改变',e:'We may need to adjust the timetable.',k:'adjust'},
+{t:'core',w:'enough',s:['sufficient','adequate'],c:'足够的',e:'Make sure you bring sufficient warm clothing for the trip.',k:'sufficient'},
+{t:'core',w:'many',s:['numerous','a large number of'],c:'许多',e:'Numerous studies have confirmed the benefits of exercise.',k:'numerous'},
+{t:'core',w:'most',s:['the majority of'],c:'大多数',e:'The majority of respondents agreed with the statement.',k:'majority'},
+{t:'core',w:'also',s:['in addition','moreover','furthermore'],c:'此外',e:'In addition, the course includes weekly tutorials.',k:'in addition'},
+{t:'core',w:'because',s:['due to','owing to','since'],c:'因为',e:'The event was postponed due to heavy rain.',k:'due to'},
+{t:'core',w:'so',s:['therefore','consequently','as a result'],c:'因此',e:'Therefore, we strongly recommend booking early.',k:'therefore'},
+{t:'core',w:'but',s:['however','nevertheless','whereas'],c:'但是',e:'However, the price does not include meals.',k:'however'},
+{t:'core',w:'maybe',s:['perhaps','possibly','potentially'],c:'也许',e:'Perhaps we could arrange a meeting earlier in the week.',k:'perhaps'},
+{t:'core',w:'about',s:['approximately','around','roughly'],c:'大约',e:'The journey takes approximately two hours by train.',k:'approximately'},
+{t:'core',w:'very',s:['extremely','particularly','remarkably'],c:'非常',e:'The building is particularly impressive at night.',k:'particularly'},
+{t:'core',w:'often',s:['frequently','regularly','commonly'],c:'经常',e:'The buses run frequently during the rush hour.',k:'frequently'},
+{t:'core',w:'rarely',s:['seldom','hardly ever'],c:'很少',e:'Such opportunities seldom come along.',k:'seldom'},
+
+{t:'edu',w:'course',s:['programme','module','class'],c:'课程',e:'The programme covers both theory and practical work.',k:'programme'},
+{t:'edu',w:'subject',s:['topic','discipline','field'],c:'学科，主题',e:'Her main field of research is marine biology.',k:'field'},
+{t:'edu',w:'teacher',s:['instructor','tutor','lecturer'],c:'老师',e:'Each student is assigned a personal tutor.',k:'tutor'},
+{t:'edu',w:'student',s:['learner','pupil','trainee'],c:'学生',e:'The centre welcomes learners of all levels.',k:'learner'},
+{t:'edu',w:'homework',s:['assignment','coursework'],c:'作业',e:'The assignment must be submitted online by Friday.',k:'assignment'},
+{t:'edu',w:'exam',s:['test','assessment','evaluation'],c:'考试',e:'The final assessment counts for fifty percent of the grade.',k:'assessment'},
+{t:'edu',w:'score',s:['mark','grade','result'],c:'分数',e:'She received a high mark in the writing test.',k:'mark'},
+{t:'edu',w:'degree',s:['qualification','diploma','certificate'],c:'学位，证书',e:'A recognised qualification is essential for the post.',k:'qualification'},
+{t:'edu',w:'university',s:['college','institution','campus'],c:'大学',e:'The campus offers excellent sports facilities.',k:'campus'},
+{t:'edu',w:'lesson',s:['class','session','tutorial'],c:'课',e:'The first session is a general introduction to the course.',k:'session'},
+{t:'edu',w:'learn',s:['study','pick up','master'],c:'学习',e:'You will pick up useful skills during the work placement.',k:'pick up'},
+{t:'edu',w:'revise',s:['review','go over','refresh'],c:'复习',e:'Use the weekend to go over your lecture notes.',k:'go over'},
+{t:'edu',w:'difficult',s:['hard','challenging','tough'],c:'困难的',e:'The second part of the test is quite challenging.',k:'challenging'},
+{t:'edu',w:'easy',s:['simple','straightforward'],c:'容易的',e:'The application form is straightforward to complete.',k:'straightforward'},
+{t:'edu',w:'compulsory',s:['mandatory','required','obligatory'],c:'必修的，强制的',e:'Attendance at the laboratory sessions is mandatory.',k:'mandatory'},
+{t:'edu',w:'knowledge',s:['understanding','awareness','familiarity'],c:'知识',e:'The course builds a solid understanding of the subject.',k:'understanding'},
+
+{t:'work',w:'job',s:['work','employment','occupation','position'],c:'工作',e:'He found full-time employment in a local law firm.',k:'employment'},
+{t:'work',w:'salary',s:['wage','income','pay','earnings'],c:'薪水',e:'The starting pay is above the national average.',k:'pay'},
+{t:'work',w:'company',s:['firm','business','enterprise','corporation'],c:'公司',e:'She runs her own small business from home.',k:'business'},
+{t:'work',w:'employee',s:['staff','worker','workforce'],c:'员工',e:'All staff must attend the safety briefing.',k:'staff'},
+{t:'work',w:'manager',s:['supervisor','director','head'],c:'经理',e:'Please report to your supervisor before noon.',k:'supervisor'},
+{t:'work',w:'meeting',s:['conference','session','appointment'],c:'会议',e:'The conference will be held in the main hall.',k:'conference'},
+{t:'work',w:'retire',s:['leave work','give up work','stop working'],c:'退休',e:'He plans to give up work when he turns sixty.',k:'give up work'},
+{t:'work',w:'hire',s:['recruit','employ','take on'],c:'雇用',e:'The firm hopes to recruit new graduates this summer.',k:'recruit'},
+{t:'work',w:'fire',s:['dismiss','sack','lay off'],c:'解雇',e:'The company may have to lay off some workers.',k:'lay off'},
+{t:'work',w:'promotion',s:['advancement','career progression','rise'],c:'晋升',e:'The scheme supports career progression within the company.',k:'career progression'},
+{t:'work',w:'experience',s:['background','track record','expertise'],c:'经验',e:'Applicants need a strong track record in sales.',k:'track record'},
+{t:'work',w:'skill',s:['ability','expertise','competence'],c:'技能',e:'She has the right expertise for the job.',k:'expertise'},
+{t:'work',w:'colleague',s:['co-worker','workmate','teammate'],c:'同事',e:'Her co-workers are very supportive.',k:'co-worker'},
+{t:'work',w:'office',s:['workplace','premises','site'],c:'办公室',e:'The new premises are close to the railway station.',k:'premises'},
+
+{t:'travel',w:'travel',s:['journey','trip','commute'],c:'旅行',e:'The journey took much longer than we expected.',k:'journey'},
+{t:'travel',w:'arrive',s:['reach','get to','turn up'],c:'到达',e:'We expect to reach the hotel before midnight.',k:'reach'},
+{t:'travel',w:'leave',s:['depart','set off','go away'],c:'离开',e:'The coach will depart at six in the morning.',k:'depart'},
+{t:'travel',w:'return',s:['come back','go back'],c:'返回',e:'We plan to come back from the trip on Sunday.',k:'come back'},
+{t:'travel',w:'book',s:['reserve','make a reservation'],c:'预订',e:'You can reserve a seat on the train online.',k:'reserve'},
+{t:'travel',w:'ticket',s:['fare','pass','admission'],c:'票',e:'The train fare includes a reserved seat.',k:'fare'},
+{t:'travel',w:'near',s:['close to','nearby','adjacent'],c:'附近',e:'The hostel is close to the city centre.',k:'close to'},
+{t:'travel',w:'far',s:['distant','remote','out of the way'],c:'远的',e:'The farm is quite remote from the nearest village.',k:'remote'},
+{t:'travel',w:'fast',s:['rapid','quick','speedy'],c:'快的',e:'The rapid growth of the city has caused traffic problems.',k:'rapid'},
+{t:'travel',w:'slow',s:['gradual','unhurried','leisurely'],c:'慢的',e:'There has been a gradual improvement in the service.',k:'gradual'},
+{t:'travel',w:'busy',s:['crowded','congested','packed'],c:'繁忙的',e:'The roads are congested during the rush hour.',k:'congested'},
+{t:'travel',w:'free',s:['available','vacant','spare'],c:'空闲的，免费的',e:'Is the doctor available this afternoon?',k:'available'},
+{t:'travel',w:'luggage',s:['baggage','bags','belongings'],c:'行李',e:'Passengers must collect their baggage downstairs.',k:'baggage'},
+{t:'travel',w:'vehicle',s:['car','transport','means of transport'],c:'交通工具',e:'Cycling is a popular means of transport in the city.',k:'transport'},
+{t:'travel',w:'route',s:['way','path','itinerary'],c:'路线',e:'The tour itinerary includes three famous museums.',k:'itinerary'},
+{t:'travel',w:'postpone',s:['put off','delay','defer'],c:'推迟',e:'The flight was put off until the next morning.',k:'put off'},
+
+{t:'health',w:'ill',s:['sick','unwell','poorly'],c:'生病的',e:'Several children were off school because they felt unwell.',k:'unwell'},
+{t:'health',w:'tired',s:['exhausted','worn out','fatigued'],c:'疲惫的',e:'She felt exhausted after the long flight.',k:'exhausted'},
+{t:'health',w:'healthy',s:['fit','in good shape'],c:'健康的',e:'Swimming keeps him fit all year round.',k:'fit'},
+{t:'health',w:'exercise',s:['physical activity','workout','training'],c:'锻炼',e:'Regular physical activity can reduce stress.',k:'physical activity'},
+{t:'health',w:'diet',s:['eating habits','nutrition'],c:'饮食',e:'Good nutrition is important for young children.',k:'nutrition'},
+{t:'health',w:'medicine',s:['medication','drug','treatment'],c:'药物',e:'The doctor prescribed some medication for the cough.',k:'medication'},
+{t:'health',w:'injury',s:['wound','damage','harm'],c:'受伤',e:'The fall caused serious damage to his knee.',k:'damage'},
+{t:'health',w:'recover',s:['get better','heal','pull through'],c:'康复',e:'It took her several weeks to get better.',k:'get better'},
+{t:'health',w:'pain',s:['ache','discomfort','soreness'],c:'疼痛',e:'She complained of a sharp ache in her back.',k:'ache'},
+{t:'health',w:'stress',s:['pressure','strain','tension'],c:'压力',e:'Students often feel under pressure during exams.',k:'pressure'},
+{t:'health',w:'relax',s:['unwind','take it easy','de-stress'],c:'放松',e:'A hot bath helps me unwind after work.',k:'unwind'},
+{t:'health',w:'sleep',s:['rest','doze','nap'],c:'睡觉',e:'Take a short nap during the break.',k:'nap'},
+{t:'health',w:'strong',s:['powerful','robust','sturdy'],c:'强壮的',e:'A robust immune system can fight off infections.',k:'robust'},
+{t:'health',w:'weak',s:['fragile','feeble','vulnerable'],c:'虚弱的',e:'The patient is still quite fragile after the operation.',k:'fragile'},
+{t:'health',w:'cure',s:['treat','heal','remedy'],c:'治疗',e:'Doctors are working to treat the disease.',k:'treat'},
+{t:'health',w:'prevent',s:['stop','avoid','guard against'],c:'预防',e:'Regular checks can help stop the disease spreading.',k:'stop'},
+
+/* ===DATA2=== */{t:'env',w:'environment',s:['surroundings','nature'],c:'环境',e:'We should protect the natural surroundings of the area.',k:'surroundings'},
+{t:'env',w:'pollution',s:['contamination'],c:'污染',e:'Air contamination is a major concern for residents.',k:'contamination'},
+{t:'env',w:'waste',s:['rubbish','garbage','litter'],c:'垃圾',e:'Visitors are asked not to leave litter on the beach.',k:'litter'},
+{t:'env',w:'recycle',s:['reuse','reprocess'],c:'回收利用',e:'The bottles can be reused many times.',k:'reuse'},
+{t:'env',w:'energy',s:['power','fuel'],c:'能源',e:'The building runs entirely on solar power.',k:'power'},
+{t:'env',w:'climate',s:['weather patterns','weather conditions'],c:'气候',e:'The weather patterns have become less predictable.',k:'weather patterns'},
+{t:'env',w:'damage',s:['harm','destroy','ruin'],c:'破坏',e:'The flood may destroy several bridges in the region.',k:'destroy'},
+{t:'env',w:'protect',s:['preserve','conserve','safeguard'],c:'保护',e:'We must preserve the wetlands for future generations.',k:'preserve'},
+{t:'env',w:'reduce',s:['cut down on','lower','decrease'],c:'减少',e:'The scheme aims to cut down on plastic waste.',k:'cut down on'},
+{t:'env',w:'plant',s:['vegetation','flora'],c:'植物',e:'The region is rich in native vegetation.',k:'vegetation'},
+{t:'env',w:'animal',s:['creature','wildlife','species'],c:'动物',e:'The island is home to many rare species.',k:'species'},
+{t:'env',w:'resource',s:['supply','material','reserve'],c:'资源',e:'The country has large coal reserves.',k:'reserve'},
+{t:'env',w:'growth',s:['expansion','development'],c:'增长',e:'Rapid urban expansion has affected local wildlife.',k:'expansion'},
+{t:'env',w:'shortage',s:['lack','scarcity','deficit'],c:'短缺',e:'The region suffers from a lack of clean water.',k:'lack'},
+{t:'env',w:'solve',s:['resolve','tackle','deal with'],c:'解决',e:'New technology may help tackle the problem.',k:'tackle'},
+{t:'env',w:'eco-friendly',s:['environmentally friendly','sustainable','green'],c:'环保的',e:'The hotel uses sustainable materials.',k:'sustainable'},
+
+{t:'living',w:'house',s:['home','accommodation','property'],c:'房子',e:'The accommodation includes heating and water bills.',k:'accommodation'},
+{t:'living',w:'room',s:['space','studio','chamber'],c:'房间',e:'The studio is furnished and ready to move in.',k:'studio'},
+{t:'living',w:'rent',s:['lease','hire','let'],c:'租',e:'The flat is available to lease from September.',k:'lease'},
+{t:'living',w:'landlord',s:['owner','property owner'],c:'房东',e:'Contact the owner if the heater breaks down.',k:'owner'},
+{t:'living',w:'bill',s:['charge','fee','payment'],c:'账单',e:'The charge covers electricity and water.',k:'charge'},
+{t:'living',w:'pay',s:['cover','fund','meet the cost'],c:'支付',e:'The grant will cover your tuition fees.',k:'cover'},
+{t:'living',w:'save',s:['economize','cut back'],c:'节省',e:'We need to cut back on heating costs.',k:'cut back'},
+{t:'living',w:'quiet',s:['peaceful','calm','tranquil'],c:'安静的',e:'The village is peaceful and safe at night.',k:'peaceful'},
+{t:'living',w:'noisy',s:['loud','deafening'],c:'吵闹的',e:'The room faces a loud main road.',k:'loud'},
+{t:'living',w:'spacious',s:['roomy','generous','large'],c:'宽敞的',e:'The apartment has generous storage space.',k:'generous'},
+{t:'living',w:'cramped',s:['tiny','poky','small'],c:'狭小的',e:'The kitchen is quite poky.',k:'poky'},
+{t:'living',w:'comfortable',s:['cosy','snug','pleasant'],c:'舒适的',e:'The beds are cosy and the rooms are warm.',k:'cosy'},
+{t:'living',w:'convenient',s:['handy','accessible','practical'],c:'方便的',e:'The shop is handy for daily essentials.',k:'handy'},
+{t:'living',w:'remote',s:['isolated','out of the way','secluded'],c:'偏远的',e:'The cottage is isolated but very beautiful.',k:'isolated'},
+{t:'living',w:'facilities',s:['amenities','services','equipment'],c:'设施',e:'The gym offers excellent amenities.',k:'amenities'},
+{t:'living',w:'repair',s:['fix','mend','restore'],c:'修理',e:'The technician will fix the boiler tomorrow.',k:'fix'},
+
+{t:'academic',w:'research',s:['investigation','study','survey'],c:'研究',e:'The investigation focused on local history.',k:'investigation'},
+{t:'academic',w:'data',s:['information','figures','statistics'],c:'数据',e:'The figures suggest a steady rise in demand.',k:'figures'},
+{t:'academic',w:'method',s:['approach','technique','way'],c:'方法',e:'The approach proved highly effective.',k:'approach'},
+{t:'academic',w:'experiment',s:['test','trial','pilot'],c:'实验',e:'The trial ran for six months.',k:'trial'},
+{t:'academic',w:'result',s:['outcome','finding','conclusion'],c:'结果',e:'The findings will be published next month.',k:'finding'},
+{t:'academic',w:'cause',s:['lead to','result in','give rise to'],c:'导致',e:'Lack of sleep can lead to poor concentration.',k:'lead to'},
+{t:'academic',w:'effect',s:['impact','influence','consequence'],c:'影响',e:'The policy had a significant impact on prices.',k:'impact'},
+{t:'academic',w:'example',s:['instance','case','illustration'],c:'例子',e:'For instance, the course includes fieldwork.',k:'instance'},
+{t:'academic',w:'reason',s:['factor','explanation','motive'],c:'原因',e:'The main factor was the cost of travel.',k:'factor'},
+{t:'academic',w:'suggest',s:['indicate','imply','point to'],c:'表明',e:'The evidence may point to a link between diet and health.',k:'point to'},
+{t:'academic',w:'prove',s:['demonstrate','confirm','verify'],c:'证明',e:'The results confirm the original hypothesis.',k:'confirm'},
+{t:'academic',w:'examine',s:['investigate','analyse','look into'],c:'检查，研究',e:'The team will analyse samples from the river.',k:'analyse'},
+{t:'academic',w:'measure',s:['assess','gauge','evaluate'],c:'测量，评估',e:'Researchers will assess the impact on local wildlife.',k:'assess'},
+{t:'academic',w:'compare',s:['contrast','weigh up'],c:'比较',e:'The study will contrast urban and rural schools.',k:'contrast'},
+{t:'academic',w:'similar',s:['alike','comparable','analogous'],c:'相似的',e:'The two reports are broadly comparable.',k:'comparable'},
+{t:'academic',w:'conclusion',s:['summary','outcome','verdict'],c:'结论',e:'In summary, the project was a success.',k:'summary'},
+
+{t:'shopping',w:'price',s:['cost','charge','fee'],c:'价格',e:'The cost includes a three-year warranty.',k:'cost'},
+{t:'shopping',w:'discount',s:['reduction','concession','deal'],c:'折扣',e:'Students get a ten percent reduction.',k:'reduction'},
+{t:'shopping',w:'refund',s:['reimbursement','money back'],c:'退款',e:'You can get your money back within thirty days.',k:'money back'},
+{t:'shopping',w:'receipt',s:['invoice','proof of purchase'],c:'收据',e:'Keep the invoice in case you need to return the item.',k:'invoice'},
+{t:'shopping',w:'available',s:['in stock','on sale','obtainable'],c:'有货的',e:'The item is in stock at the main store.',k:'in stock'},
+{t:'shopping',w:'unavailable',s:['out of stock','sold out'],c:'缺货的',e:'The larger size is currently sold out.',k:'sold out'},
+{t:'shopping',w:'offer',s:['provide','supply','give'],c:'提供',e:'The store will provide free delivery on large orders.',k:'provide'},
+{t:'shopping',w:'customer',s:['client','buyer','consumer'],c:'顾客',e:'Regular clients receive a loyalty card.',k:'client'},
+{t:'shopping',w:'queue',s:['line','wait','stand in line'],c:'排队',e:'Visitors had to stand in line for tickets.',k:'stand in line'},
+{t:'shopping',w:'popular',s:['well-liked','in demand','sought-after'],c:'受欢迎的',e:'The course is highly sought-after.',k:'sought-after'},
+{t:'shopping',w:'trendy',s:['fashionable','stylish','modern'],c:'时尚的',e:'The café has a stylish interior.',k:'stylish'},
+{t:'shopping',w:'bargain',s:['good value','deal','steal'],c:'便宜货，划算',e:'This jacket was really good value for money.',k:'good value'},
+{t:'shopping',w:'delivery',s:['shipping','postage','dispatch'],c:'配送',e:'Shipping is free for orders over thirty pounds.',k:'shipping'},
+{t:'shopping',w:'quality',s:['standard','grade','calibre'],c:'质量',e:'The products are of a high standard.',k:'standard'},
+{t:'shopping',w:'guarantee',s:['warranty','assurance'],c:'保修',e:'The camera comes with a two-year warranty.',k:'warranty'},
+{t:'shopping',w:'afford',s:['pay for','manage','cover the cost'],c:'负担得起',e:'Not all families can pay for private lessons.',k:'pay for'},
+
+{t:'feelings',w:'happy',s:['delighted','pleased','content'],c:'高兴的',e:'She was delighted with the final results.',k:'delighted'},
+{t:'feelings',w:'sad',s:['upset','miserable','down'],c:'难过的',e:'He felt miserable about missing the deadline.',k:'miserable'},
+{t:'feelings',w:'angry',s:['annoyed','furious','irritated'],c:'生气的',e:'Residents were furious about the noise.',k:'furious'},
+{t:'feelings',w:'worried',s:['anxious','concerned','nervous'],c:'担心的',e:'Parents are concerned about the changes.',k:'concerned'},
+{t:'feelings',w:'surprised',s:['astonished','amazed','stunned'],c:'惊讶的',e:'I was amazed by the size of the library.',k:'amazed'},
+{t:'feelings',w:'confused',s:['puzzled','bewildered','unsure'],c:'困惑的',e:'Tourists were puzzled by the signs.',k:'puzzled'},
+{t:'feelings',w:'interested',s:['keen','enthusiastic','fascinated'],c:'感兴趣的',e:'She is keen to learn more about local history.',k:'keen'},
+{t:'feelings',w:'bored',s:['uninterested','fed up','tired of'],c:'无聊的',e:'He is fed up with the same routine.',k:'fed up'},
+{t:'feelings',w:'excited',s:['thrilled','eager','exhilarated'],c:'兴奋的',e:'The children were thrilled about the trip.',k:'thrilled'},
+{t:'feelings',w:'afraid',s:['scared','frightened','terrified'],c:'害怕的',e:'She is frightened of flying.',k:'frightened'},
+{t:'feelings',w:'grateful',s:['thankful','appreciative'],c:'感激的',e:'We are thankful for your generous support.',k:'thankful'},
+{t:'feelings',w:'confident',s:['sure','certain','self-assured'],c:'自信的',e:'She felt certain about her answer.',k:'certain'},
+{t:'feelings',w:'doubtful',s:['uncertain','unsure','sceptical'],c:'怀疑的',e:'Experts are sceptical about the claims.',k:'sceptical'},
+{t:'feelings',w:'prefer',s:['favour','would rather','like better'],c:'更喜欢',e:'Most students favour online lectures.',k:'favour'},
+{t:'feelings',w:'agree',s:['consent','concur','be in favour of'],c:'同意',e:'Most members will be in favour of the proposal.',k:'be in favour of'},
+{t:'feelings',w:'disagree',s:['oppose','object to','be against'],c:'反对',e:'Some residents object to the new plan.',k:'object to'},
+{t:'feelings',w:'refuse',s:['decline','reject','turn down'],c:'拒绝',e:'She may turn down the offer of a job.',k:'turn down'}
+];
+
+/* ===UTIL=== *//* ================= 工具函数 ================= */
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const GOAL = 30;
+function shuffle(arr){ const a = arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function ydayStr(){ const d=new Date(Date.now()-864e5); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function highlight(text, key){
+  const t = String(text), k = String(key||'');
+  if(!k) return escapeHtml(t);
+  const i = t.toLowerCase().indexOf(k.toLowerCase());
+  if(i < 0) return escapeHtml(t);
+  return escapeHtml(t.slice(0,i)) + '<mark>' + escapeHtml(t.slice(i, i+k.length)) + '</mark>' + escapeHtml(t.slice(i+k.length));
+}
+let toastTimer = null;
+function toast(msg){
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 2200);
+}
+function topicName(id){ const t = TOPICS.find(x=>x.id===id); return t ? t.icon+' '+t.name : ''; }
+
+/* 语音合成（浏览器内置，无需网络） */
+let voices = [];
+if('speechSynthesis' in window){
+  const load = ()=>{ voices = speechSynthesis.getVoices(); };
+  load();
+  speechSynthesis.onvoiceschanged = load;
+}
+function speak(text, rate){
+  if(!('speechSynthesis' in window)){ toast('当前浏览器不支持语音合成，请使用 Chrome / Edge'); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const v = voices.find(x=>x.lang==='en-GB') || voices.find(x=>x.lang && x.lang.startsWith('en'));
+  if(v) u.voice = v;
+  u.lang = 'en-GB';
+  u.rate = rate || 0.85;
+  speechSynthesis.speak(u);
+}
+
+/* ================= 数据持久化 ================= */
+const DB_KEY = 'ielts-syn-trainer-v1';
+function defaultState(){ return { stats:{}, daily:{date:'',count:0}, streak:0, lastDate:'', wordbook:[] }; }
+function loadState(){ try{ const raw = localStorage.getItem(DB_KEY); return raw ? Object.assign(defaultState(), JSON.parse(raw)) : null; }catch(e){ return null; } }
+let state = loadState() || defaultState();
+function saveState(){ try{ localStorage.setItem(DB_KEY, JSON.stringify(state)); }catch(e){ toast('保存失败：浏览器存储不可用'); } }
+function wordStat(w){ return state.stats[w] || {seen:0, correct:0, wrong:0}; }
+function isMastered(w){ const s = wordStat(w); return s.seen >= 4 && s.wrong <= 1; }
+function addWordbook(w){ if(!state.wordbook.includes(w)){ state.wordbook.push(w); saveState(); } }
+function recordAnswer(w, ok){
+  const s = wordStat(w);
+  s.seen++; ok ? s.correct++ : s.wrong++;
+  state.stats[w] = s;
+  const t = todayStr();
+  if(state.daily.date !== t){
+    if(state.lastDate === ydayStr()) state.streak++;
+    else state.streak = 1;
+    state.lastDate = t;
+    state.daily = {date:t, count:0};
+  }
+  state.daily.count++;
+  saveState();
+  renderHeaderStats();
+}
+function renderHeaderStats(){
+  const el = $('#streak-badge');
+  el.textContent = '🔥 连续 ' + state.streak + ' 天 · 今日 ' + state.daily.count + '/' + GOAL + ' 词';
+}
+
+/* ================= 视图切换 ================= */
+function switchView(name){
+  $$('.tab').forEach(b=>b.classList.toggle('active', b.dataset.view===name));
+  $$('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+name));
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  window.scrollTo({top:0});
+  if(name==='learn') renderLearn();
+  if(name==='stats') renderStats();
+}
+$$('.tab').forEach(b=>b.addEventListener('click', ()=>switchView(b.dataset.view)));
+
+/* ================= 词库 ================= */
+let learnTopic = 'all';
+let learnQuery = '';
+function learnPool(){
+  return learnTopic==='all' ? WORDS : WORDS.filter(w=>w.t===learnTopic);
+}
+function renderLearn(){
+  const chips = ['<button class="chip '+(learnTopic==='all'?'on':'')+'" data-t="all">📚 全部 <i>'+WORDS.length+'</i></button>']
+    .concat(TOPICS.map(t=>'<button class="chip '+(learnTopic===t.id?'on':'')+'" data-t="'+t.id+'">'+t.icon+' '+t.name+' <i>'+WORDS.filter(w=>w.t===t.id).length+'</i></button>'));
+  $('#learn-topics').innerHTML = chips.join('');
+  $$('#learn-topics .chip').forEach(b=>b.addEventListener('click', ()=>{ learnTopic = b.dataset.t; renderLearn(); }));
+  renderLearnList();
+}
+function renderLearnList(){
+  const q = learnQuery.trim().toLowerCase();
+  const list = learnPool().filter(w=>{
+    if(!q) return true;
+    return w.w.toLowerCase().includes(q) || w.c.includes(learnQuery.trim()) ||
+      w.s.some(s=>s.toLowerCase().includes(q)) || w.e.toLowerCase().includes(q);
+  });
+  const box = $('#learn-list');
+  if(!list.length){ box.innerHTML = '<div class="empty">没有匹配的单词，换个关键词试试～</div>'; return; }
+  box.innerHTML = list.map(w=>{
+    const syn = w.s.map(s=>'<button class="syn-chip" data-speak="'+escapeHtml(s)+'">'+escapeHtml(s)+'</button>').join('');
+    const m = isMastered(w.w) ? '<span class="done">✅ 已掌握</span>' : '';
+    return '<div class="word-card">'+
+      '<div class="wc-top"><div><div class="wc-word">'+escapeHtml(w.w)+'</div><div class="wc-cn">'+escapeHtml(w.c)+'</div></div>'+
+      '<button class="icon-btn" data-speak="'+escapeHtml(w.w)+'">🔊</button></div>'+
+      '<div class="wc-syn">'+syn+'</div>'+
+      '<p class="wc-ex">'+highlight(w.e, w.k)+'</p>'+
+      '<div class="wc-meta"><span>'+topicName(w.t)+'</span>'+m+'</div>'+
+    '</div>';
+  }).join('');
+}
+$('#learn-search').addEventListener('input', e=>{ learnQuery = e.target.value; renderLearnList(); });
+$('#learn-list').addEventListener('click', e=>{
+  const t = e.target.closest('[data-speak]');
+  if(t) speak(t.dataset.speak);
+});
+
+/* ================= 闪卡 ================= */
+let flashTopic = 'all';
+let flashDir = 'forward';
+let flash = {list:[], idx:0, known:0, unknown:0};
+function renderFlashSetup(){
+  const chips = ['<button class="chip '+(flashTopic==='all'?'on':'')+'" data-t="all">📚 全部</button>']
+    .concat(TOPICS.map(t=>'<button class="chip '+(flashTopic===t.id?'on':'')+'" data-t="'+t.id+'">'+t.icon+' '+t.name+'</button>'));
+  $('#flash-topics').innerHTML = chips.join('');
+  $$('#flash-topics .chip').forEach(b=>b.addEventListener('click', ()=>{ flashTopic = b.dataset.t; renderFlashSetup(); }));
+}
+$$('#flash-dirs .chip').forEach(b=>b.addEventListener('click', ()=>{ flashDir = b.dataset.dir; $$('#flash-dirs .chip').forEach(x=>x.classList.toggle('on', x===b)); }));
+$('#flash-start').addEventListener('click', startFlash);
+$('#flash-skip-start').addEventListener('click', ()=>{ flashTopic='all'; startFlash(); });
+$('#flash-again').addEventListener('click', ()=>{ $('#flash-end').classList.add('hidden'); startFlash(); });
+$('#flash-back').addEventListener('click', ()=>{ $('#flash-end').classList.add('hidden'); $('#flash-game').classList.add('hidden'); $('#flash-card').classList.remove('flipped'); });
+function startFlash(){
+  const pool = flashTopic==='all' ? WORDS : WORDS.filter(w=>w.t===flashTopic);
+  if(pool.length < 2){ toast('该主题词太少，无法开始'); return; }
+  flash = {list:shuffle(pool), idx:0, known:0, unknown:0};
+  $('#flash-end').classList.add('hidden');
+  $('#flash-game').classList.remove('hidden');
+  renderFlashCard();
+}
+function renderFlashCard(){
+  const e = flash.list[flash.idx];
+  const fwd = flashDir==='forward';
+  const shown = fwd ? e.w : e.s[Math.floor(Math.random()*e.s.length)];
+  flash.curKey = shown;
+  $('#flash-card').classList.remove('flipped');
+  $('#flash-front').innerHTML = '<div class="f-word">'+escapeHtml(shown)+'</div>'+
+    (fwd ? '<div class="f-cn">'+escapeHtml(e.c)+'</div>' : '<div class="f-cn">找出与它意思相同的单词</div>')+
+    '<div class="f-hint">点击卡片翻转</div>';
+  const synChips = e.s.map(s=>'<button class="syn-chip" data-speak="'+escapeHtml(s)+'">'+escapeHtml(s)+'</button>').join('');
+  $('#flash-back').innerHTML =
+    (fwd ? '<div class="f-word">'+escapeHtml(e.w)+'</div><div class="f-cn">'+escapeHtml(e.c)+'</div>' : '<div class="f-syns">'+synChips+'</div>')+
+    (fwd ? '<div class="f-syns">'+synChips+'</div>' : '<div class="f-word">'+escapeHtml(e.w)+'</div><div class="f-cn">'+escapeHtml(e.c)+'</div>')+
+    '<div class="f-ex">'+highlight(e.e, e.k)+'</div>';
+  $('#flash-pos').textContent = '第 '+(flash.idx+1)+' / '+flash.list.length+' 张';
+  $('#flash-count').textContent = '✓ '+flash.known+' · ✗ '+flash.unknown;
+}
+$('#flash-card').addEventListener('click', ()=>{ if(!$('#flash-game').classList.contains('hidden')) $('#flash-card').classList.toggle('flipped'); });
+$('#flash-back').addEventListener('click', e=>{
+  const t = e.target.closest('[data-speak]');
+  if(t){ e.stopPropagation(); speak(t.dataset.speak); }
+});
+$('#flash-speak').addEventListener('click', e=>{ e.stopPropagation(); if(flash.idx<flash.list.length) speak(flash.curKey); });
+$('#flash-yes').addEventListener('click', e=>{ e.stopPropagation(); if(flash.idx>=flash.list.length) return; recordAnswer(flash.list[flash.idx].w, true); flash.known++; nextFlash(); });
+$('#flash-no').addEventListener('click', e=>{ e.stopPropagation(); if(flash.idx>=flash.list.length) return; const w = flash.list[flash.idx]; recordAnswer(w.w, false); addWordbook(w.w); flash.unknown++; nextFlash(); });
+function nextFlash(){
+  flash.idx++;
+  if(flash.idx >= flash.list.length){ endFlash(); return; }
+  renderFlashCard();
+}
+function endFlash(){
+  $('#flash-game').classList.add('hidden');
+  $('#flash-end').classList.remove('hidden');
+  $('#flash-end-msg').textContent = '认识 '+flash.known+' 个，不认识 '+flash.unknown+' 个'+(flash.unknown? '（已自动加入生词本）':'，太棒了！');
+}
+
+/* ===PRAC=== *//* ================= 练习 ================= */
+let pTopics = new Set();
+let pType = 'mcq';
+let pDir = 'forward';
+let pCount = 10;
+let prac = null;
+
+function renderPracticeSetup(){
+  const chips = ['<button class="chip '+(pTopics.size===0?'on':'')+'" data-t="all">📚 全部</button>']
+    .concat(TOPICS.map(t=>'<button class="chip '+(pTopics.has(t.id)?'on':'')+'" data-t="'+t.id+'">'+t.icon+' '+t.name+'</button>'));
+  $('#p-topics').innerHTML = chips.join('');
+  $$('#p-topics .chip').forEach(b=>b.addEventListener('click', ()=>{
+    const t = b.dataset.t;
+    if(t==='all'){ pTopics.clear(); }
+    else if(pTopics.has(t)){ pTopics.delete(t); }
+    else { pTopics.add(t); }
+    renderPracticeSetup();
+  }));
+}
+$$('#p-dirs .chip').forEach(b=>b.addEventListener('click', ()=>{ pDir = b.dataset.dir; $$('#p-dirs .chip').forEach(x=>x.classList.toggle('on', x===b)); }));
+$$('#p-counts .chip').forEach(b=>b.addEventListener('click', ()=>{ pCount = +b.dataset.n; $$('#p-counts .chip').forEach(x=>x.classList.toggle('on', x===b)); }));
+$$('#p-types .type-card').forEach(c=>c.addEventListener('click', ()=>{ pType = c.querySelector('input').value; $$('#p-types .type-card').forEach(x=>x.classList.toggle('sel', x===c)); }));
+function practicePool(){
+  if(pTopics.size===0) return WORDS.slice();
+  return WORDS.filter(w=>pTopics.has(w.t));
+}
+function startPractice(reviewOnly){
+  let pool = reviewOnly ? WORDS.filter(w=>state.wordbook.includes(w.w)) : practicePool();
+  if(pool.length < 4){ toast('可选单词不足 4 个，请扩大范围'); return; }
+  if(pType==='match' && pool.length < 6){ toast('配对题需要至少 6 个单词'); return; }
+  const count = pType==='match' ? 6 : Math.min(pCount, pool.length);
+  prac = { type:pType, dir:pDir, count:count, queue:shuffle(pool).slice(0, count),
+           idx:0, score:0, wrongs:[], answered:false };
+  $('#practice-setup').classList.add('hidden');
+  $('#practice-result').classList.add('hidden');
+  $('#practice-game').classList.remove('hidden');
+  $('#quiz-score').textContent = '0';
+  renderQuizTop();
+  renderQuestion();
+}
+$('#p-start').addEventListener('click', ()=>startPractice(false));
+$('#quiz-quit').addEventListener('click', quitPractice);
+function quitPractice(){
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  $('#practice-game').classList.add('hidden');
+  $('#practice-result').classList.add('hidden');
+  $('#practice-setup').classList.remove('hidden');
+  prac = null;
+  renderPracticeSetup();
+}
+function renderQuizTop(){
+  const total = prac.queue.length;
+  $('#quiz-pos').textContent = '第 '+(prac.idx+1)+' / '+total+' 题';
+  $('#quiz-fill').style.width = (prac.idx/total*100)+'%';
+}
+function renderQuestion(){
+  prac.answered = false;
+  renderQuizTop();
+  const q = prac.queue[prac.idx];
+  if(prac.type==='match'){ renderMatch(); return; }
+  if(prac.type==='listen'){ renderListen(q); return; }
+  renderMcq(q);
+}
+/* ---- 选择题 ---- */
+function distractorSyns(entry, n){
+  const others = shuffle(WORDS.filter(x=>x.w!==entry.w));
+  const out = [];
+  for(const o of others){
+    for(const s of o.s){
+      if(!entry.s.includes(s) && !out.includes(s)){ out.push(s); if(out.length>=n) return out; }
+    }
+  }
+  return out;
+}
+function distractorWords(entry, n){
+  return shuffle(WORDS.filter(x=>x.w!==entry.w).map(x=>x.w)).filter((v,i,a)=>a.indexOf(v)===i).slice(0,n);
+}
+function renderMcq(q){
+  const fwd = pDir==='mixed' ? Math.random()<0.5 : pDir==='forward';
+  let prompt, correct, opts, shown;
+  if(fwd){
+    shown = q.w; correct = q.s[Math.floor(Math.random()*q.s.length)];
+    opts = shuffle([correct].concat(distractorSyns(q,3)));
+    prompt = '选出 “<b>'+escapeHtml(q.w)+'</b>（'+escapeHtml(q.c)+'）” 的同义词';
+  }else{
+    shown = q.s[Math.floor(Math.random()*q.s.length)]; correct = q.w;
+    opts = shuffle([correct].concat(distractorWords(q,3)));
+    prompt = '“<b>'+escapeHtml(shown)+'</b>” 与下面哪个词意思相同？';
+  }
+  prac.q = {type:'mcq', fwd, correct, opts, shown, w:q.w, cn:q.c, e:q.e, k:q.k};
+  $('#quiz-body').innerHTML =
+    '<div class="q-card">'+
+      '<div class="q-word">'+escapeHtml(shown)+' '+(fwd?'<span class="q-cn">'+escapeHtml(q.c)+'</span>':'')+
+        '<button class="icon-btn" id="speak-word">🔊</button></div>'+
+      '<div class="q-prompt">'+prompt+'</div>'+
+      '<div class="options">'+opts.map((o,i)=>'<button class="opt" data-opt="'+escapeHtml(o)+'"><span class="k">'+(i+1)+'</span>'+escapeHtml(o)+'</button>').join('')+'</div>'+
+      '<div class="feedback" id="feedback"></div>'+
+      '<div class="next-row hidden" id="next-row"><button class="btn btn-primary btn-sm" id="next-btn">下一题 →</button></div>'+
+    '</div>';
+  $('#speak-word').addEventListener('click', ()=>speak(shown));
+  bindOptionClicks();
+  $('#next-btn').addEventListener('click', nextQuestion);
+}
+/* ---- 听力题 ---- */
+function renderListen(q){
+  const correct = q.s.find(s=>q.e.toLowerCase().includes(s.toLowerCase())) || q.s[0];
+  const opts = shuffle([correct].concat(distractorSyns(q,3)));
+  prac.q = {type:'listen', correct, opts, w:q.w, cn:q.c, e:q.e, k:q.k};
+  $('#quiz-body').innerHTML =
+    '<div class="q-card">'+
+      '<div class="listen-row">'+
+        '<button class="listen-btn" id="play-btn">🔊 播放句子</button>'+
+        '<button class="icon-btn" id="replay-btn" title="再听一遍">🔁 再听一遍</button>'+
+      '</div>'+
+      '<div class="q-prompt">听录音：说话者用哪个词表达了 “<b>'+escapeHtml(q.w)+'</b>（'+escapeHtml(q.c)+'）” 的意思？</div>'+
+      '<div class="options">'+opts.map((o,i)=>'<button class="opt" data-opt="'+escapeHtml(o)+'"><span class="k">'+(i+1)+'</span>'+escapeHtml(o)+'</button>').join('')+'</div>'+
+      '<div class="feedback" id="feedback"></div>'+
+      '<div class="next-row hidden" id="next-row"><button class="btn btn-primary btn-sm" id="next-btn">下一题 →</button></div>'+
+    '</div>';
+  const play = ()=>{ speak(q.e); const b=$('#play-btn'); b.classList.add('playing'); setTimeout(()=>b.classList.remove('playing'), 2500); };
+  $('#play-btn').addEventListener('click', play);
+  $('#replay-btn').addEventListener('click', play);
+  setTimeout(play, 400);
+  bindOptionClicks();
+  $('#next-btn').addEventListener('click', nextQuestion);
+}
+/* ---- 选项点击与作答 ---- */
+function bindOptionClicks(){
+  $$('#quiz-body .opt').forEach(b=>b.addEventListener('click', ()=>answer(b)));
+}
+function answer(btn){
+  if(prac.answered) return;
+  prac.answered = true;
+  const q = prac.q;
+  const chosen = btn.dataset.opt;
+  const ok = chosen === q.correct;
+  $$('#quiz-body .opt').forEach(b=>{
+    b.disabled = true;
+    if(b.dataset.opt===q.correct) b.classList.add('correct');
+    else if(b===btn) b.classList.add('wrong');
+  });
+  if(ok) prac.score++;
+  recordAnswer(q.w, ok);
+  if(!ok){
+    addWordbook(q.w);
+    prac.wrongs.push({w:q.w, c:q.c, s:q.s, e:q.e, k:q.k, your:chosen, correct:q.correct});
+  }
+  const fb = $('#feedback');
+  let html;
+  if(ok){
+    html = '✅ 正确！<b>'+escapeHtml(q.correct)+'</b> 是 '+escapeHtml(q.w)+'（'+escapeHtml(q.c)+'）的同义词。';
+  }else{
+    html = '❌ 正确答案是 <b>'+escapeHtml(q.correct)+'</b>（'+escapeHtml(q.correct)+' = '+escapeHtml(q.w)+' '+escapeHtml(q.c)+'）。';
+  }
+  html += '<div class="transcript">📝 '+(q.type==='listen'?'录音原文':'例句')+'：'+highlight(q.e, q.k)+'</div>';
+  fb.innerHTML = html;
+  fb.className = 'feedback show '+(ok?'ok':'bad');
+  $('#next-row').classList.remove('hidden');
+  $('#quiz-score').textContent = prac.score;
+}
+function nextQuestion(){
+  prac.idx++;
+  if(prac.idx >= prac.queue.length){ endPractice(); return; }
+  renderQuestion();
+}
+/* ---- 配对题 ---- */
+let match = null;
+function renderMatch(){
+  const entries = prac.queue.slice(0,6);
+  match = {entries, left:shuffle(entries.map(e=>({w:e.w, done:false}))), right:shuffle(entries.map(e=>({w:e.s[0], key:e.w, done:false}))),
+           selL:null, selR:null, moves:0, matched:0};
+  $('#quiz-body').innerHTML =
+    '<div class="match-wrap">'+
+      '<div class="match-head"><span id="m-progress">已配对 0 / 6</span><span>步数 <b id="m-moves">0</b></span></div>'+
+      '<div class="match-grid">'+
+        '<div class="match-col"><div class="m-col-title">单词</div>'+match.left.map(c=>'<button class="m-card" data-side="l" data-w="'+escapeHtml(c.w)+'">'+escapeHtml(c.w)+'</button>').join('')+'</div>'+
+        '<div class="match-col"><div class="m-col-title">同义词</div>'+match.right.map(c=>'<button class="m-card" data-side="r" data-key="'+escapeHtml(c.key)+'" data-w="'+escapeHtml(c.w)+'">'+escapeHtml(c.w)+'</button>').join('')+'</div>'+
+      '</div>'+
+      '<div class="next-row hidden" id="next-row"><button class="btn btn-primary btn-sm" id="next-btn">查看结果 →</button></div>'+
+    '</div>';
+  $$('#quiz-body .m-card').forEach(b=>b.addEventListener('click', ()=>matchClick(b)));
+  $('#next-btn').addEventListener('click', ()=>{ prac.wrongs = []; endPractice(); });
+}
+function matchClick(btn){
+  if(btn.classList.contains('done')) return;
+  const side = btn.dataset.side;
+  const isSel = btn.classList.contains('sel');
+  if(side==='l'){ if(match.selL) match.selL.classList.remove('sel'); match.selL = isSel ? null : btn; }
+  else { if(match.selR) match.selR.classList.remove('sel'); match.selR = isSel ? null : btn; }
+  btn.classList.toggle('sel');
+  if(match.selL && match.selR){
+    match.moves++;
+    $('#m-moves').textContent = match.moves;
+    const l = match.selL, r = match.selR;
+    match.selL = match.selR = null;
+    if(l.dataset.w === r.dataset.key){
+      l.classList.remove('sel'); r.classList.remove('sel');
+      l.classList.add('done'); r.classList.add('done');
+      l.disabled = r.disabled = true;
+      match.matched++;
+      $('#m-progress').textContent = '已配对 '+match.matched+' / 6';
+      if(match.matched===6){
+        match.entries.forEach(e=>recordAnswer(e.w, true));
+        $('#next-row').classList.remove('hidden');
+        toast('🎉 全部配对成功！');
+      }
+    }else{
+      l.classList.remove('sel'); r.classList.remove('sel');
+      l.classList.add('wrong'); r.classList.add('wrong');
+      setTimeout(()=>{ l.classList.remove('wrong'); r.classList.remove('wrong'); }, 500);
+    }
+  }
+}
+/* ---- 结果页 ---- */
+function endPractice(){
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  if(prac.type==='match') prac.score = 6;
+  $('#practice-game').classList.add('hidden');
+  const total = prac.type==='match' ? 6 : prac.queue.length;
+  const acc = Math.round(prac.score/total*100);
+  const emoji = acc===100 ? '🏆' : acc>=80 ? '🎉' : acc>=60 ? '💪' : '📚';
+  $('#res-emoji').textContent = emoji;
+  $('#res-title').textContent = prac.type==='match' ? '配对完成！' : '练习完成！';
+  $('#res-score').textContent = '得分 '+prac.score+' / '+total;
+  $('#res-sub').textContent = '正确率 '+acc+'%' + (acc>=80 ? ' · 同义替换掌握得不错！' : ' · 错题已自动加入生词本');
+  $('#res-chips').innerHTML = [
+    '<div><b>'+prac.score+'</b>答对</div>',
+    '<div><b>'+acc+'%</b>正确率</div>',
+    '<div><b>'+total+'</b>总题数</div>'
+  ].join('');
+  const wrongBox = $('#res-wrong');
+  if(prac.wrongs.length){
+    wrongBox.innerHTML = '<h4>❌ 错题回顾（已加入生词本）</h4>'+prac.wrongs.map(it=>
+      '<div class="wrong-item"><div><b>'+escapeHtml(it.w)+'</b> <span class="wc">'+escapeHtml(it.c)+'</span></div>'+
+      '<div>你选 <span class="wa">'+escapeHtml(it.your)+'</span> → 正确 <span class="wb">'+escapeHtml(it.correct)+'</span></div></div>').join('');
+  }else{
+    wrongBox.innerHTML = '';
+  }
+  $('#practice-result').classList.remove('hidden');
+}
+$('#res-again').addEventListener('click', ()=>{ $('#practice-result').classList.add('hidden'); $('#practice-game').classList.remove('hidden'); prac.idx=0; prac.score=0; prac.wrongs=[]; $('#quiz-score').textContent='0'; renderQuizTop(); renderQuestion(); });
+$('#res-back').addEventListener('click', quitPractice);
+
+/* 键盘快捷键：1-4 选题，Enter 下一题 */
+document.addEventListener('keydown', e=>{
+  if(!prac || prac.type==='match' || $('#practice-game').classList.contains('hidden')) return;
+  if(e.key>='1' && e.key<='4'){
+    const opt = $$('#quiz-body .opt')[+e.key-1];
+    if(opt && !opt.disabled){ opt.click(); }
+  }else if(e.key==='Enter'){
+    const nb = $('#next-btn');
+    if(nb && !nb.closest('.hidden')) nb.click();
+  }
+});
+
+/* ===STATS=== *//* ================= 统计 ================= */
+function renderStats(){
+  const totalSeen = Object.values(state.stats).reduce((a,s)=>a+s.seen,0);
+  const totalOk = Object.values(state.stats).reduce((a,s)=>a+s.correct,0);
+  const totalQ = Object.values(state.stats).reduce((a,s)=>a+s.correct+s.wrong,0);
+  const acc = totalQ ? Math.round(totalOk/totalQ*100) : 0;
+  const mastered = WORDS.filter(w=>isMastered(w.w)).length;
+  const today = state.daily.date===todayStr() ? state.daily.count : 0;
+  $('#stat-cards').innerHTML = [
+    ['🎯','今日练习', today+' / '+GOAL],
+    ['📝','累计题目', totalSeen],
+    ['🎯','正确率', acc+'%'],
+    ['🏆','已掌握', mastered+' 词'],
+    ['📌','生词本', state.wordbook.length+' 词'],
+    ['🔥','连续天数', state.streak+' 天']
+  ].map(x=>'<div class="stat-card"><div class="num">'+x[2]+'</div><div class="lbl">'+x[0]+' '+x[1]+'</div></div>').join('');
+  $('#topic-progress').innerHTML = TOPICS.map(t=>{
+    const ws = WORDS.filter(w=>w.t===t.id);
+    const done = ws.filter(w=>wordStat(w.w).seen>0).length;
+    const pct = Math.round(done/ws.length*100);
+    return '<div class="topic-bar"><span class="tn">'+t.icon+' '+t.name+'</span>'+
+      '<div class="track"><div class="fill" style="width:'+pct+'%"></div></div>'+
+      '<span class="pct">'+done+'/'+ws.length+'</span></div>';
+  }).join('');
+  renderWordbook();
+}
+function renderWordbook(){
+  $('#wb-count').textContent = state.wordbook.length ? '（'+state.wordbook.length+' 个待复习）' : '';
+  const box = $('#wordbook-list');
+  if(!state.wordbook.length){ box.innerHTML = '<div class="empty">暂无生词。闪卡点“不认识”或练习答错的词会自动加入这里。</div>'; return; }
+  box.innerHTML = state.wordbook.map(w=>{
+    const e = WORDS.find(x=>x.w===w);
+    if(!e) return '';
+    return '<div class="wb-item"><span class="wb-word">'+escapeHtml(e.w)+'</span><span class="wb-cn">'+escapeHtml(e.c)+'</span>'+
+      '<span class="wb-syn">'+e.s.map(s=>'<span>'+escapeHtml(s)+'</span>').join('')+'</span>'+
+      '<button class="rm-btn" data-rm="'+escapeHtml(e.w)+'">移除</button></div>';
+  }).join('');
+}
+$('#wordbook-list').addEventListener('click', e=>{
+  const b = e.target.closest('[data-rm]');
+  if(b){ state.wordbook = state.wordbook.filter(w=>w!==b.dataset.rm); saveState(); renderStats(); }
+});
+$('#review-start').addEventListener('click', ()=>{ if(!state.wordbook.length){ toast('生词本是空的'); return; } switchView('practice'); pType='mcq'; startPractice(true); });
+$('#wordbook-clear').addEventListener('click', ()=>{ state.wordbook = []; saveState(); renderStats(); toast('生词本已清空'); });
+$('#reset-all').addEventListener('click', ()=>{
+  if(confirm('确定要清空所有学习数据吗？此操作不可恢复。')){ state = defaultState(); saveState(); renderHeaderStats(); renderStats(); toast('已重置全部数据'); }
+});
+
+/* ================= 初始化 ================= */
+function init(){
+  renderHeaderStats();
+  renderLearn();
+  renderFlashSetup();
+  renderPracticeSetup();
+}
+init();
+</script>
+
+</body></html>
