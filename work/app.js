@@ -338,7 +338,7 @@ $$('#flash-dirs .chip').forEach(b=>b.addEventListener('click', ()=>{ flashDir = 
 $('#flash-start').addEventListener('click', startFlash);
 $('#flash-skip-start').addEventListener('click', ()=>{ flashTopic='all'; startFlash(); });
 $('#flash-again').addEventListener('click', ()=>{ $('#flash-end').classList.add('hidden'); startFlash(); });
-$('#flash-back').addEventListener('click', ()=>{ $('#flash-end').classList.add('hidden'); $('#flash-game').classList.add('hidden'); $('#flash-card').classList.remove('flipped'); });
+$('#flash-end-back').addEventListener('click', ()=>{ $('#flash-end').classList.add('hidden'); $('#flash-game').classList.add('hidden'); $('#flash-card').classList.remove('flipped'); });
 function startFlash(){
   const pool = flashTopic==='all' ? WORDS : WORDS.filter(w=>w.t===flashTopic);
   if(pool.length < 2){ toast('该主题词太少，无法开始'); return; }

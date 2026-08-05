@@ -2,3 +2,8 @@
 work/chrome-*/
 # 测试截图
 work/*.png
+
+work/.push-filelist.txt
+work/.existing-words.txt
+work/.e2e-profile/
+work/.push-gh-tmp/
