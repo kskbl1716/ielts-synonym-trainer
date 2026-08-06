@@ -1,7 +1,7 @@
 # 雅思同义词训练器 — 部署与维护指南（最终版）
 
 ## 当前状态
-- 词库：**1342 词**（听力专区 864 / 书写专区 478），每条含音标、词性、英文释义、中文翻译、例句与关键词高亮
+- 词库：**2274 词**（听力专区 1210 / 书写专区 1064），每条含音标、词性、英文释义、中文翻译、例句与关键词高亮
 - 练习模式：听写模式、看词选义、听音选义、选择题、配对题、闪卡
 - 功能：每日目标、打卡系统、生词本、进度统计、数据导出/导入、深色模式、字号调节
 - 邮箱登录 + 云端进度同步（Supabase）
@@ -12,7 +12,7 @@
 
 ## 源码结构
 - 构建产物：outputs/index.html（单文件，含全部功能）
-- 词库源码：work/dict-data.js（原始词）、work/v4-words.js、work/v5-words.js、work/v6-words.js（最新批次）
+- 词库源码：work/dict-data.js（原始词）、work/v4-words.js、work/v5-words.js、work/v6-words.js、work/v7-words.js、work/v8-words.js（最新批次）
 - 功能源码：work/features.js、work/cloud.js（登录+云同步）、work/modal.html、work/features.css
 - 构建脚本：work/build.js（node work/build.js 重新生成产物）
 

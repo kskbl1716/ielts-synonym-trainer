@@ -5,6 +5,7 @@ const { V4NEW } = require('./v4-words.js');
 const { V5NEW } = require('./v5-words.js');
 const { V6NEW } = require('./v6-words.js');
 const { V7NEW } = require('./v7-words.js');
+const { V8NEW } = require('./v8-words.js');
 const OUT = 'outputs/index.html';
 const CSS_MARK = '/* ===== v2: 单词详情弹窗 / 备份 ===== */';
 const HTML_MARK = '<!-- ============ 单词详情弹窗 v2 ============ -->';
@@ -66,7 +67,7 @@ const existing = entries.map(l => {
   if (K_FIX[obj.w]) obj.k = K_FIX[obj.w];
   return obj;
 });
-const all = existing.concat(NEW.map(w => Object.assign({}, w, { z: w.z || 'l' }))).concat(V4NEW).concat(V5NEW).concat(V6NEW).concat(V7NEW);
+const all = existing.concat(NEW.map(w => Object.assign({}, w, { z: w.z || 'l' }))).concat(V4NEW).concat(V5NEW).concat(V6NEW).concat(V7NEW).concat(V8NEW);
 const seen = new Set();
 all.forEach(w => {
   if (seen.has(w.w)) throw new Error('duplicate word: ' + w.w);

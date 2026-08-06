@@ -1,6 +1,12 @@
 ﻿$ErrorActionPreference = 'Stop'
 $list = (Invoke-WebRequest 'http://127.0.0.1:9223/json' -UseBasicParsing).Content | ConvertFrom-Json
-$page = $list | Where-Object { $_.type -eq 'page' } | Select-Object -First 1
+$page = $list | Where-Object { $_.type -eq 'page' -and $_.url -like 'http://localhost:8000/*' } | Select-Object -First 1
+if (-not $page) {
+  $null = Invoke-RestMethod -Method Put "http://127.0.0.1:9223/json/new?http://localhost:8000/"
+  Start-Sleep -Milliseconds 1500
+  $list = (Invoke-WebRequest 'http://127.0.0.1:9223/json' -UseBasicParsing).Content | ConvertFrom-Json
+  $page = $list | Where-Object { $_.type -eq 'page' -and $_.url -like 'http://localhost:8000/*' } | Select-Object -First 1
+}
 $ws = [System.Net.WebSockets.ClientWebSocket]::new()
 $ct = [System.Threading.CancellationToken]::None
 $null = $ws.ConnectAsync([Uri][string]$page.webSocketDebuggerUrl, $ct).GetAwaiter().GetResult()
@@ -60,9 +66,9 @@ T 'n5-search-word' "(()=>{ const inp=document.getElementById('learn-search'); in
 T 'n6-search-empty' "(()=>{ const inp=document.getElementById('learn-search'); inp.value='zzzqqqxxx'; inp.dispatchEvent(new Event('input',{bubbles:true})); const btn=document.getElementById('learn-clear-search'); return {empty:!!document.querySelector('#learn-list .empty'), btn:!!btn, msg:document.querySelector('#learn-list .empty')?document.querySelector('#learn-list .empty').textContent.slice(0,30):null}; })()"
 T 'n7-clear-search' "(()=>{ document.getElementById('learn-clear-search').click(); return {q:learnQuery, val:document.getElementById('learn-search').value, cards:document.querySelectorAll('#learn-list .word-card').length}; })()"
 
-# 专区+主题叠加为空 → 清除筛选按钮
-T 'n8-filter-empty' "(()=>{ learnZone='w'; learnTopic='food'; renderLearn(); const btn=document.getElementById('learn-clear-filter'); return {empty:!!document.querySelector('#learn-list .empty'), btn:!!btn, msg:document.querySelector('#learn-list .empty')?document.querySelector('#learn-list .empty').textContent.slice(0,30):null}; })()"
-T 'n9-clear-filter' "(()=>{ document.getElementById('learn-clear-filter').click(); return {zone:learnZone, topic:learnTopic, cards:document.querySelectorAll('#learn-list .word-card').length}; })()"
+# 主题修复后无「专区×主题」空交集，改为验证筛选过滤正确（空状态由 n6/n7 覆盖）
+T 'n8-filter-zone-topic' "(()=>{ learnZone='l'; learnTopic='travel'; renderLearn(); return {cards:document.querySelectorAll('#learn-list .word-card').length, zone:learnZone, topic:learnTopic}; })()"
+T 'n9-filter-reset' "(()=>{ learnZone='all'; learnTopic='all'; renderLearn(); return {cards:document.querySelectorAll('#learn-list .word-card').length}; })()"
 
 # 设置 → 返回词库 词库正常显示
 T 'n10-settings-back' "(()=>{ [...document.querySelectorAll('.tab')].find(t=>t.dataset.view==='settings').click(); [...document.querySelectorAll('.tab')].find(t=>t.dataset.view==='learn').click(); return {cards:document.querySelectorAll('#learn-list .word-card').length, empty:!!document.querySelector('#learn-list .empty'), zone:learnZone, topic:learnTopic}; })()"

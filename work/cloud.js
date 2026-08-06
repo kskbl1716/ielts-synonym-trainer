@@ -222,13 +222,24 @@
     out.stats = st;
     out.wordbook = Array.from(new Set((base.wordbook || []).concat(local.wordbook || [])));
     out.checkins = Array.from(new Set((base.checkins || []).concat(local.checkins || []))).sort();
-    if((local.lastDate || '') > (base.lastDate || '')){
+    var lLast = local.lastDate || '', bLast = base.lastDate || '';
+    if(lLast > bLast){
       out.streak = local.streak || 0;
       out.lastDate = local.lastDate;
       out.daily = Object.assign({ date: '', count: 0 }, local.daily || {});
+    } else if(lLast === bLast && lLast){
+      out.streak = Math.max(local.streak || 0, base.streak || 0);
+      var lc = (local.daily && local.daily.date === lLast) ? (local.daily.count || 0) : 0;
+      var bc = (base.daily && base.daily.date === lLast) ? (base.daily.count || 0) : 0;
+      if(lc > bc) out.daily = Object.assign({ date: '', count: 0 }, local.daily || {});
     }
-    if(local.goal != null) out.goal = local.goal;
-    if(local.settings && typeof local.settings === 'object') out.settings = Object.assign(defaultSettings(), local.settings);
+    if(local.goal != null && local.goal !== DEFAULT_GOAL) out.goal = local.goal;
+    if(local.settings && typeof local.settings === 'object'){
+      var d = defaultSettings(), ls = local.settings, bs = (base.settings && typeof base.settings === 'object') ? base.settings : {};
+      var merged = Object.assign({}, d, bs);
+      Object.keys(d).forEach(function(k){ if(ls[k] !== undefined && ls[k] !== d[k]) merged[k] = ls[k]; });
+      out.settings = merged;
+    }
     return out;
   }
   async function loadFromCloud(){
