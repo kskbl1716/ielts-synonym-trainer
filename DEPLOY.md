@@ -21,7 +21,7 @@
 2. 复制 outputs/index.html 到仓库根 index.html（Pages 部署的是根目录文件）
 3. git add -A && git commit -m "说明"
 4. 推送：node work/push-gh.js（需要环境变量 GH_TOKEN，已存入 Codex 全局配置 ~/.codex/config.toml 和系统环境变量）
-5. GitHub Pages 与 Vercel 约 1~2 分钟自动更新，两个网址同步生效
+5. GitHub Pages 由 `.github/workflows/pages.yml`（Actions）自动部署，Vercel 自动同步，约 1~2 分钟更新（2026-08-07 起 legacy Jekyll 构建故障，已迁移 Actions；勿改回）
 
 ## Supabase 配置
 - 当前项目：xetfvqissmpcznxtnpnx.supabase.co（邮箱验证开启；user_data 表已建并启用 RLS）

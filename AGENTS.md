@@ -12,7 +12,7 @@
 - 主：https://kskbl1716.github.io/ielts-synonym-trainer/（国内可用）
 - 备：https://ielts-trainer-liard.vercel.app/（海外/香港节点，国内网络可能超时属正常）
 - 仓库：https://github.com/kskbl1716/ielts-synonym-trainer.git（默认分支 main）
-- 当前线上状态：词库 2274 词（听力 1210 / 书写 1064），v8.0 待部署
+- 当前线上状态：词库 2274 词（听力 1210 / 书写 1064），v8.0 已上线（2026-08-07，GitHub Actions 部署）
 
 ## GitHub 令牌与推送机制（重要）
 - 令牌在**系统用户级环境变量 GH_TOKEN**（40 位经典 token，owner=kskbl1716）；Codex 全局配置 `~/.codex/config.toml` 里也有备份
@@ -29,6 +29,7 @@
 - 词库文件：`work/dict-data.js`（DICT 音标表 + NEW）、`work/v4-words.js`、`work/v5-words.js`（汇总 v5-a~f）、`work/v6-words.js`、`work/v7-words.js`（532 词，已接入 build.js）、`work/v8-words.js`（400 词，已接入 build.js）。
 - 功能注入源：`work/features.js`（详情弹窗/备份/字号/反馈/空状态清除按钮等）、`work/features.css`、`work/modal.html`、`work/cloud.js`（Supabase 登录+云同步）。
 - 推送与校验：`work/push-gh.js`、`work/validate-v7.js`（v7 批次校验，已入库）、`work/validate-v8.js`（v8 批次校验，加 v9 词时把其中 V8NEW 换成新批次源）、`work/.push-filelist.txt`（推送清单，被 gitignore）、`work/.existing-words.txt`（当前 2274 词去重基准）。
+- 部署：`.github/workflows/pages.yml`（GitHub Pages 部署 workflow，push 到 main 自动部署静态文件，已在推送清单）。⚠️ 2026-08-07 legacy Jekyll 构建服务故障（连旧内容也报 Page build failed），已迁移到 Actions 部署，勿改回 legacy。
 - 测试：`work/e2e-*.ps1`（Chrome CDP + 本地服务器 8000 + 调试端口 9223）、`work/shot-*.ps1`（截图验证）、`work/mock-supa.js`（登录 mock）。
 - `work/_archive/`：历史一次性脚本/旧版本文件归档处（不参与构建、不在推送清单）。
 - `DEPLOY.md`：部署与 Supabase 配置说明。
@@ -54,7 +55,7 @@ Copy-Item outputs\index.html index.html -Force
 1. 构建 + 复制根 index.html（见上）
 2. `git add -A && git commit -m "说明"`
 3. `node work/push-gh.js`（自动走 api.github.com；若改了 work/ 下文件，先确认它们在新推送清单里）
-4. GitHub Pages 与 Vercel 约 1~2 分钟自动更新；线上验证带 `?_t=<时间戳>` 参数穿透 CDN 缓存
+4. GitHub Pages 由 `.github/workflows/pages.yml`（Actions）自动部署，Vercel 自动同步，约 1~2 分钟更新；线上验证带 `?_t=<时间戳>` 参数穿透 CDN 缓存
 
 ## 测试流程
 - 本地服务器：`python -m http.server 8000`（在项目根目录）
@@ -71,7 +72,7 @@ Copy-Item outputs\index.html index.html -Force
 - ps1 脚本务必保留 UTF-8 BOM（e2e-v5/fix 曾因缺 BOM 在 PS5.1 下中文乱码，已补）。
 
 ## 版本记录
-- v8.0（2026-08-07，待部署）：新增 v8 词库（+400，总量 2274，听力 1210/书写 1064）；**修复云同步合并 bug**（新设备登录不再用本地默认值覆盖云端 goal/settings；同日多设备 streak 取最大、daily 取大）；183 个非标准主题词全部映射到 10 个标准主题；页面版本号 v5.0→v8.0；e2e-v7 的 n8/n9 改为筛选过滤断言（主题修复后已无「专区×主题」空交集组合）。
+- v8.0（2026-08-07，已上线）：新增 v8 词库（+400，总量 2274，听力 1210/书写 1064）；**修复云同步合并 bug**（新设备登录不再用本地默认值覆盖云端 goal/settings；同日多设备 streak 取最大、daily 取大）；183 个非标准主题词全部映射到 10 个标准主题；页面版本号 v5.0→v8.0；e2e-v7 的 n8/n9 改为筛选过滤断言（主题修复后已无「专区×主题」空交集组合）；**部署迁移 GitHub Actions**（legacy Jekyll 构建故障，加 .nojekyll + pages.yml workflow）。
 - v7.2（2026-08-05，commit aa4f6bf，已上线）：v7 词库接入（+532，总量 1874，听力 1010/书写 864）；修 `#learn-search` 邮箱自动填充 bug（加 autocomplete=off 等 + 邮箱守卫）；空状态区分「搜索无结果 / 专区×主题无交集」并提供清除按钮；e2e-v7.ps1 14/14 通过。
 - v7.1：意见反馈表单（FormSubmit → 2012837089@qq.com，激活已完成）。
 - v7 前：词库 173→293→477→1005→1342 的历次扩充，功能含详情弹窗/字号三档/备份/登录云同步。
