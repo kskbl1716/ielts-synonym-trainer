@@ -13,6 +13,7 @@
 - 备：https://ielts-trainer-liard.vercel.app/（海外/香港节点，国内网络可能超时属正常）
 - 仓库：https://github.com/kskbl1716/ielts-synonym-trainer.git（默认分支 main）
 - 当前线上状态：词库 2274 词（听力 1210 / 书写 1064），v8.0 已上线（2026-08-07，GitHub Actions 部署）
+- 本地状态：v9（学习中心首页 + 配色系统 + 过渡动画）已构建完成，**未推送**，待用户确认；发布清单见 `V9-RELEASE.md`，设计过程见 `V9-PLAN.md`，下一步见 `V10-PLAN.md`
 
 ## GitHub 令牌与推送机制（重要）
 - 令牌在**系统用户级环境变量 GH_TOKEN**（40 位经典 token，owner=kskbl1716）；Codex 全局配置 `~/.codex/config.toml` 里也有备份
@@ -72,6 +73,7 @@ Copy-Item outputs\index.html index.html -Force
 - ps1 脚本务必保留 UTF-8 BOM（e2e-v5/fix 曾因缺 BOM 在 PS5.1 下中文乱码，已补）。
 
 ## 版本记录
+- v9.0（2026-08-07，**未上线**，待用户确认推送）：首页改造为「学习中心」默认页（hero/目标环/继续学习/词书卡/工具卡/每日一词）；**配色系统变量化**：浅色 `:root`（`--bg #f6f3ed / --card #fffdf8 / --card-2 #faf5ec` …）与深色 `html[data-theme="dark"]` 变量块（`--bg #0b111c / --card #151e2b / --card-2 #1c2737` …）三级分层，浅色硬编码色值全部变量化；修复深色模式部分文字过暗；主题切换加 `.th-trans` 0.35s 平滑过渡（`features.js applyAppearance` 加类 450ms 后移除）；v8.0 原版备份到 `backups/v8.0-original-20260807/`；截图验证 7 张（`work/v9-shot-*.png`）；词数仍 2274。发布清单见 `V9-RELEASE.md`，设计过程见 `V9-PLAN.md`。
 - v8.0（2026-08-07，已上线）：新增 v8 词库（+400，总量 2274，听力 1210/书写 1064）；**修复云同步合并 bug**（新设备登录不再用本地默认值覆盖云端 goal/settings；同日多设备 streak 取最大、daily 取大）；183 个非标准主题词全部映射到 10 个标准主题；页面版本号 v5.0→v8.0；e2e-v7 的 n8/n9 改为筛选过滤断言（主题修复后已无「专区×主题」空交集组合）；**部署迁移 GitHub Actions**（legacy Jekyll 构建故障，加 .nojekyll + pages.yml workflow）。
 - v7.2（2026-08-05，commit aa4f6bf，已上线）：v7 词库接入（+532，总量 1874，听力 1010/书写 864）；修 `#learn-search` 邮箱自动填充 bug（加 autocomplete=off 等 + 邮箱守卫）；空状态区分「搜索无结果 / 专区×主题无交集」并提供清除按钮；e2e-v7.ps1 14/14 通过。
 - v7.1：意见反馈表单（FormSubmit → 2012837089@qq.com，激活已完成）。
@@ -87,3 +89,8 @@ Copy-Item outputs\index.html index.html -Force
 - 反馈邮箱：2012837089@qq.com（FormSubmit 已激活）
 - Supabase：xetfvqissmpcznxtnpnx.supabase.co，表 user_data，anon key 在 work/cloud.js 顶部
 - 本地存储键：localStorage `ielts-syn-trainer-v1`（进度/生词本/设置都在里面）
+
+## 环境备注（Codex 应用配置，与网站无关，仅维护会话备忘）
+- 2026-08-07 修复自定义模型上下文窗口被压缩在 258K 的问题：`~/.codex/model-catalog.json`（含 26.730 必填 `base_instructions` 字段；context/max_context_window=1,000,000，auto_compact_token_limit=900,000，effective 95%），`~/.codex/config.toml` 中 `model_catalog_json` 指向该文件
+- 教训：26.730 的模型目录 schema 比 codex-rs 主分支更严格（`base_instructions` 必填），缺字段会导致整份配置解析失败、回退默认模型。改配置前先备份（`config.toml.bak-20260807-try2` 等），回滚脚本 `~/.codex/rollback-model-catalog.ps1`
+- 若 Codex 更新后目录 schema 变化：按二进制内字段顺序补齐必填字段（upgrade 之后、model_messages 之前的 base_instructions）
