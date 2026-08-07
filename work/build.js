@@ -6,6 +6,8 @@ const { V5NEW } = require('./v5-words.js');
 const { V6NEW } = require('./v6-words.js');
 const { V7NEW } = require('./v7-words.js');
 const { V8NEW } = require('./v8-words.js');
+const { BOOKS } = require('./books.js');
+const BOOK_IDS = new Set(BOOKS.map(b => b.id));
 const OUT = 'outputs/index.html';
 const CSS_MARK = '/* ===== v2: 单词详情弹窗 / 备份 ===== */';
 const HTML_MARK = '<!-- ============ 单词详情弹窗 v2 ============ -->';
@@ -25,6 +27,7 @@ const cut = (from, to, keepTo) => {
 while (cut(JS_MARK, '</script>', true)) {}
 while (cut(HTML_MARK, '</main>', true)) {}
 while (cut(CSS_MARK, '</style>', true)) {}
+while (cut('const BOOKS = ', UTIL_ANCHOR, true)) {}
 while (cut('const DICT = {', UTIL_ANCHOR, true)) {}
 
 /* ---------- 1. 提取并合并词库 ---------- */
@@ -72,6 +75,8 @@ const seen = new Set();
 all.forEach(w => {
   if (seen.has(w.w)) throw new Error('duplicate word: ' + w.w);
   seen.add(w.w);
+  if (!Array.isArray(w.b) || !w.b.length) w.b = ['default']; // 老词默认归入「内置词库」
+  w.b.forEach(id => { if (!BOOK_IDS.has(id)) throw new Error('bad book id ' + id + ' for ' + w.w); });
   ['t','w','s','c','e','k','p','pos','d','z'].forEach(f => { if (w[f] === undefined || w[f] === '') throw new Error('missing field ' + f + ' for ' + w.w); });
   if (w.z !== 'l' && w.z !== 'w') throw new Error('bad zone for ' + w.w);
   if (!Array.isArray(w.s) || !w.s.length) throw new Error('bad synonyms for ' + w.w);
@@ -79,17 +84,29 @@ all.forEach(w => {
 const zc = all.reduce((a,w)=>{ a[w.z]=(a[w.z]||0)+1; return a; }, {});
 console.log('existing:', existing.length, '| new:', NEW.length, '| v4new:', V4NEW.length, '| total:', all.length, '| zones:', JSON.stringify(zc));
 
+/* ---------- 1.5 词书校验 ---------- */
+const bc = {};
+all.forEach(w => { w.b.forEach(id => { bc[id] = (bc[id]||0)+1; }); });
+if ((bc['default']||0) < 2274) throw new Error('default book must cover 2274 words, got ' + (bc['default']||0));
+BOOKS.forEach(b => {
+  const act = bc[b.id] || 0;
+  if (act !== b.words) console.log('WARN book ' + b.id + ': declared ' + b.words + ' words, actual ' + act + '（一词多书/分批接入，仅提示）');
+});
+console.log('book counts:', JSON.stringify(bc));
+
 /* ---------- 2. 序列化 ---------- */
 function jsStr(s){ return "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r/g, '').replace(/\n/g, '\\n') + "'"; }
 function entryStr(o){
   return '{t:' + jsStr(o.t) + ',w:' + jsStr(o.w) + ',s:[' + o.s.map(jsStr).join(',') + '],c:' + jsStr(o.c) +
-    ',e:' + jsStr(o.e) + ',k:' + jsStr(o.k) + ',p:' + jsStr(o.p) + ',pos:' + jsStr(o.pos) + ',d:' + jsStr(o.d) + ',z:' + jsStr(o.z) + '}';
+    ',e:' + jsStr(o.e) + ',k:' + jsStr(o.k) + ',p:' + jsStr(o.p) + ',pos:' + jsStr(o.pos) + ',d:' + jsStr(o.d) + ',z:' + jsStr(o.z) + ',b:[' + o.b.map(jsStr).join(',') + ']}';
 }
 const newBlock = 'const WORDS = [\n' + all.map(entryStr).join(',\n') + '\n];';
 html = html.replace(block, newBlock);
 
-/* ---------- 3. 注入 DICT ---------- */
+/* ---------- 3. 注入 BOOKS + DICT ---------- */
 if (!html.includes(UTIL_ANCHOR)) throw new Error('UTIL anchor not found');
+const booksConst = '\n\nconst BOOKS = ' + JSON.stringify(BOOKS) + ';\n\n' + UTIL_ANCHOR;
+html = html.replace(UTIL_ANCHOR, booksConst);
 const dictConst = '\n\nconst DICT = {\n' + Object.keys(DICT).map(k => '  ' + jsStr(k) + ':[' + DICT[k].map(jsStr).join(',') + ']').join(',\n') + '\n};\n\n' + UTIL_ANCHOR;
 html = html.replace(UTIL_ANCHOR, dictConst);
 

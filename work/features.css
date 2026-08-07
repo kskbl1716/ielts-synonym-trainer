@@ -155,3 +155,54 @@ html[data-theme="dark"] .bk-flag.on{background:#1d3a5f;color:#9cc0ff}
 
 /* ===== v9: theme switch transition ===== */
 html.th-trans body,html.th-trans .panel,html.th-trans .word-card,html.th-trans .home-hero,html.th-trans .book-card,html.th-trans .tool-card,html.th-trans .daily-card,html.th-trans .tabs,html.th-trans .chip,html.th-trans .btn-ghost,html.th-trans .search-wrap input,html.th-trans .goal-custom input,html.th-trans .dict-row input,html.th-trans .cal-cell,html.th-trans .checkin-now,html.th-trans .cloud-card,html.th-trans .wc-ex,html.th-trans .face,html.th-trans .type-card,html.th-trans .opt,html.th-trans .m-card,html.th-trans .wb-item,html.th-trans .modal,html.th-trans .empty,html.th-trans .tip,html.th-trans #toast{transition:background-color .35s ease,color .35s ease,border-color .35s ease}
+
+/* ===== v10 M2: 词书系统 ===== */
+.books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:12px}
+.books-grid .book-card{cursor:pointer}
+.bk-ico.bk-lg{font-size:34px}
+.book-detail-cover{display:flex;flex-direction:column;align-items:flex-start;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin-bottom:14px}
+.book-detail-cover .bk-name{font-weight:800;font-size:17px;font-family:var(--serif)}
+.book-detail-cover .bk-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.book-detail-cover .bk-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.book-detail-cover .bk-flag{font-size:11px;padding:3px 9px;border-radius:999px;font-weight:700}
+.book-word-list{display:flex;flex-direction:column;gap:8px}
+.book-word-item{display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;padding:9px 13px;background:var(--card);border:1px solid var(--line);border-radius:12px;font-size:13px;transition:.15s}
+.book-word-item:hover{border-color:var(--primary);box-shadow:0 0 0 3px rgba(44,79,143,.08);transform:translateY(-1px)}
+.book-word-item .bw-word{font-weight:800;color:var(--primary-hi);font-family:var(--serif);min-width:86px}
+.book-word-item .bw-cn{font-size:12px;color:var(--muted);min-width:52px}
+.book-word-item .bw-syn{flex:1;display:flex;flex-wrap:wrap;gap:5px}
+.book-tag{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;background:var(--card-2);border:1px solid var(--line);color:var(--ink);cursor:pointer;transition:.15s}
+.book-tag:hover{border-color:var(--primary);color:var(--primary)}
+.wm-books{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.book-progress-panel .book-bar{display:grid;grid-template-columns:90px 1fr 64px;align-items:center;gap:10px;padding:7px 0;font-size:13px}
+.book-progress-panel .book-bar .bn{color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.book-progress-panel .book-bar .track{height:9px;background:var(--line-2);border-radius:99px;overflow:hidden}
+.book-progress-panel .book-bar .fill{height:100%;background:var(--green);border-radius:99px;transition:width .4s}
+.book-progress-panel .book-bar .pct{text-align:right;color:var(--muted);font-size:12px;white-space:nowrap}
+.src-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.src-row:last-child{border-bottom:none}
+.src-name{font-weight:600}
+.src-meta{font-size:12px;color:var(--muted)}
+.src-license{font-size:11px;padding:1px 8px;border-radius:999px;background:var(--card-2);border:1px solid var(--line);color:var(--muted)}
+html[data-theme="dark"] .book-detail-cover,html[data-theme="dark"] .book-word-item{background:var(--card);border-color:var(--line)}
+html[data-theme="dark"] .book-tag,html[data-theme="dark"] .src-license{background:var(--card-2);border-color:var(--line);color:var(--muted)}
+
+/* ===== v10 M3: 背诵模式 ===== */
+#book-recite{padding:4px 0}
+.br-setup{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-top:12px}
+.br-game{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-top:12px}
+.br-progress{height:8px;background:var(--card-2);border-radius:999px;overflow:hidden;margin:10px 0}
+.br-fill{height:100%;background:var(--green);border-radius:999px;transition:width .25s}
+.br-rep{display:inline-block;font-size:12px;color:var(--primary);margin-bottom:8px}
+.br-card{background:var(--card-2);border:1px solid var(--line);border-radius:var(--radius);padding:22px;text-align:center;margin:12px 0}
+.br-word{font-size:30px;font-weight:700;font-family:var(--serif)}
+.br-ipa{font-size:14px;color:var(--muted);margin-left:8px}
+.br-pos-tag{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 6px;margin-left:6px}
+.br-cn{font-size:16px;margin-top:10px}
+.br-ex{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.6}
+.br-btns{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.br-result{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);text-align:center;padding:24px;margin-top:12px}
+.br-big{font-size:56px}
+.br-res-line{font-size:14px;margin:10px 0 16px}
+html[data-theme="dark"] .br-card{background:var(--card);border-color:var(--line)}
+.br-card .icon-btn{margin-left:8px}
