@@ -1,4 +1,4 @@
-﻿# Chrome 测试临时目录（不上传）
+# Chrome 测试临时目录（不上传）
 work/chrome-*/
 # 测试截图
 work/*.png
@@ -7,3 +7,5 @@ work/.push-filelist.txt
 work/.existing-words.txt
 work/.e2e-profile/
 work/.push-gh-tmp/
+# V10 批次校验中间产物（不入库）
+work/_archive/.m5-*

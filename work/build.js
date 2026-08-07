@@ -7,6 +7,62 @@ const { V6NEW } = require('./v6-words.js');
 const { V7NEW } = require('./v7-words.js');
 const { V8NEW } = require('./v8-words.js');
 const { BOOKS } = require('./books.js');
+const V10LISTEN = [].concat(
+  require('./v10-listening-a1.js').V10LIST_A1,
+  require('./v10-listening-a2.js').V10LIST_A2,
+  require('./v10-listening-a3.js').V10LIST_A3,
+  require('./v10-listening-a4.js').V10LIST_A4,
+  require('./v10-listening-a5.js').V10LIST_A5,
+  require('./v10-listening-a6.js').V10LIST_A6,
+  require('./v10-listening-b1.js').V10LIST_B1,
+  require('./v10-listening-b2.js').V10LIST_B2,
+  require('./v10-listening-b3.js').V10LIST_B3,
+  require('./v10-listening-b4.js').V10LIST_B4,
+  require('./v10-listening-b5.js').V10LIST_B5
+);
+const V10JQ = [].concat(
+  require('./v10-jianqiao-c1.js').V10JQ_C1,
+  require('./v10-jianqiao-c2.js').V10JQ_C2,
+  require('./v10-jianqiao-c3.js').V10JQ_C3,
+  require('./v10-jianqiao-c4.js').V10JQ_C4,
+  require('./v10-jianqiao-c5.js').V10JQ_C5,
+  require('./v10-jianqiao-c6.js').V10JQ_C6
+);
+const V10ZJ = [].concat(
+  require('./v10-zhenjing-d1.js').V10ZJ_D1,
+  require('./v10-zhenjing-d2.js').V10ZJ_D2,
+  require('./v10-zhenjing-d3.js').V10ZJ_D3,
+  require('./v10-zhenjing-d4.js').V10ZJ_D4,
+  require('./v10-zhenjing-d5.js').V10ZJ_D5,
+  require('./v10-zhenjing-d6.js').V10ZJ_D6,
+  require('./v10-zhenjing-e1.js').V10ZJ_E1,
+  require('./v10-zhenjing-e2.js').V10ZJ_E2,
+  require('./v10-zhenjing-e3.js').V10ZJ_E3,
+  require('./v10-zhenjing-e4.js').V10ZJ_E4,
+  require('./v10-zhenjing-e5.js').V10ZJ_E5,
+  require('./v10-zhenjing-e6.js').V10ZJ_E6,
+  require('./v10-zhenjing-e7.js').V10ZJ_E7
+);
+const { V10AWL } = require('./v10-awl-f1.js');
+const { AWL_WORDS } = require('./v10-awl-words.js');
+const { V10B9 } = require('./v10-band9-h1.js');
+const { BAND9_WORDS } = require('./v10-band9-words.js');
+const V10OX = [].concat(
+  require('./v10-oxford-j1.js').V10OX_J1,
+  require('./v10-oxford-j2.js').V10OX_J2,
+  require('./v10-oxford-j3.js').V10OX_J3,
+  require('./v10-oxford-j4.js').V10OX_J4,
+  require('./v10-oxford-j5.js').V10OX_J5,
+  require('./v10-oxford-j6.js').V10OX_J6,
+  require('./v10-oxford-j7.js').V10OX_J7,
+  require('./v10-oxford-k1.js').V10OX_K1,
+  require('./v10-oxford-k2.js').V10OX_K2,
+  require('./v10-oxford-k3.js').V10OX_K3,
+  require('./v10-oxford-k4.js').V10OX_K4,
+  require('./v10-oxford-k5.js').V10OX_K5,
+  require('./v10-oxford-k6.js').V10OX_K6,
+  require('./v10-oxford-k7.js').V10OX_K7
+);
 const BOOK_IDS = new Set(BOOKS.map(b => b.id));
 const OUT = 'outputs/index.html';
 const CSS_MARK = '/* ===== v2: 单词详情弹窗 / 备份 ===== */';
@@ -70,7 +126,7 @@ const existing = entries.map(l => {
   if (K_FIX[obj.w]) obj.k = K_FIX[obj.w];
   return obj;
 });
-const all = existing.concat(NEW.map(w => Object.assign({}, w, { z: w.z || 'l' }))).concat(V4NEW).concat(V5NEW).concat(V6NEW).concat(V7NEW).concat(V8NEW);
+const all = existing.concat(NEW.map(w => Object.assign({}, w, { z: w.z || 'l' }))).concat(V4NEW).concat(V5NEW).concat(V6NEW).concat(V7NEW).concat(V8NEW).concat(V10LISTEN).concat(V10JQ).concat(V10ZJ).concat(V10AWL).concat(V10B9).concat(V10OX);
 const seen = new Set();
 all.forEach(w => {
   if (seen.has(w.w)) throw new Error('duplicate word: ' + w.w);
@@ -83,6 +139,18 @@ all.forEach(w => {
 });
 const zc = all.reduce((a,w)=>{ a[w.z]=(a[w.z]||0)+1; return a; }, {});
 console.log('existing:', existing.length, '| new:', NEW.length, '| v4new:', V4NEW.length, '| total:', all.length, '| zones:', JSON.stringify(zc));
+
+/* ---------- 1.4 AWL / band9 一词多书标记 ---------- */
+/* AWL 570 词表中已在词库的词（老词/其他批次）补 b:['awl']，使 awl 词书 = 完整 570 词 */
+const awlSet = new Set(AWL_WORDS);
+let awlTagged = 0;
+all.forEach(w => { if (awlSet.has(w.w) && !w.b.includes('awl')){ w.b.push('awl'); awlTagged++; } });
+console.log('AWL tagged onto existing words:', awlTagged);
+/* band9 高分表达词表中已在词库的词补 b:['band9'] */
+const band9Set = new Set(BAND9_WORDS);
+let band9Tagged = 0;
+all.forEach(w => { if (band9Set.has(w.w) && !w.b.includes('band9')){ w.b.push('band9'); band9Tagged++; } });
+console.log('band9 tagged onto existing words:', band9Tagged);
 
 /* ---------- 1.5 词书校验 ---------- */
 const bc = {};
