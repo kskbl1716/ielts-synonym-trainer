@@ -96,7 +96,7 @@ html = html.replace(UTIL_ANCHOR, dictConst);
 /* ---------- 4. 注入 CSS ---------- */
 const styleEnd = html.lastIndexOf('</style>');
 if (styleEnd < 0) throw new Error('style end not found');
-html = html.slice(0, styleEnd) + fs.readFileSync('work/features.css', 'utf8') + '\n' + html.slice(styleEnd);
+html = html.slice(0, styleEnd) + fs.readFileSync('work/features.css', 'utf8').replace(/^\uFEFF/, '') + '\n' + html.slice(styleEnd);
 
 /* ---------- 5. 注入弹窗 HTML ---------- */
 const mainEnd = html.lastIndexOf('</main>');

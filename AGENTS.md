@@ -71,9 +71,10 @@ Copy-Item outputs\index.html index.html -Force
 - 改含中文/emoji 的文件：用 PowerShell `Set-Content -Encoding UTF8` 或 `[IO.File]::WriteAllText(path, text, UTF8)`。
 - `apply_patch` 曾在此环境报"拒绝访问"，必要时改用 PowerShell 写文件。
 - ps1 脚本务必保留 UTF-8 BOM（e2e-v5/fix 曾因缺 BOM 在 PS5.1 下中文乱码，已补）。
+- ⚠️ **HTML/CSS/JS 源码文件绝不能带 BOM**：v9 曾因模板 `outputs/index.html` 的 CSS_MARK 行首混入 U+FEFF，注入的 features.css 第一条规则 `.modal-mask` 选择器被污染成「不存在元素+后代选择器」整条失效，导致详情弹窗失去 fixed 定位/遮罩/居中（手机端卡住、电脑端显示不全）。build.js 已加防御（读取 features.css 时剥掉开头 BOM），但写 `outputs/index.html` 时仍要用无 BOM 的 UTF-8 写入。
 
 ## 版本记录
-- v9.0（2026-08-07，已上线）：首页改造为「学习中心」默认页（hero/目标环/继续学习/词书卡/工具卡/每日一词）；**配色系统变量化**：浅色 `:root`（`--bg #f6f3ed / --card #fffdf8 / --card-2 #faf5ec` …）与深色 `html[data-theme="dark"]` 变量块（`--bg #0b111c / --card #151e2b / --card-2 #1c2737` …）三级分层，浅色硬编码色值全部变量化；修复深色模式部分文字过暗；主题切换加 `.th-trans` 0.35s 平滑过渡（`features.js applyAppearance` 加类 450ms 后移除）；页面版本号 v8.0→v9.0；v8.0 原版备份到 `backups/v8.0-original-20260807/`；截图验证 7 张（`work/v9-shot-*.png`）；词数仍 2274。发布清单见 `V9-RELEASE.md`，设计过程见 `V9-PLAN.md`。
+- v9.0（2026-08-07，已上线）：首页改造为「学习中心」默认页（hero/目标环/继续学习/词书卡/工具卡/每日一词，每日一词已在 hero 下方置顶）；**配色系统变量化**：浅色 `:root`（`--bg #f6f3ed / --card #fffdf8 / --card-2 #faf5ec` …）与深色 `html[data-theme="dark"]` 变量块（`--bg #0b111c / --card #151e2b / --card-2 #1c2737` …）三级分层，浅色硬编码色值全部变量化；修复深色模式部分文字过暗；主题切换加 `.th-trans` 0.35s 平滑过渡（`features.js applyAppearance` 加类 450ms 后移除）；页面版本号 v8.0→v9.0；v8.0 原版备份到 `backups/v8.0-original-20260807/`；截图验证 7 张（`work/v9-shot-*.png`）；词数仍 2274。发布清单见 `V9-RELEASE.md`，设计过程见 `V9-PLAN.md`。
 - v8.0（2026-08-07，已上线）：新增 v8 词库（+400，总量 2274，听力 1210/书写 1064）；**修复云同步合并 bug**（新设备登录不再用本地默认值覆盖云端 goal/settings；同日多设备 streak 取最大、daily 取大）；183 个非标准主题词全部映射到 10 个标准主题；页面版本号 v5.0→v8.0；e2e-v7 的 n8/n9 改为筛选过滤断言（主题修复后已无「专区×主题」空交集组合）；**部署迁移 GitHub Actions**（legacy Jekyll 构建故障，加 .nojekyll + pages.yml workflow）。
 - v7.2（2026-08-05，commit aa4f6bf，已上线）：v7 词库接入（+532，总量 1874，听力 1010/书写 864）；修 `#learn-search` 邮箱自动填充 bug（加 autocomplete=off 等 + 邮箱守卫）；空状态区分「搜索无结果 / 专区×主题无交集」并提供清除按钮；e2e-v7.ps1 14/14 通过。
 - v7.1：意见反馈表单（FormSubmit → 2012837089@qq.com，激活已完成）。

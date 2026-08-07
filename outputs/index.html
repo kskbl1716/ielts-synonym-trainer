@@ -269,7 +269,7 @@ footer{max-width:980px;margin:0 auto;padding:0 16px 30px;color:var(--muted);font
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
 }
-﻿/* ===== v2: 单词详情弹窗 / 备份 ===== */
+/* ===== v2: 单词详情弹窗 / 备份 ===== */
 .modal-mask{position:fixed;inset:0;background:rgba(22,28,38,.58);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
 .modal{background:var(--card);color:var(--ink);border-radius:20px;max-width:580px;width:100%;max-height:84vh;overflow:auto;padding:26px 24px;position:relative;box-shadow:0 24px 70px rgba(15,25,45,.4);animation:modalIn .22s cubic-bezier(.22,.8,.32,1)}
 @keyframes modalIn{from{transform:translateY(16px) scale(.98);opacity:0}to{transform:none;opacity:1}}
@@ -466,6 +466,8 @@ html.th-trans body,html.th-trans .panel,html.th-trans .word-card,html.th-trans .
         </div>
       </div>
     </div>
+    <div class="home-sec-title"><h2>📌 每日一词</h2></div>
+    <div class="daily-card" id="home-daily-word"></div>
     <div class="continue-card">
       <div>
         <div class="cc-title">📖 继续学习</div>
@@ -483,8 +485,6 @@ html.th-trans body,html.th-trans .panel,html.th-trans .word-card,html.th-trans .
     <div class="book-grid" id="home-books"></div>
     <div class="home-sec-title"><h2>⚡ 快捷工具</h2></div>
     <div class="tools-grid" id="home-tools"></div>
-    <div class="home-sec-title"><h2>📌 每日一词</h2></div>
-    <div class="daily-card" id="home-daily-word"></div>
   </section>
   <section id="view-learn" class="view">
     <div class="tip">💡 <b>雅思听力核心技巧：同义替换。</b>题目里的词，往往不会原样出现在录音里。例如题干写 <b>important</b>，录音里可能说 <b>crucial</b>。多积累同义词组，才能"听出答案"。</div>
@@ -670,7 +670,7 @@ html.th-trans body,html.th-trans .panel,html.th-trans .word-card,html.th-trans .
       <div class="about-line" id="set-about"></div>
     </div>
   </section>
-                                              <!-- ============ 单词详情弹窗 v2 ============ -->
+                                                  <!-- ============ 单词详情弹窗 v2 ============ -->
   <div id="word-modal" class="modal-mask hidden" role="dialog" aria-modal="true" aria-label="单词详情">
     <div class="modal">
       <button class="modal-close" id="wm-close" aria-label="关闭">✕</button>
@@ -3052,6 +3052,10 @@ const WORDS = [
 
 
 
+
+
+
+
 const DICT = {
   'important':['ɪmˈpɔːtnt','adj.','having great value or influence'],
   'improve':['ɪmˈpruːv','v.','to make something better'],
@@ -3819,6 +3823,8 @@ function init(){
   renderPracticeSetup();
 }
 init();
+
+
 
 
 
