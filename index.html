@@ -730,7 +730,7 @@ html[data-theme="dark"] .br-card{background:var(--card);border-color:var(--line)
       <div class="about-line" id="set-about"></div>
     </div>
   </section>
-                                                                                                              <!-- ============ 单词详情弹窗 v2 ============ -->
+                                                                                                                <!-- ============ 单词详情弹窗 v2 ============ -->
   <div id="word-modal" class="modal-mask hidden" role="dialog" aria-modal="true" aria-label="单词详情">
     <div class="modal">
       <button class="modal-close" id="wm-close" aria-label="关闭">✕</button>
@@ -6524,6 +6524,8 @@ const WORDS = [
 
 
 
+
+
 const BOOKS = [{"id":"default","name":"内置词库","desc":"网站原有全部词","icon":"📖","zone":"both","source":"自有","license":"自有","words":2274},{"id":"jianqiao","name":"真题高频","desc":"剑桥 4-19 真题高频词","icon":"📚","zone":"both","source":"chunsi-w/ielts-vocab-cloudflare","license":"MIT","words":450},{"id":"listening","name":"听力拼写","desc":"听力填空高频答案词","icon":"🎧","zone":"l","source":"yuqingsong71/IELTS-listening-vocabulary（剑桥 4-20 听力填空答案词）","license":"公开仓库（无 LICENSE）· 事实性词表 + 本站原创加工","words":821},{"id":"zhenjing","name":"雅思真经","desc":"雅思真经核心词汇","icon":"📗","zone":"both","source":"hefengxian/ielts-vocabulary","license":"MIT","words":938},{"id":"awl","name":"学术词汇 AWL","desc":"学术词汇表（Coxhead）","icon":"🎓","zone":"both","source":"Coxhead，惠灵顿维多利亚大学","license":"开放教育免费使用","words":570},{"id":"band9","name":"Band 9 高分表达","desc":"高分替换表达","icon":"🏅","zone":"both","source":"learning-zone/ielts-materials","license":"MIT","words":102},{"id":"oxford","name":"牛津基础词","desc":"牛津 3000 基础词（非商用）","icon":"🇬🇧","zone":"both","source":"OUP Oxford 3000","license":"需署名 + 非商用","words":1000}];
 
 
@@ -7013,7 +7015,7 @@ function startPractice(reviewOnly){
   if(pType==='match' && pool.length < 6){ toast('配对题需要至少 6 个单词'); return; }
   const count = pType==='match' ? 6 : Math.min(pCount, pool.length);
   prac = { type:pType, dir:pDir, count:count, queue:shuffle(pool).slice(0, count),
-           idx:0, score:0, wrongs:[], answered:false };
+           idx:0, score:0, wrongs:[], answered:false, reviewOnly: !!reviewOnly };
   $('#practice-setup').classList.add('hidden');
   $('#practice-result').classList.add('hidden');
   $('#practice-game').classList.remove('hidden');
@@ -7221,7 +7223,19 @@ function endPractice(){
   }
   $('#practice-result').classList.remove('hidden');
 }
-$('#res-again').addEventListener('click', ()=>{ $('#practice-result').classList.add('hidden'); $('#practice-game').classList.remove('hidden'); prac.idx=0; prac.score=0; prac.wrongs=[]; $('#quiz-score').textContent='0'; renderQuizTop(); renderQuestion(); });
+$('#res-again').addEventListener('click', ()=>{
+  const pool = prac.reviewOnly ? WORDS.filter(w=>state.wordbook.includes(w.w)) : practicePool();
+  if(pool.length < 4){ toast('可选单词不足 4 个，请扩大范围'); return; }
+  if(prac.type==='match' && pool.length < 6){ toast('配对题需要至少 6 个单词'); return; }
+  const count = prac.type==='match' ? 6 : Math.min(prac.count, pool.length);
+  prac.queue = shuffle(pool).slice(0, count);
+  prac.idx = 0; prac.score = 0; prac.wrongs = [];
+  $('#practice-result').classList.add('hidden');
+  $('#practice-game').classList.remove('hidden');
+  $('#quiz-score').textContent = '0';
+  renderQuizTop();
+  renderQuestion();
+});
 $('#res-back').addEventListener('click', quitPractice);
 
 /* 键盘快捷键：1-4 选题，Enter 下一题 */
@@ -7295,6 +7309,7 @@ function init(){
   renderPracticeSetup();
 }
 init();
+
 
 
 
