@@ -206,3 +206,6 @@ html[data-theme="dark"] .book-tag,html[data-theme="dark"] .src-license{backgroun
 .br-res-line{font-size:14px;margin:10px 0 16px}
 html[data-theme="dark"] .br-card{background:var(--card);border-color:var(--line)}
 .br-card .icon-btn{margin-left:8px}
+/* ===== 练习题目提示（pHint 开关） ===== */
+.q-hint{margin:10px 0;padding:10px 14px;background:var(--card-2);border:1px dashed var(--line);border-radius:10px;font-size:13px;color:var(--ink);line-height:1.6}
+html[data-theme="dark"] .q-hint{background:var(--card);border-color:var(--line)}

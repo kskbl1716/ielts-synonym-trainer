@@ -1,5 +1,7 @@
 # Chrome 测试临时目录（不上传）
 work/chrome-*/
+work/.chrome-profile/
+work/.edge-profile/
 # 测试截图
 work/*.png
 

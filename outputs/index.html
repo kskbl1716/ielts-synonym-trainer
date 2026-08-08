@@ -477,6 +477,9 @@ html[data-theme="dark"] .book-tag,html[data-theme="dark"] .src-license{backgroun
 .br-res-line{font-size:14px;margin:10px 0 16px}
 html[data-theme="dark"] .br-card{background:var(--card);border-color:var(--line)}
 .br-card .icon-btn{margin-left:8px}
+/* ===== 练习题目提示（pHint 开关） ===== */
+.q-hint{margin:10px 0;padding:10px 14px;background:var(--card-2);border:1px dashed var(--line);border-radius:10px;font-size:13px;color:var(--ink);line-height:1.6}
+html[data-theme="dark"] .q-hint{background:var(--card);border-color:var(--line)}
 
 </style>
 </head>
@@ -627,6 +630,8 @@ html[data-theme="dark"] .br-card{background:var(--card);border-color:var(--line)
         <button class="chip" data-n="15">15 题</button>
         <button class="chip" data-n="20">20 题</button>
       </div>
+      <h3 style="margin-top:16px">5. 题目提示 <span style="font-weight:400;color:var(--muted)">（关掉增加难度）</span></h3>
+      <div class="chips" id="p-hints"></div>
       <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn btn-primary" id="p-start">🚀 开始练习</button>
       </div>
@@ -704,6 +709,7 @@ html[data-theme="dark"] .br-card{background:var(--card);border-color:var(--line)
       <h3>✍️ 练习偏好</h3>
       <div class="set-row"><div class="set-label">默认题数</div><div class="set-control chips" id="set-pcount"></div></div>
       <div class="set-row"><div class="set-label">默认出题方向</div><div class="set-control chips" id="set-pdir"></div></div>
+      <div class="set-row"><div class="set-label">题目提示</div><div class="set-control chips" id="set-phint"></div></div>
     </div>
     <div class="panel">
       <h3>🎨 外观</h3>
@@ -730,7 +736,7 @@ html[data-theme="dark"] .br-card{background:var(--card);border-color:var(--line)
       <div class="about-line" id="set-about"></div>
     </div>
   </section>
-                                                                                                                <!-- ============ 单词详情弹窗 v2 ============ -->
+                                                                                                                  <!-- ============ 单词详情弹窗 v2 ============ -->
   <div id="word-modal" class="modal-mask hidden" role="dialog" aria-modal="true" aria-label="单词详情">
     <div class="modal">
       <button class="modal-close" id="wm-close" aria-label="关闭">✕</button>
@@ -6526,6 +6532,8 @@ const WORDS = [
 
 
 
+
+
 const BOOKS = [{"id":"default","name":"内置词库","desc":"网站原有全部词","icon":"📖","zone":"both","source":"自有","license":"自有","words":2274},{"id":"jianqiao","name":"真题高频","desc":"剑桥 4-19 真题高频词","icon":"📚","zone":"both","source":"chunsi-w/ielts-vocab-cloudflare","license":"MIT","words":450},{"id":"listening","name":"听力拼写","desc":"听力填空高频答案词","icon":"🎧","zone":"l","source":"yuqingsong71/IELTS-listening-vocabulary（剑桥 4-20 听力填空答案词）","license":"公开仓库（无 LICENSE）· 事实性词表 + 本站原创加工","words":821},{"id":"zhenjing","name":"雅思真经","desc":"雅思真经核心词汇","icon":"📗","zone":"both","source":"hefengxian/ielts-vocabulary","license":"MIT","words":938},{"id":"awl","name":"学术词汇 AWL","desc":"学术词汇表（Coxhead）","icon":"🎓","zone":"both","source":"Coxhead，惠灵顿维多利亚大学","license":"开放教育免费使用","words":570},{"id":"band9","name":"Band 9 高分表达","desc":"高分替换表达","icon":"🏅","zone":"both","source":"learning-zone/ielts-materials","license":"MIT","words":102},{"id":"oxford","name":"牛津基础词","desc":"牛津 3000 基础词（非商用）","icon":"🇬🇧","zone":"both","source":"OUP Oxford 3000","license":"需署名 + 非商用","words":1000}];
 
 
@@ -7038,6 +7046,15 @@ function renderQuizTop(){
   $('#quiz-pos').textContent = '第 '+(prac.idx+1)+' / '+total+' 题';
   $('#quiz-fill').style.width = (prac.idx/total*100)+'%';
 }
+/* 题目提示块：单词旁显示中文/释义（pHint: 'cd' 中文+释义 / 'c' 仅中文 / 'off' 无提示=加难度） */
+function pHintHtml(q){
+  const m = (typeof sett==='function' && sett() && sett().pHint) ? sett().pHint : 'c';
+  if(m==='off' || !q) return '';
+  const c = q.c ? '中文：'+escapeHtml(q.c) : '';
+  const d = (m==='cd' && q.d) ? '含义：'+escapeHtml(q.d) : '';
+  if(!c && !d) return '';
+  return '<div class="q-hint">'+[c,d].filter(Boolean).join('<br>')+'</div>';
+}
 function renderQuestion(){
   prac.answered = false;
   renderQuizTop();
@@ -7066,7 +7083,7 @@ function renderMcq(q){
   if(fwd){
     shown = q.w; correct = q.s[Math.floor(Math.random()*q.s.length)];
     opts = shuffle([correct].concat(distractorSyns(q,3)));
-    prompt = '选出 “<b>'+escapeHtml(q.w)+'</b>（'+escapeHtml(q.c)+'）” 的同义词';
+    prompt = '选出 “<b>'+escapeHtml(q.w)+'</b>” 的同义词';
   }else{
     shown = q.s[Math.floor(Math.random()*q.s.length)]; correct = q.w;
     opts = shuffle([correct].concat(distractorWords(q,3)));
@@ -7075,8 +7092,9 @@ function renderMcq(q){
   prac.q = {type:'mcq', fwd, correct, opts, shown, w:q.w, cn:q.c, e:q.e, k:q.k};
   $('#quiz-body').innerHTML =
     '<div class="q-card">'+
-      '<div class="q-word">'+escapeHtml(shown)+' '+(fwd?'<span class="q-cn">'+escapeHtml(q.c)+'</span>':'')+
+      '<div class="q-word">'+escapeHtml(shown)+
         '<button class="icon-btn" id="speak-word">🔊</button></div>'+
+      (fwd ? pHintHtml(q) : '')+
       '<div class="q-prompt">'+prompt+'</div>'+
       '<div class="options">'+opts.map((o,i)=>'<button class="opt" data-opt="'+escapeHtml(o)+'"><span class="k">'+(i+1)+'</span>'+escapeHtml(o)+'</button>').join('')+'</div>'+
       '<div class="feedback" id="feedback"></div>'+
@@ -7097,7 +7115,8 @@ function renderListen(q){
         '<button class="listen-btn" id="play-btn">🔊 播放句子</button>'+
         '<button class="icon-btn" id="replay-btn" title="再听一遍">🔁 再听一遍</button>'+
       '</div>'+
-      '<div class="q-prompt">听录音：说话者用哪个词表达了 “<b>'+escapeHtml(q.w)+'</b>（'+escapeHtml(q.c)+'）” 的意思？</div>'+
+      '<div class="q-prompt">听录音：说话者用哪个词表达了 “<b>'+escapeHtml(q.w)+'</b>” 的意思？</div>'+
+      pHintHtml(q)+
       '<div class="options">'+opts.map((o,i)=>'<button class="opt" data-opt="'+escapeHtml(o)+'"><span class="k">'+(i+1)+'</span>'+escapeHtml(o)+'</button>').join('')+'</div>'+
       '<div class="feedback" id="feedback"></div>'+
       '<div class="next-row hidden" id="next-row"><button class="btn btn-primary btn-sm" id="next-btn">下一题 →</button></div>'+
@@ -7309,6 +7328,7 @@ function init(){
   renderPracticeSetup();
 }
 init();
+
 
 
 
@@ -7673,7 +7693,7 @@ renderStats = function(){ _rsV3(); renderCheckinPanel(); };
 
 
 /* ================= v4: 设置 + 专区 + 新模式 ================= */
-function defaultSettings(){ return { voice:'auto', rate:0.85, theme:'light', font:'m', pCount:10, pDir:'forward', book:'all' }; }
+function defaultSettings(){ return { voice:'auto', rate:0.85, theme:'light', font:'m', pCount:10, pDir:'forward', book:'all', pHint:'c' }; }
 function sett(){ if(!state.settings || typeof state.settings!=='object') state.settings = defaultSettings(); return state.settings; }
 function saveSett(patch){ state.settings = Object.assign(sett(), patch||{}); saveState(); applyAppearance(); renderSettings(); }
 function applyAppearance(){
@@ -7698,6 +7718,8 @@ function renderSettings(){
   if(pc) pc.innerHTML = [5,10,15,20].map(n=>'<button class="chip'+(s.pCount===n?' on':'')+'" data-v="'+n+'">'+n+' 题</button>').join('');
   const pd = $('#set-pdir');
   if(pd) pd.innerHTML = [['forward','正向'],['reverse','反向'],['mixed','混合']].map(o=>'<button class="chip'+(s.pDir===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
+  const ph = $('#set-phint');
+  if(ph) ph.innerHTML = [['cd','中文+释义'],['c','仅中文'],['off','无提示']].map(o=>'<button class="chip'+(s.pHint===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
   const th = $('#set-theme');
   if(th) th.innerHTML = [['light','☀️ 浅色'],['dark','🌙 深色'],['auto','🔄 跟随系统']].map(o=>'<button class="chip'+(s.theme===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
   const ft = $('#set-font');
@@ -7724,6 +7746,7 @@ function bindSettingsEvents(){
   on('#set-rate', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({rate:parseFloat(b.dataset.v)}); });
   on('#set-pcount', e=>{ const b=e.target.closest('[data-v]'); if(b){ saveSett({pCount:parseInt(b.dataset.v,10)}); applyPracticePrefs(); } });
   on('#set-pdir', e=>{ const b=e.target.closest('[data-v]'); if(b){ saveSett({pDir:b.dataset.v}); applyPracticePrefs(); } });
+  on('#set-phint', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({pHint:b.dataset.v}); });
   on('#set-theme', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({theme:b.dataset.v}); });
   on('#set-font', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({font:b.dataset.v}); });
   on('#set-export', ()=>{ if(typeof exportProgress==='function') exportProgress(); });
@@ -7821,6 +7844,7 @@ function renderDict(q){
       '<div class="listen-row"><button class="listen-btn" id="play-btn">🔊 播放单词</button>'+
       '<button class="icon-btn" id="replay-btn" title="再听一遍">🔁 再听一遍</button></div>'+
       '<div class="q-prompt">听发音，在下方输入你听到的单词（可反复重听）</div>'+
+      pHintHtml(q)+
       '<div class="dict-row"><input id="dict-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="输入单词…">'+
       '<button class="btn btn-primary" id="dict-check">✓ 检查</button></div>'+
       '<div class="feedback" id="feedback"></div>'+
@@ -8055,6 +8079,12 @@ renderPracticeSetup = function(){
   const el = $('#p-books'); if(!el) return;
   el.innerHTML = bookChips(pBook);
   el.onclick = e=>{ const b=e.target.closest('[data-book]'); if(b){ pBook=b.dataset.book; renderPracticeSetup(); } };
+  const ph = $('#p-hints');
+  if(ph){
+    const s = sett();
+    ph.innerHTML = [['cd','中文+释义'],['c','仅中文'],['off','无提示']].map(o=>'<button class="chip'+(s.pHint===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
+    ph.onclick = e=>{ const b=e.target.closest('[data-v]'); if(b){ saveSett({pHint:b.dataset.v}); renderPracticeSetup(); } };
+  }
 };
 const _v10pp = practicePool;
 practicePool = function(){

@@ -302,7 +302,7 @@ renderStats = function(){ _rsV3(); renderCheckinPanel(); };
 
 
 /* ================= v4: 设置 + 专区 + 新模式 ================= */
-function defaultSettings(){ return { voice:'auto', rate:0.85, theme:'light', font:'m', pCount:10, pDir:'forward', book:'all' }; }
+function defaultSettings(){ return { voice:'auto', rate:0.85, theme:'light', font:'m', pCount:10, pDir:'forward', book:'all', pHint:'c' }; }
 function sett(){ if(!state.settings || typeof state.settings!=='object') state.settings = defaultSettings(); return state.settings; }
 function saveSett(patch){ state.settings = Object.assign(sett(), patch||{}); saveState(); applyAppearance(); renderSettings(); }
 function applyAppearance(){
@@ -327,6 +327,8 @@ function renderSettings(){
   if(pc) pc.innerHTML = [5,10,15,20].map(n=>'<button class="chip'+(s.pCount===n?' on':'')+'" data-v="'+n+'">'+n+' 题</button>').join('');
   const pd = $('#set-pdir');
   if(pd) pd.innerHTML = [['forward','正向'],['reverse','反向'],['mixed','混合']].map(o=>'<button class="chip'+(s.pDir===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
+  const ph = $('#set-phint');
+  if(ph) ph.innerHTML = [['cd','中文+释义'],['c','仅中文'],['off','无提示']].map(o=>'<button class="chip'+(s.pHint===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
   const th = $('#set-theme');
   if(th) th.innerHTML = [['light','☀️ 浅色'],['dark','🌙 深色'],['auto','🔄 跟随系统']].map(o=>'<button class="chip'+(s.theme===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
   const ft = $('#set-font');
@@ -353,6 +355,7 @@ function bindSettingsEvents(){
   on('#set-rate', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({rate:parseFloat(b.dataset.v)}); });
   on('#set-pcount', e=>{ const b=e.target.closest('[data-v]'); if(b){ saveSett({pCount:parseInt(b.dataset.v,10)}); applyPracticePrefs(); } });
   on('#set-pdir', e=>{ const b=e.target.closest('[data-v]'); if(b){ saveSett({pDir:b.dataset.v}); applyPracticePrefs(); } });
+  on('#set-phint', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({pHint:b.dataset.v}); });
   on('#set-theme', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({theme:b.dataset.v}); });
   on('#set-font', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({font:b.dataset.v}); });
   on('#set-export', ()=>{ if(typeof exportProgress==='function') exportProgress(); });
@@ -450,6 +453,7 @@ function renderDict(q){
       '<div class="listen-row"><button class="listen-btn" id="play-btn">🔊 播放单词</button>'+
       '<button class="icon-btn" id="replay-btn" title="再听一遍">🔁 再听一遍</button></div>'+
       '<div class="q-prompt">听发音，在下方输入你听到的单词（可反复重听）</div>'+
+      pHintHtml(q)+
       '<div class="dict-row"><input id="dict-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="输入单词…">'+
       '<button class="btn btn-primary" id="dict-check">✓ 检查</button></div>'+
       '<div class="feedback" id="feedback"></div>'+
@@ -684,6 +688,12 @@ renderPracticeSetup = function(){
   const el = $('#p-books'); if(!el) return;
   el.innerHTML = bookChips(pBook);
   el.onclick = e=>{ const b=e.target.closest('[data-book]'); if(b){ pBook=b.dataset.book; renderPracticeSetup(); } };
+  const ph = $('#p-hints');
+  if(ph){
+    const s = sett();
+    ph.innerHTML = [['cd','中文+释义'],['c','仅中文'],['off','无提示']].map(o=>'<button class="chip'+(s.pHint===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
+    ph.onclick = e=>{ const b=e.target.closest('[data-v]'); if(b){ saveSett({pHint:b.dataset.v}); renderPracticeSetup(); } };
+  }
 };
 const _v10pp = practicePool;
 practicePool = function(){
