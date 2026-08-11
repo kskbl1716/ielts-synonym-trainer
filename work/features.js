@@ -24,8 +24,8 @@ function openWordDetail(word){
   if(cn) html += '<div class="wm-sec"><div class="wm-sec-t">中文释义</div><div class="wm-cn">'+escapeHtml(cn)+'</div></div>';
   if(def) html += '<div class="wm-sec"><div class="wm-sec-t">英文释义</div><div class="wm-def">'+escapeHtml(def)+'</div></div>';
   if(entry && entry.s.length) html += '<div class="wm-sec"><div class="wm-sec-t">同义替换（点击发音 · 📖 可看详情）</div><div class="wm-syns">'+synChips+'</div></div>';
-  if(entry) html += '<div class="wm-sec"><div class="wm-sec-t">例句（听力语境）</div><p class="wc-ex">'+highlight(entry.e, entry.k)+'</p></div>';
-  if(entry) html += '<div class="wm-meta">'+topicName(entry.t)+lvBadge(entry)+
+  if(entry) html += '<div class="wm-sec"><div class="wm-sec-t">例句（听力语境）<button class="icon-btn wm-say" data-speak="'+escapeHtml(entry.e)+'" type="button">🔊 朗读</button></div><p class="wc-ex">'+highlight(entry.e, entry.k)+'</p></div>';
+  if(entry) html += '<div class="wm-meta">'+topicName(entry.t)+lvBadge(entry)+masteryBadge(entry)+
     '<div class="wm-books">'+(entry.b||['default']).map(bid=>'<button class="book-tag" data-book="'+escapeHtml(bid)+'">'+escapeHtml(bookName(bid))+'</button>').join('')+'</div></div>';
   $('#wm-body').innerHTML = html;
   const wbBtn = $('#wm-wb');
@@ -346,7 +346,9 @@ function renderSettings(){
   if(ab){
     const zl = WORDS.filter(w=>w.z==='l').length, zw = WORDS.filter(w=>w.z==='w').length;
     const c1 = WORDS.filter(w=>w.lv==='1').length, c2 = WORDS.filter(w=>w.lv==='2').length, c3 = WORDS.filter(w=>w.lv==='3').length;
-    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v10.4<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
+    let m1=0,m2=0,m3=0,m4=0,m5=0;
+    WORDS.forEach(w=>{ const l=masteryLevel(w.w); if(l===5)m5++; else if(l===4)m4++; else if(l===3)m3++; else if(l===2)m2++; else m1++; });
+    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.0<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：练习过的词按艾宾浩斯遗忘曲线自动安排复习（首页「今日待复习」）<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
   }
 }
 function applyPracticePrefs(){
@@ -1175,6 +1177,7 @@ applyRoute();
 
 /* ================= v10.3: 首页更新内容 ================= */
 var UPDATES = [
+  {d:'2026-08-11', v:'v11.0', t:'智能记忆引擎：掌握度 5 级分级 + 艾宾浩斯遗忘曲线复习调度 + 首页今日待复习 + 错题本 + 例句整句朗读'},
   {d:'2026-08-11', v:'v10.4', t:'新增单词难度分级（基础/进阶/高级），词库、词书、练习界面均可按难度筛选'},
   {d:'2026-08-11', v:'v10.3', t:'练习自动发音（看词/选择题自动朗读、配对点卡即念）；首页新增「更新内容」'},
   {d:'2026-08-11', v:'v10.2', t:'词库/词书列表分页优化，打开不再卡顿；反馈支持直接回复；SEO 优化'},
@@ -1192,3 +1195,122 @@ function renderHomeUpdates(){
 const _v10up = renderHome;
 renderHome = function(){ _v10up(); renderHomeUpdates(); };
 renderHomeUpdates(); // 首页是默认视图，features 加载时立即渲染一次更新内容
+
+/* ================= v11.0: 智能记忆引擎 ================= */
+/* 掌握度 5 级（从 state.stats 派生，不新增存储，向后兼容旧 isMastered） */
+function masteryLevel(w){
+  const s = wordStat(w);
+  if(s.seen === 0) return 1;                                            // 陌生
+  if(s.seen >= 10 && s.wrong <= 1 && s.correct/s.seen >= 0.9) return 5; // 熟练
+  if(s.seen >= 4 && s.wrong <= 1) return 4;                             // 掌握（=旧 isMastered）
+  if(s.seen >= 3 && s.wrong >= 2) return 3;                             // 模糊
+  return 2;                                                             // 认识
+}
+function masteryName(lv){ return {1:'陌生',2:'认识',3:'模糊',4:'掌握',5:'熟练'}[lv] || '陌生'; }
+function masteryBadge(w){ const l = masteryLevel(w.w); return '<span class="lv-mastery m'+l+'">'+masteryName(l)+'</span>'; }
+isMastered = function(w){ return masteryLevel(w) >= 4; };  // 覆盖基础版，结果与旧版一致
+
+/* 懒加载 state key（仿 reciteStore 先例，不改内联 defaultState） */
+function reviewStore(){ if(!state.review || typeof state.review!=='object') state.review = {}; return state.review; }
+function notebookStore(){ if(!state.notebook || typeof state.notebook!=='object') state.notebook = {}; return state.notebook; }
+function addDays(days){ const d = new Date(); d.setDate(d.getDate() + days); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+/* 包装 recordAnswer（唯一收口，未被改写）：艾宾浩斯调度 + 错题本 */
+const _v11rec = recordAnswer;
+recordAnswer = function(w, ok){
+  _v11rec(w, ok);   // 原逻辑：streak/daily/stats/saveState
+  const rv = reviewStore(), nb = notebookStore();
+  const r = rv[w] || {int:0, next:'', lapses:0, last:''};
+  if(ok){
+    r.int = r.int === 0 ? 1 : ({1:3,3:7,7:15,15:30})[r.int] || 30;   // 艾宾浩斯点 1→3→7→15→30
+  } else {
+    r.int = 1;
+    r.lapses = (r.lapses||0) + 1;
+    nb[w] = { count:(nb[w]?nb[w].count:0)+1, last:todayStr() };
+  }
+  r.next = addDays(r.int);
+  r.last = todayStr();
+  rv[w] = r;
+  saveState();   // base 已 save 一次，这里再 save 一次（廉价）
+};
+function dueWords(){
+  const rv = reviewStore(), t = todayStr();
+  return Object.keys(rv).filter(w => rv[w].next <= t).sort((a,b)=> rv[a].next < rv[b].next ? -1 : 1);
+}
+function wrongWords(){ const nb = notebookStore(); return Object.keys(nb).sort((a,b)=> (nb[b].count||0)-(nb[a].count||0)); }
+
+/* 复习/错题专用闪卡（reviewMode/wrongMode 覆盖 startFlash，否则委托原逻辑） */
+var reviewMode = false, wrongMode = false;
+const _v11sf = startFlash;
+startFlash = function(){
+  if(reviewMode || wrongMode){
+    // dueWords/wrongWords 返回词字符串，须映射回完整词条对象（renderFlashCard 需要 w/c/s/e/k）
+    const pool = (reviewMode ? dueWords() : wrongWords()).map(w=>WORDS.find(x=>x.w===w)).filter(Boolean);
+    if(pool.length === 0){ toast(reviewMode ? '今天没有待复习的词' : '错题本还没有词'); return; }
+    flash = {list:shuffle(pool), idx:0, known:0, unknown:0};
+    $('#flash-end').classList.add('hidden');
+    $('#flash-game').classList.remove('hidden');
+    renderFlashCard();
+    return;
+  }
+  _v11sf();
+};
+
+/* 首页「今日待复习」 */
+function renderHomeReview(){
+  const el = $('#home-review'); if(!el) return;
+  const due = dueWords();
+  if(!due.length){
+    el.innerHTML = '<div class="home-sec-title"><h2>📅 今日待复习</h2></div>'+
+      '<div class="empty">🎉 今天没有待复习的词<br><span style="font-size:12px;color:var(--muted)">练习过的词会自动按遗忘曲线排入复习计划</span></div>';
+    return;
+  }
+  const cards = due.slice(0,5).map(w=>{
+    const e = WORDS.find(x=>x.w===w); if(!e) return '';
+    return '<div class="review-item" data-w="'+escapeHtml(w)+'">'+
+      '<button class="icon-btn wm-say" data-speak="'+escapeHtml(e.e)+'" type="button">🔊</button>'+
+      '<span class="rv-word">'+escapeHtml(w)+'</span>'+
+      '<span class="rv-cn">'+escapeHtml(e.c)+'</span>'+masteryBadge(e)+
+    '</div>';
+  }).join('');
+  el.innerHTML = '<div class="home-sec-title"><h2>📅 今日待复习</h2><span class="rv-due">'+due.length+' 词到期</span></div>'+
+    '<div class="review-list">'+cards+'</div>'+
+    '<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">'+
+      '<button class="btn btn-primary btn-sm" id="home-review-btn">🔁 开始复习 '+due.length+' 词</button>'+
+      '<button class="btn btn-ghost btn-sm" id="home-wrong-btn">📕 错题本</button>'+
+    '</div>';
+  el.onclick = e=>{
+    const sp = e.target.closest('[data-speak]'); if(sp){ speak(sp.dataset.speak); return; }
+    const it = e.target.closest('.review-item[data-w]'); if(it){ openWordDetail(it.dataset.w); return; }
+    const rb = e.target.closest('#home-review-btn'); if(rb){ switchView('flash'); reviewMode=true; startFlash(); reviewMode=false; return; }
+    const wb = e.target.closest('#home-wrong-btn'); if(wb){ switchView('stats'); }
+  };
+}
+const _v11up = renderHome;
+renderHome = function(){ _v11up(); renderHomeReview(); };
+
+/* 统计页「错题本」面板 */
+function renderWrongPanel(){
+  const sec = $('#view-stats'); if(!sec) return;
+  let panel = $('#wrong-panel');
+  if(!panel){ panel = document.createElement('div'); panel.className = 'panel'; panel.id = 'wrong-panel'; sec.appendChild(panel); }
+  const nb = notebookStore(), words = wrongWords();
+  if(!words.length){
+    panel.innerHTML = '<h3>📕 错题本 <span style="font-weight:400;color:var(--muted)">（答错的词会自动记录）</span></h3>'+
+      '<div class="empty">还没有错题记录，去练习一下吧</div>';
+    return;
+  }
+  const items = words.slice(0,50).map(w=>{
+    const e = WORDS.find(x=>x.w===w); if(!e) return '';
+    return '<div class="wrong-item" data-w="'+escapeHtml(w)+'"><span class="bw-word">'+escapeHtml(w)+'</span><span class="bw-cn">'+escapeHtml(e.c)+'</span><span class="wrong-cnt">错 '+(nb[w].count||0)+' 次 · '+escapeHtml(nb[w].last||'')+'</span></div>';
+  }).join('');
+  panel.innerHTML = '<h3>📕 错题本 <span style="font-weight:400;color:var(--muted)">（'+words.length+' 词）</span></h3>'+
+    '<div class="wordbook-list">'+items+'</div>'+
+    '<div style="margin-top:12px"><button class="btn btn-primary btn-sm" id="wrong-review-btn">🔁 重练错题</button></div>';
+  panel.onclick = e=>{
+    const it = e.target.closest('.wrong-item[data-w]'); if(it){ openWordDetail(it.dataset.w); return; }
+    const rb = e.target.closest('#wrong-review-btn'); if(rb){ switchView('flash'); wrongMode=true; startFlash(); wrongMode=false; }
+  };
+}
+const _v11stats = renderStats;
+renderStats = function(){ _v11stats(); renderWrongPanel(); };

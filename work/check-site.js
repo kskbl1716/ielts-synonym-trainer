@@ -30,7 +30,7 @@ const get = (url, headers) => new Promise((res) => {
     ['百度统计 hm.js', home.body.includes('hm.baidu.com/hm.js')],
     ['首页更新区', home.body.includes('id="home-updates"')],
     ['顶部提示条', home.body.includes('announce-bar')],
-    ['版本 v10.x', /版本 v10\.\d/.test(home.body)],
+    ['版本 v1[01].x', /版本 v1[01]\.\d/.test(home.body)],
     ['分页 learn-more', home.body.includes('learn-more-bar')],
     ['反馈 _replyto', home.body.includes('_replyto')],
   ];

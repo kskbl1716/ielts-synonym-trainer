@@ -209,6 +209,18 @@
       if(now - lastPushErrAt > 15000){ lastPushErrAt = now; toast('☁️ 云端同步失败（网络问题），数据仍安全保存在本机'); }
     }
   }
+  /* v11: 复习调度/错题本合并——按条目 last 日期较新者胜（缺省取有的一方） */
+  function mergeByLast(a, b){
+    var out = {};
+    var keys = new Set(Object.keys(a || {}).concat(Object.keys(b || {})));
+    keys.forEach(function(k){
+      var av = a && a[k], bv = b && b[k];
+      if(!av){ out[k] = bv; return; }
+      if(!bv){ out[k] = av; return; }
+      out[k] = (String(bv.last || '') > String(av.last || '')) ? bv : av;
+    });
+    return out;
+  }
   function mergeState(cloud, local){
     var base = JSON.parse(JSON.stringify(cloud && typeof cloud === 'object' ? cloud : {}));
     var out = Object.assign(defaultState(), base);
@@ -240,6 +252,8 @@
       Object.keys(d).forEach(function(k){ if(ls[k] !== undefined && ls[k] !== d[k]) merged[k] = ls[k]; });
       out.settings = merged;
     }
+    out.review = mergeByLast(base.review, local.review);
+    out.notebook = mergeByLast(base.notebook, local.notebook);
     return out;
   }
   async function loadFromCloud(){

@@ -232,3 +232,30 @@ html[data-theme="dark"] .upd-item{background:var(--card-2);border-color:var(--li
 html[data-theme="dark"] .lv-badge.lv-1{color:#7ee2a8;background:#0d2b1c;border-color:#1f4a33}
 html[data-theme="dark"] .lv-badge.lv-2{color:#ffd966;background:#3a2e0a;border-color:#5c4a14}
 html[data-theme="dark"] .lv-badge.lv-3{color:#ff8a8a;background:#3a1212;border-color:#5c2020}
+/* ===== v11.0: 智能记忆引擎（掌握度/待复习/错题本） ===== */
+.review-panel{margin-bottom:16px}
+.review-list{display:flex;flex-direction:column;gap:8px}
+.review-item{display:flex;align-items:center;gap:8px;flex-wrap:wrap;cursor:pointer;padding:8px 12px;background:var(--card-2);border:1px solid var(--line);border-radius:12px;font-size:13px;transition:.15s}
+.review-item:hover{border-color:var(--primary);box-shadow:0 0 0 3px rgba(44,79,143,.08);transform:translateY(-1px)}
+.review-item .rv-word{font-weight:800;color:var(--primary-hi);font-family:var(--serif)}
+.review-item .rv-cn{font-size:12px;color:var(--muted)}
+.rv-due{font-size:12px;color:var(--muted);font-weight:400}
+.lv-mastery{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;line-height:1.7;border:1px solid transparent;white-space:nowrap;vertical-align:middle}
+.lv-mastery.m1{color:var(--muted);background:var(--card-2);border-color:var(--line)}
+.lv-mastery.m2{color:#3a6ea5;background:#e8f0f8;border-color:#c3d8ec}
+.lv-mastery.m3{color:#8a6100;background:#fdf3d7;border-color:#f0dfae}
+.lv-mastery.m4{color:#0a7d4f;background:#e5f6ec;border-color:#bfe8d2}
+.lv-mastery.m5{color:#7a3b8f;background:#f1e6f5;border-color:#dcc3e6}
+.wm-sec-t{display:flex;align-items:center;gap:6px}
+.wm-say{margin-left:auto;font-size:12px;padding:3px 8px}
+.wrong-item{display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;padding:8px 12px;background:var(--card-2);border:1px solid var(--line);border-radius:10px;font-size:13px;margin-bottom:6px;transition:.15s}
+.wrong-item:hover{border-color:var(--red);box-shadow:0 0 0 3px rgba(198,83,79,.08)}
+.wrong-item .bw-word{font-weight:800;color:var(--primary-hi);font-family:var(--serif);min-width:86px}
+.wrong-item .bw-cn{font-size:12px;color:var(--muted)}
+.wrong-cnt{font-size:11px;color:var(--red);margin-left:auto;white-space:nowrap}
+html[data-theme="dark"] .review-item,html[data-theme="dark"] .wrong-item{background:var(--card);border-color:var(--line)}
+html[data-theme="dark"] .lv-mastery.m1{color:var(--muted);background:var(--card-2);border-color:var(--line)}
+html[data-theme="dark"] .lv-mastery.m2{color:#9cc4ef;background:#12283f;border-color:#22456b}
+html[data-theme="dark"] .lv-mastery.m3{color:#ffd966;background:#3a2e0a;border-color:#5c4a14}
+html[data-theme="dark"] .lv-mastery.m4{color:#7ee2a8;background:#0d2b1c;border-color:#1f4a33}
+html[data-theme="dark"] .lv-mastery.m5{color:#d9a8e8;background:#2d1638;border-color:#4a255c}
