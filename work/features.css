@@ -313,6 +313,9 @@ html[data-theme="dark"] .wm-root-tag{background:#12283f;color:#9cc4ef}
 .fg-id{color:var(--muted);flex:1}
 .home-hint{margin-top:18px;text-align:center;font-size:12px;color:var(--muted)}
 html[data-theme="dark"] .fg-item{border-bottom-color:var(--line)}
+/* ===== v11.4: 近义词辨析 ===== */
+.wm-note{font-size:13px;color:var(--ink);background:var(--green-l);border:1px dashed var(--green);border-radius:10px;padding:9px 12px;line-height:1.7}
+html[data-theme="dark"] .wm-note{background:#0d2b1c;border-color:#1f4a33;color:#c9e9d8}
 /* ===== 字号档位（补丁：修复字号不生效——此前 data-font 无 CSS 规则，全站 px 写死，用 zoom 统一缩放） ===== */
 html[data-font="xs"] body{zoom:.85}
 html[data-font="s"] body{zoom:.95}

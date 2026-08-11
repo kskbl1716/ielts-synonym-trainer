@@ -13,6 +13,9 @@ const BOOKS = [
   {id:'oxford',    name:'牛津基础词',   desc:'牛津 3000 基础词（非商用）', icon:'🇬🇧', zone:'both', source:'OUP Oxford 3000',                 license:'需署名 + 非商用', words:1000},
   {id:'nawl',      name:'NAWL 学术新词', desc:'非 AWL 的高频学术词',        icon:'🔬', zone:'both', source:'NAWL（Browne, Culligan & Phillips, newgeneralservicelist.org）', license:'开放学术词表（需署名）', words:950},
   {id:'spoken',    name:'口语话题词',     desc:'雅思口语 Part1-3 话题词汇',  icon:'🗣️', zone:'l',    source:'本工具链按雅思口语高频话题汇编',   license:'自有',           words:227},
-  {id:'camb',      name:'剑桥18-20话题词', desc:'剑桥 18-20 真题高频话题词',  icon:'📕', zone:'both', source:'本工具链按剑桥 18-20 高频话题汇编（非抓取原文）', license:'自有', words:200}
+  {id:'camb',      name:'剑桥18-20话题词', desc:'剑桥 18-20 真题高频话题词',  icon:'📕', zone:'both', source:'本工具链按剑桥 18-20 高频话题汇编（非抓取原文）', license:'自有', words:200},
+  {id:'chart',     name:'写作图表词',     desc:'雅思写作 Task1 图表描述语言', icon:'📈', zone:'w',    source:'本工具链按 Task1 图表语言汇编',     license:'自有',           words:302},
+  {id:'part2',     name:'口语 Part2 专题', desc:'人物/地点/物品/经历/事件/活动', icon:'🗂️', zone:'l',    source:'本工具链按口语 Part2 六大话题汇编', license:'自有',           words:344},
+  {id:'phrasal',   name:'学术短语动词',   desc:'雅思高频学术短语动词',       icon:'🔗', zone:'both', source:'本工具链按学术短语动词汇编',       license:'自有',           words:171}
 ];
 module.exports = { BOOKS };

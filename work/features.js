@@ -25,6 +25,7 @@ function openWordDetail(word){
   if(def) html += '<div class="wm-sec"><div class="wm-sec-t">英文释义</div><div class="wm-def">'+escapeHtml(def)+'</div></div>';
   if(entry && (entry.rt||entry.af||entry.mn)) html += '<div class="wm-sec"><div class="wm-sec-t">🔤 词根词缀</div><div class="wm-root">'+(entry.rt?'<div class="wm-rt">'+escapeHtml(entry.rt)+'</div>':'')+(entry.af?'<div class="wm-af">'+escapeHtml(entry.af)+'</div>':'')+(entry.mn?'<div class="wm-mn">💡 '+escapeHtml(entry.mn)+'</div>':'')+'</div></div>';
   if(entry && entry.s.length) html += '<div class="wm-sec"><div class="wm-sec-t">同义替换（点击发音 · 📖 可看详情）</div><div class="wm-syns">'+synChips+'</div></div>';
+  if(entry && entry.note) html += '<div class="wm-sec"><div class="wm-sec-t">🔀 近义词辨析</div><div class="wm-note">'+escapeHtml(entry.note)+'</div></div>';
   if(entry) html += '<div class="wm-sec"><div class="wm-sec-t">例句（听力语境）<button class="icon-btn wm-say" data-speak="'+escapeHtml(entry.e)+'" type="button">🔊 朗读</button></div><p class="wc-ex">'+highlight(entry.e, entry.k)+'</p></div>';
   if(entry) html += '<div class="wm-meta">'+topicName(entry.t)+lvBadge(entry)+masteryBadge(entry)+
     (entry.rt?'<span class="wm-root-tag">🔤 '+escapeHtml(entry.rt)+'</span>':'')+
@@ -366,7 +367,7 @@ function renderSettings(){
     const c1 = WORDS.filter(w=>w.lv==='1').length, c2 = WORDS.filter(w=>w.lv==='2').length, c3 = WORDS.filter(w=>w.lv==='3').length;
     let m1=0,m2=0,m3=0,m4=0,m5=0;
     WORDS.forEach(w=>{ const l=masteryLevel(w.w); if(l===5)m5++; else if(l===4)m4++; else if(l===3)m3++; else if(l===2)m2++; else m1++; });
-    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.3<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🔤 词根词缀：学术词标词根+词缀+记忆提示（单词详情可看，词库可按词根筛词）<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：艾宾浩斯遗忘曲线复习调度 + 统计页「遗忘曲线 / 学习热力图 / 复习看板」可视化<br>📱 手机适配：手机自动切换手机版布局，也可在「外观」手动选 手机版/桌面版<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
+    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.4<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🔤 词根词缀：学术词标词根+词缀+记忆提示；🔀 近义词辨析：高频同义词用法区分（单词详情可看）<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：艾宾浩斯遗忘曲线复习调度 + 统计页「遗忘曲线 / 学习热力图 / 复习看板」可视化<br>📱 手机适配：手机自动切换手机版布局，也可在「外观」手动选 手机版/桌面版<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
   }
 }
 function applyPracticePrefs(){
@@ -943,7 +944,7 @@ renderSettings = function(){ _v10rs(); renderBookSettings(); };
 var FEATURES = [
   { cat:'📚 学习核心', items:[
     {t:'词库', d:'全量雅思词汇，可按 专区/主题/词书/难度/词根 筛选；搜索支持单词/同义词/中文/词根'},
-    {t:'词书', d:'多本词书：内置词库/真题高频/听力拼写/雅思真经/学术词汇 AWL/Band9 高分表达/牛津基础/NAWL 学术新词/口语话题/剑桥18-20；每本可浏览/背诵/练习'},
+    {t:'词书', d:'多本词书：内置词库/真题高频/听力拼写/雅思真经/学术词汇 AWL/Band9 高分表达/牛津基础/NAWL 学术新词/口语话题/口语Part2专题/剑桥18-20/写作图表词/学术短语动词；每本可浏览/背诵/练习'},
     {t:'闪卡', d:'看词想义，认识/不认识，快速过词'},
     {t:'练习', d:'6 种题型：选择题/配对题/听力题/听写/看词选义/听音选义 + 背诵模式（顺序/乱序，错词自动重背）'}
   ]},
@@ -954,9 +955,10 @@ var FEATURES = [
     {t:'学习热力图', d:'统计页 12 周学习足迹，每天练习自动记录'},
     {t:'错题本', d:'答错自动记录，统计页查看并一键重练'}
   ]},
-  { cat:'🔤 词根词缀', items:[
+  { cat:'🔤 词根词缀 · 🔀 近义词辨析', items:[
     {t:'词根拆解', d:'学术词标注 词根+词缀+记忆提示，单词详情点开即看'},
-    {t:'按词根筛词', d:'词库页「词根」筛选条 + 搜索直接匹配词根（如输 spect 出 inspect/respect…）'}
+    {t:'按词根筛词', d:'词库页「词根」筛选条 + 搜索直接匹配词根（如输 spect 出 inspect/respect…）'},
+    {t:'近义词辨析', d:'高频同义词用法区分（如 important/crucial/vital 什么时候用哪个），单词详情可看'}
   ]},
   { cat:'⚙️ 个性化', items:[
     {t:'每日目标与打卡', d:'可调每日目标；每天首次练习自动打卡，也可手动；连续打卡统计'},
@@ -972,6 +974,8 @@ var FEATURES = [
   ]}
 ];
 var FEATURE_LOG = [
+  {v:'v11.4', t:'扩词：写作图表词 / 口语Part2专题 / 学术短语动词 词书 + 近义词辨析'},
+  {v:'v11.3', t:'手机布局优化（自动/手动切换）'},
   {v:'v11.2', t:'词根词缀记忆（词根拆解 + 按词根筛词）'},
   {v:'v11.1', t:'遗忘曲线图 / 学习热力图 / 复习看板'},
   {v:'v11.0', t:'智能记忆引擎（掌握度 / 艾宾浩斯调度 / 今日待复习 / 错题本 / 例句朗读）'},
@@ -1275,6 +1279,7 @@ applyRoute();
 
 /* ================= v10.3: 首页更新内容 ================= */
 var UPDATES = [
+  {d:'2026-08-11', v:'v11.4', t:'扩词：写作图表词 / 口语Part2专题 / 学术短语动词 三本新词书 + 近义词辨析（单词详情可看用法区分）'},
   {d:'2026-08-11', v:'v11.3', t:'手机布局优化：手机自动切换手机版（导航/筛选单行滑动、紧凑排版），设置可手动选 手机版/桌面版'},
   {d:'2026-08-11', v:'v11.2', t:'词根词缀记忆：学术词根标注 + 单词详情词根拆解 + 词库按词根筛词'},
   {d:'2026-08-11', v:'v11.1', t:'记忆可视化：统计页新增遗忘曲线图（按你的复习间隔自动绘制）+ 学习热力图 + 复习看板'},

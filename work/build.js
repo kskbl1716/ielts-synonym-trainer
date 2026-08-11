@@ -9,6 +9,12 @@ const { V8NEW } = require('./v8-words.js');
 const { BOOKS } = require('./books.js');
 const { assignLv } = require('./lv-assign.js');
 const { ROOTDATA } = require('./rootdata.js');
+const { V10CHART_ADD } = require('./v10-chart-add.js');
+const { CHART_WORDS } = require('./v10-chart-words.js');
+const { V10PART2_ADD } = require('./v10-part2-add.js');
+const { PART2_WORDS } = require('./v10-part2-words.js');
+const { V10PHRASAL } = require('./v10-phrasal-words.js');
+const { SYNNOTE } = require('./synnote.js');
 const V10LISTEN = [].concat(
   require('./v10-listening-a1.js').V10LIST_A1,
   require('./v10-listening-a2.js').V10LIST_A2,
@@ -139,7 +145,7 @@ const existing = entries.map(l => {
   if (K_FIX[obj.w]) obj.k = K_FIX[obj.w];
   return obj;
 });
-const all = existing.concat(NEW.map(w => Object.assign({}, w, { z: w.z || 'l' }))).concat(V4NEW).concat(V5NEW).concat(V6NEW).concat(V7NEW).concat(V8NEW).concat(V10LISTEN).concat(V10JQ).concat(V10ZJ).concat(V10AWL).concat(V10B9).concat(V10OX).concat(V10NAWL).concat(V10SPOKEN_ADD).concat(V10CAMB_ADD);
+const all = existing.concat(NEW.map(w => Object.assign({}, w, { z: w.z || 'l' }))).concat(V4NEW).concat(V5NEW).concat(V6NEW).concat(V7NEW).concat(V8NEW).concat(V10LISTEN).concat(V10JQ).concat(V10ZJ).concat(V10AWL).concat(V10B9).concat(V10OX).concat(V10NAWL).concat(V10SPOKEN_ADD).concat(V10CAMB_ADD).concat(V10CHART_ADD).concat(V10PART2_ADD).concat(V10PHRASAL);
 const seen = new Set();
 all.forEach(w => {
   if (seen.has(w.w)) throw new Error('duplicate word: ' + w.w);
@@ -179,6 +185,16 @@ const cambSet = new Set(CAMB_WORDS);
 let cambTagged = 0;
 all.forEach(w => { if (cambSet.has(w.w) && !w.b.includes('camb')){ w.b.push('camb'); cambTagged++; } });
 console.log('CAMB tagged onto existing words:', cambTagged);
+/* chart 图表词表中已在词库的词补 b:['chart'] */
+const chartSet = new Set(CHART_WORDS);
+let chartTagged = 0;
+all.forEach(w => { if (chartSet.has(w.w) && !w.b.includes('chart')){ w.b.push('chart'); chartTagged++; } });
+console.log('CHART tagged onto existing words:', chartTagged);
+/* part2 口语专题词表中已在词库的词补 b:['part2'] */
+const part2Set = new Set(PART2_WORDS);
+let part2Tagged = 0;
+all.forEach(w => { if (part2Set.has(w.w) && !w.b.includes('part2')){ w.b.push('part2'); part2Tagged++; } });
+console.log('PART2 tagged onto existing words:', part2Tagged);
 
 /* ---------- 1.45 难度自动分级（lv：1基础 2进阶 3高级） ---------- */
 /* 在词书 tagging 之后跑，使 awl/band9 锚点生效；不修改词源文件 */
@@ -191,6 +207,8 @@ all.forEach(w => {
   w.af = d ? d.af : '';
   w.mn = d ? d.mn : '';
 });
+/* ---------- 1.47 近义词辨析 note（P4）：查表注入，缺省空串（可选字段） ---------- */
+all.forEach(w => { w.note = SYNNOTE[w.w] ? SYNNOTE[w.w].note : ''; });
 
 /* ---------- 1.5 词书校验 ---------- */
 const bc = {};
@@ -206,7 +224,7 @@ console.log('book counts:', JSON.stringify(bc));
 function jsStr(s){ return "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r/g, '').replace(/\n/g, '\\n') + "'"; }
 function entryStr(o){
   return '{t:' + jsStr(o.t) + ',w:' + jsStr(o.w) + ',s:[' + o.s.map(jsStr).join(',') + '],c:' + jsStr(o.c) +
-    ',e:' + jsStr(o.e) + ',k:' + jsStr(o.k) + ',p:' + jsStr(o.p) + ',pos:' + jsStr(o.pos) + ',d:' + jsStr(o.d) + ',z:' + jsStr(o.z) + ',lv:' + jsStr(String(o.lv)) + ',rt:' + jsStr(o.rt||'') + ',af:' + jsStr(o.af||'') + ',mn:' + jsStr(o.mn||'') + ',b:[' + o.b.map(jsStr).join(',') + ']}';
+    ',e:' + jsStr(o.e) + ',k:' + jsStr(o.k) + ',p:' + jsStr(o.p) + ',pos:' + jsStr(o.pos) + ',d:' + jsStr(o.d) + ',z:' + jsStr(o.z) + ',lv:' + jsStr(String(o.lv)) + ',rt:' + jsStr(o.rt||'') + ',af:' + jsStr(o.af||'') + ',mn:' + jsStr(o.mn||'') + ',note:' + jsStr(o.note||'') + ',b:[' + o.b.map(jsStr).join(',') + ']}';
 }
 const newBlock = 'const WORDS = [\n' + all.map(entryStr).join(',\n') + '\n];';
 html = html.replace(block, newBlock);
