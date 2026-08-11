@@ -612,12 +612,7 @@ html[data-theme="dark"] .fg-item{border-bottom-color:var(--line)}
 /* ===== v11.4: 近义词辨析 ===== */
 .wm-note{font-size:13px;color:var(--ink);background:var(--green-l);border:1px dashed var(--green);border-radius:10px;padding:9px 12px;line-height:1.7}
 html[data-theme="dark"] .wm-note{background:#0d2b1c;border-color:#1f4a33;color:#c9e9d8}
-/* ===== 字号档位（补丁：修复字号不生效——此前 data-font 无 CSS 规则，全站 px 写死，用 zoom 统一缩放） ===== */
-html[data-font="xs"] body{zoom:.85}
-html[data-font="s"] body{zoom:.95}
-html[data-font="l"] body{zoom:1.1}
-html[data-font="xl"] body{zoom:1.2}
-/* data-font="m" = 默认，无缩放 */
+
 /* ===== v11.3: 手机布局（html[data-layout="mobile"]，≤640px 自动或手动强制） ===== */
 html[data-layout="mobile"] .topbar{padding:12px 14px 10px}
 html[data-layout="mobile"] .topbar-inner{gap:8px}
@@ -643,6 +638,43 @@ html[data-layout="mobile"] .home-hero-stats{flex-wrap:wrap;gap:8px}
 html[data-layout="mobile"] .continue-card{flex-wrap:wrap;gap:10px}
 html[data-layout="mobile"] .word-card{padding:14px}
 html[data-layout="mobile"] .wc-word{font-size:20px}
+
+/* ===== 字号档位（font-size 直接缩放关键文字，全浏览器兼容；Safari 不支持 zoom，故弃用 zoom） =====
+   基准 m；xs=0.85x / s=0.95x / l=1.1x / xl=1.2x。data-font="m" 为默认，无缩放规则。 */
+html[data-font="xs"]{font-size:12px}
+html[data-font="s"]{font-size:13px}
+html[data-font="m"]{font-size:14px}
+html[data-font="l"]{font-size:15px}
+html[data-font="xl"]{font-size:16px}
+/* 固定 px 元素显式缩放（继承不到 html font-size 的） */
+html[data-font="xs"] .wc-word{font-size:17px}
+html[data-font="s"] .wc-word{font-size:19px}
+html[data-font="l"] .wc-word{font-size:22px}
+html[data-font="xl"] .wc-word{font-size:24px}
+html[data-font="xs"] .wc-cn,html[data-font="xs"] .wc-ex,html[data-font="xs"] .syn-chip,html[data-font="xs"] .chip,html[data-font="xs"] .tab,html[data-font="xs"] .bw-word,html[data-font="xs"] .bw-cn,html[data-font="xs"] .rv-word,html[data-font="xs"] .rv-cn{font-size:11px}
+html[data-font="s"] .wc-cn,html[data-font="s"] .wc-ex,html[data-font="s"] .syn-chip,html[data-font="s"] .chip,html[data-font="s"] .tab,html[data-font="s"] .bw-word,html[data-font="s"] .bw-cn,html[data-font="s"] .rv-word,html[data-font="s"] .rv-cn{font-size:12.5px}
+html[data-font="l"] .wc-cn,html[data-font="l"] .wc-ex,html[data-font="l"] .syn-chip,html[data-font="l"] .chip,html[data-font="l"] .tab,html[data-font="l"] .bw-word,html[data-font="l"] .bw-cn,html[data-font="l"] .rv-word,html[data-font="l"] .rv-cn{font-size:14px}
+html[data-font="xl"] .wc-cn,html[data-font="xl"] .wc-ex,html[data-font="xl"] .syn-chip,html[data-font="xl"] .chip,html[data-font="xl"] .tab,html[data-font="xl"] .bw-word,html[data-font="xl"] .bw-cn,html[data-font="xl"] .rv-word,html[data-font="xl"] .rv-cn{font-size:15px}
+html[data-font="xs"] .num,html[data-font="xs"] .ms-item .num{font-size:17px}
+html[data-font="s"] .num,html[data-font="s"] .ms-item .num{font-size:19px}
+html[data-font="l"] .num,html[data-font="l"] .ms-item .num{font-size:22px}
+html[data-font="xl"] .num,html[data-font="xl"] .ms-item .num{font-size:24px}
+html[data-font="xs"] .lbl,html[data-font="xs"] .ms-item .lbl{font-size:9.5px}
+html[data-font="s"] .lbl,html[data-font="s"] .ms-item .lbl{font-size:10px}
+html[data-font="l"] .lbl,html[data-font="l"] .ms-item .lbl{font-size:12px}
+html[data-font="xl"] .lbl,html[data-font="xl"] .ms-item .lbl{font-size:13px}
+html[data-font="xs"] .br-word{font-size:24px}
+html[data-font="s"] .br-word{font-size:27px}
+html[data-font="l"] .br-word{font-size:31px}
+html[data-font="xl"] .br-word{font-size:34px}
+html[data-font="xs"] .panel h3{font-size:13px}
+html[data-font="s"] .panel h3{font-size:14px}
+html[data-font="l"] .panel h3{font-size:17px}
+html[data-font="xl"] .panel h3{font-size:18px}
+html[data-font="xs"] .btn{font-size:12px}
+html[data-font="s"] .btn{font-size:13px}
+html[data-font="l"] .btn{font-size:15px}
+html[data-font="xl"] .btn{font-size:16px}
 
 </style>
 <script>
@@ -935,7 +967,7 @@ var _hmt = _hmt || [];
       </details>
     </div>
   </section>
-                                                                                                                                                                                    <!-- ============ 单词详情弹窗 v2 ============ -->
+                                                                                                                                                                                        <!-- ============ 单词详情弹窗 v2 ============ -->
   <div id="word-modal" class="modal-mask hidden" role="dialog" aria-modal="true" aria-label="单词详情">
     <div class="modal">
       <button class="modal-close" id="wm-close" aria-label="关闭">✕</button>
@@ -7710,6 +7742,10 @@ const WORDS = [
 
 
 
+
+
+
+
 const BOOKS = [{"id":"default","name":"内置词库","desc":"网站原有全部词","icon":"📖","zone":"both","source":"自有","license":"自有","words":2274},{"id":"jianqiao","name":"真题高频","desc":"剑桥 4-19 真题高频词","icon":"📚","zone":"both","source":"chunsi-w/ielts-vocab-cloudflare","license":"MIT","words":450},{"id":"listening","name":"听力拼写","desc":"听力填空高频答案词","icon":"🎧","zone":"l","source":"yuqingsong71/IELTS-listening-vocabulary（剑桥 4-20 听力填空答案词）","license":"公开仓库（无 LICENSE）· 事实性词表 + 本站原创加工","words":821},{"id":"zhenjing","name":"雅思真经","desc":"雅思真经核心词汇","icon":"📗","zone":"both","source":"hefengxian/ielts-vocabulary","license":"MIT","words":938},{"id":"awl","name":"学术词汇 AWL","desc":"学术词汇表（Coxhead）","icon":"🎓","zone":"both","source":"Coxhead，惠灵顿维多利亚大学","license":"开放教育免费使用","words":570},{"id":"band9","name":"Band 9 高分表达","desc":"高分替换表达","icon":"🏅","zone":"both","source":"learning-zone/ielts-materials","license":"MIT","words":102},{"id":"oxford","name":"牛津基础词","desc":"牛津 3000 基础词（非商用）","icon":"🇬🇧","zone":"both","source":"OUP Oxford 3000","license":"需署名 + 非商用","words":1000},{"id":"nawl","name":"NAWL 学术新词","desc":"非 AWL 的高频学术词","icon":"🔬","zone":"both","source":"NAWL（Browne, Culligan & Phillips, newgeneralservicelist.org）","license":"开放学术词表（需署名）","words":950},{"id":"spoken","name":"口语话题词","desc":"雅思口语 Part1-3 话题词汇","icon":"🗣️","zone":"l","source":"本工具链按雅思口语高频话题汇编","license":"自有","words":227},{"id":"camb","name":"剑桥18-20话题词","desc":"剑桥 18-20 真题高频话题词","icon":"📕","zone":"both","source":"本工具链按剑桥 18-20 高频话题汇编（非抓取原文）","license":"自有","words":200},{"id":"chart","name":"写作图表词","desc":"雅思写作 Task1 图表描述语言","icon":"📈","zone":"w","source":"本工具链按 Task1 图表语言汇编","license":"自有","words":302},{"id":"part2","name":"口语 Part2 专题","desc":"人物/地点/物品/经历/事件/活动","icon":"🗂️","zone":"l","source":"本工具链按口语 Part2 六大话题汇编","license":"自有","words":344},{"id":"phrasal","name":"学术短语动词","desc":"雅思高频学术短语动词","icon":"🔗","zone":"both","source":"本工具链按学术短语动词汇编","license":"自有","words":171}];
 
 
@@ -8506,6 +8542,8 @@ function init(){
   renderPracticeSetup();
 }
 init();
+
+
 
 
 

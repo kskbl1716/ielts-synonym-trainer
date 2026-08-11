@@ -316,12 +316,7 @@ html[data-theme="dark"] .fg-item{border-bottom-color:var(--line)}
 /* ===== v11.4: 近义词辨析 ===== */
 .wm-note{font-size:13px;color:var(--ink);background:var(--green-l);border:1px dashed var(--green);border-radius:10px;padding:9px 12px;line-height:1.7}
 html[data-theme="dark"] .wm-note{background:#0d2b1c;border-color:#1f4a33;color:#c9e9d8}
-/* ===== 字号档位（补丁：修复字号不生效——此前 data-font 无 CSS 规则，全站 px 写死，用 zoom 统一缩放） ===== */
-html[data-font="xs"] body{zoom:.85}
-html[data-font="s"] body{zoom:.95}
-html[data-font="l"] body{zoom:1.1}
-html[data-font="xl"] body{zoom:1.2}
-/* data-font="m" = 默认，无缩放 */
+
 /* ===== v11.3: 手机布局（html[data-layout="mobile"]，≤640px 自动或手动强制） ===== */
 html[data-layout="mobile"] .topbar{padding:12px 14px 10px}
 html[data-layout="mobile"] .topbar-inner{gap:8px}
@@ -347,3 +342,40 @@ html[data-layout="mobile"] .home-hero-stats{flex-wrap:wrap;gap:8px}
 html[data-layout="mobile"] .continue-card{flex-wrap:wrap;gap:10px}
 html[data-layout="mobile"] .word-card{padding:14px}
 html[data-layout="mobile"] .wc-word{font-size:20px}
+
+/* ===== 字号档位（font-size 直接缩放关键文字，全浏览器兼容；Safari 不支持 zoom，故弃用 zoom） =====
+   基准 m；xs=0.85x / s=0.95x / l=1.1x / xl=1.2x。data-font="m" 为默认，无缩放规则。 */
+html[data-font="xs"]{font-size:12px}
+html[data-font="s"]{font-size:13px}
+html[data-font="m"]{font-size:14px}
+html[data-font="l"]{font-size:15px}
+html[data-font="xl"]{font-size:16px}
+/* 固定 px 元素显式缩放（继承不到 html font-size 的） */
+html[data-font="xs"] .wc-word{font-size:17px}
+html[data-font="s"] .wc-word{font-size:19px}
+html[data-font="l"] .wc-word{font-size:22px}
+html[data-font="xl"] .wc-word{font-size:24px}
+html[data-font="xs"] .wc-cn,html[data-font="xs"] .wc-ex,html[data-font="xs"] .syn-chip,html[data-font="xs"] .chip,html[data-font="xs"] .tab,html[data-font="xs"] .bw-word,html[data-font="xs"] .bw-cn,html[data-font="xs"] .rv-word,html[data-font="xs"] .rv-cn{font-size:11px}
+html[data-font="s"] .wc-cn,html[data-font="s"] .wc-ex,html[data-font="s"] .syn-chip,html[data-font="s"] .chip,html[data-font="s"] .tab,html[data-font="s"] .bw-word,html[data-font="s"] .bw-cn,html[data-font="s"] .rv-word,html[data-font="s"] .rv-cn{font-size:12.5px}
+html[data-font="l"] .wc-cn,html[data-font="l"] .wc-ex,html[data-font="l"] .syn-chip,html[data-font="l"] .chip,html[data-font="l"] .tab,html[data-font="l"] .bw-word,html[data-font="l"] .bw-cn,html[data-font="l"] .rv-word,html[data-font="l"] .rv-cn{font-size:14px}
+html[data-font="xl"] .wc-cn,html[data-font="xl"] .wc-ex,html[data-font="xl"] .syn-chip,html[data-font="xl"] .chip,html[data-font="xl"] .tab,html[data-font="xl"] .bw-word,html[data-font="xl"] .bw-cn,html[data-font="xl"] .rv-word,html[data-font="xl"] .rv-cn{font-size:15px}
+html[data-font="xs"] .num,html[data-font="xs"] .ms-item .num{font-size:17px}
+html[data-font="s"] .num,html[data-font="s"] .ms-item .num{font-size:19px}
+html[data-font="l"] .num,html[data-font="l"] .ms-item .num{font-size:22px}
+html[data-font="xl"] .num,html[data-font="xl"] .ms-item .num{font-size:24px}
+html[data-font="xs"] .lbl,html[data-font="xs"] .ms-item .lbl{font-size:9.5px}
+html[data-font="s"] .lbl,html[data-font="s"] .ms-item .lbl{font-size:10px}
+html[data-font="l"] .lbl,html[data-font="l"] .ms-item .lbl{font-size:12px}
+html[data-font="xl"] .lbl,html[data-font="xl"] .ms-item .lbl{font-size:13px}
+html[data-font="xs"] .br-word{font-size:24px}
+html[data-font="s"] .br-word{font-size:27px}
+html[data-font="l"] .br-word{font-size:31px}
+html[data-font="xl"] .br-word{font-size:34px}
+html[data-font="xs"] .panel h3{font-size:13px}
+html[data-font="s"] .panel h3{font-size:14px}
+html[data-font="l"] .panel h3{font-size:17px}
+html[data-font="xl"] .panel h3{font-size:18px}
+html[data-font="xs"] .btn{font-size:12px}
+html[data-font="s"] .btn{font-size:13px}
+html[data-font="l"] .btn{font-size:15px}
+html[data-font="xl"] .btn{font-size:16px}
