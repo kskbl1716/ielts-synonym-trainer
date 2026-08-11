@@ -317,16 +317,26 @@ renderStats = function(){ _rsV3(); renderCheckinPanel(); };
 
 
 /* ================= v4: 设置 + 专区 + 新模式 ================= */
-function defaultSettings(){ return { voice:'auto', rate:0.85, theme:'light', font:'m', pCount:10, pDir:'forward', book:'all', pHint:'c' }; }
+function defaultSettings(){ return { voice:'auto', rate:0.85, theme:'light', font:'m', pCount:10, pDir:'forward', book:'all', pHint:'c', layout:'auto' }; }
 function sett(){ if(!state.settings || typeof state.settings!=='object') state.settings = defaultSettings(); return state.settings; }
 function saveSett(patch){ state.settings = Object.assign(sett(), patch||{}); saveState(); applyAppearance(); renderSettings(); }
 function applyAppearance(){
   const s = sett();
   const root = document.documentElement;
-  const apply = ()=>{ root.classList.add('th-trans'); root.dataset.theme = (s.theme==='auto') ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : s.theme; clearTimeout(applyAppearance._t); applyAppearance._t = setTimeout(()=>root.classList.remove('th-trans'), 450); };
+  const apply = ()=>{
+    root.classList.add('th-trans');
+    root.dataset.theme = (s.theme==='auto') ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : s.theme;
+    /* v11.3 布局：≤640px 手机布局；手动 layout 可强制（auto/手机/桌面） */
+    const mqLayout = window.matchMedia('(max-width:640px)');
+    root.dataset.layout = (s.layout || 'auto') === 'auto' ? (mqLayout.matches ? 'mobile' : 'desktop') : s.layout;
+    clearTimeout(applyAppearance._t); applyAppearance._t = setTimeout(()=>root.classList.remove('th-trans'), 450);
+  };
   apply();
   if(s.theme==='auto'){
     if(!applyAppearance._mq){ applyAppearance._mq = window.matchMedia('(prefers-color-scheme: dark)'); applyAppearance._mq.addEventListener('change', apply); }
+  }
+  if((s.layout || 'auto') === 'auto'){
+    if(!applyAppearance._mq2){ applyAppearance._mq2 = window.matchMedia('(max-width:640px)'); applyAppearance._mq2.addEventListener('change', apply); }
   }
   root.dataset.font = s.font || 'm';
 }
@@ -348,13 +358,15 @@ function renderSettings(){
   if(th) th.innerHTML = [['light','☀️ 浅色'],['dark','🌙 深色'],['auto','🔄 跟随系统']].map(o=>'<button class="chip'+(s.theme===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
   const ft = $('#set-font');
   if(ft) ft.innerHTML = [['xs','极小'],['s','小号'],['m','中号'],['l','大号'],['xl','超大']].map(o=>'<button class="chip'+(s.font===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
+  const ly = $('#set-layout');
+  if(ly) ly.innerHTML = [['auto','🔄 自动'],['mobile','📱 手机版'],['desktop','🖥️ 桌面版']].map(o=>'<button class="chip'+(s.layout===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
   const ab = $('#set-about');
   if(ab){
     const zl = WORDS.filter(w=>w.z==='l').length, zw = WORDS.filter(w=>w.z==='w').length;
     const c1 = WORDS.filter(w=>w.lv==='1').length, c2 = WORDS.filter(w=>w.lv==='2').length, c3 = WORDS.filter(w=>w.lv==='3').length;
     let m1=0,m2=0,m3=0,m4=0,m5=0;
     WORDS.forEach(w=>{ const l=masteryLevel(w.w); if(l===5)m5++; else if(l===4)m4++; else if(l===3)m3++; else if(l===2)m2++; else m1++; });
-    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.2<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🔤 词根词缀：学术词标词根+词缀+记忆提示（单词详情可看，词库可按词根筛词）<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：艾宾浩斯遗忘曲线复习调度 + 统计页「遗忘曲线 / 学习热力图 / 复习看板」可视化<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
+    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.3<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🔤 词根词缀：学术词标词根+词缀+记忆提示（单词详情可看，词库可按词根筛词）<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：艾宾浩斯遗忘曲线复习调度 + 统计页「遗忘曲线 / 学习热力图 / 复习看板」可视化<br>📱 手机适配：手机自动切换手机版布局，也可在「外观」手动选 手机版/桌面版<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
   }
 }
 function applyPracticePrefs(){
@@ -376,6 +388,7 @@ function bindSettingsEvents(){
   on('#set-phint', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({pHint:b.dataset.v}); });
   on('#set-theme', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({theme:b.dataset.v}); });
   on('#set-font', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({font:b.dataset.v}); });
+  on('#set-layout', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({layout:b.dataset.v}); });
   on('#set-export', ()=>{ if(typeof exportProgress==='function') exportProgress(); });
   on('#set-import-btn', ()=>{ const f=$('#set-import-file'); if(f) f.click(); });
   const imp = $('#set-import-file');
@@ -948,7 +961,7 @@ var FEATURES = [
   { cat:'⚙️ 个性化', items:[
     {t:'每日目标与打卡', d:'可调每日目标；每天首次练习自动打卡，也可手动；连续打卡统计'},
     {t:'发音', d:'英音/美音切换、语速调节；单词、例句整句朗读'},
-    {t:'外观', d:'浅色/深色/跟随系统 + 字号调节'}
+    {t:'外观', d:'浅色/深色/跟随系统 + 字号调节（5 档）+ 布局（手机自动切换手机版，可手动强制）'}
   ]},
   { cat:'💾 数据', items:[
     {t:'云端同步', d:'邮箱登录后进度自动云端同步，换设备不丢'},
@@ -1262,6 +1275,7 @@ applyRoute();
 
 /* ================= v10.3: 首页更新内容 ================= */
 var UPDATES = [
+  {d:'2026-08-11', v:'v11.3', t:'手机布局优化：手机自动切换手机版（导航/筛选单行滑动、紧凑排版），设置可手动选 手机版/桌面版'},
   {d:'2026-08-11', v:'v11.2', t:'词根词缀记忆：学术词根标注 + 单词详情词根拆解 + 词库按词根筛词'},
   {d:'2026-08-11', v:'v11.1', t:'记忆可视化：统计页新增遗忘曲线图（按你的复习间隔自动绘制）+ 学习热力图 + 复习看板'},
   {d:'2026-08-11', v:'v11.0', t:'智能记忆引擎：掌握度 5 级分级 + 艾宾浩斯遗忘曲线复习调度 + 首页今日待复习 + 错题本 + 例句整句朗读'},
