@@ -347,7 +347,7 @@ function renderSettings(){
   const th = $('#set-theme');
   if(th) th.innerHTML = [['light','☀️ 浅色'],['dark','🌙 深色'],['auto','🔄 跟随系统']].map(o=>'<button class="chip'+(s.theme===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
   const ft = $('#set-font');
-  if(ft) ft.innerHTML = [['s','小号'],['m','中号'],['l','大号']].map(o=>'<button class="chip'+(s.font===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
+  if(ft) ft.innerHTML = [['xs','极小'],['s','小号'],['m','中号'],['l','大号'],['xl','超大']].map(o=>'<button class="chip'+(s.font===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
   const ab = $('#set-about');
   if(ab){
     const zl = WORDS.filter(w=>w.z==='l').length, zw = WORDS.filter(w=>w.z==='w').length;
