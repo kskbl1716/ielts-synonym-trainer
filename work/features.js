@@ -593,7 +593,7 @@ function renderFeedbackPanel(){
       '<button class="btn btn-primary btn-sm" id="fb-send">📨 发送反馈</button>'+
       '<span class="fb-status" id="fb-status"></span>'+
     '</div></div>'+
-    '<div class="set-hint">反馈将发送到站长邮箱（'+FEEDBACK_EMAIL+'）。首次发送会收到一封激活确认邮件，点开确认后，之后的反馈就能直接送达；网络不通时可用「📧 邮件直发」兜底。</div>';
+    '<div class="set-hint">反馈将发送到站长邮箱（'+FEEDBACK_EMAIL+'）。已登录时反馈会自动附带你的账号邮箱，方便站长结合你的学习进度定位问题；「联系方式」里填邮箱，站长就能直接回复你。网络不通时可用「📧 邮件直发」兜底。</div>';
   const about = sec.querySelector('#set-about');
   const anchor = about ? about.closest('.panel') : null;
   if(anchor) sec.insertBefore(panel, anchor); else sec.appendChild(panel);
@@ -617,7 +617,8 @@ function submitFeedback(){
   if(!content.trim()){ setSt('请先填写反馈内容', 'bad'); return; }
   const btn = $('#fb-send');
   if(btn){ btn.disabled = true; btn.textContent = '发送中…'; }
-  const mailto = 'mailto:'+FEEDBACK_EMAIL+'?subject='+encodeURIComponent('【雅思训练器反馈】'+type)+'&body='+encodeURIComponent(content+'\n\n联系方式：'+(contact||'未填写'));
+  const acct = (typeof window!=='undefined' && window.__CURRENT_USER_EMAIL__) ? window.__CURRENT_USER_EMAIL__ : '';
+  const mailto = 'mailto:'+FEEDBACK_EMAIL+'?subject='+encodeURIComponent('【雅思训练器反馈】'+type)+'&body='+encodeURIComponent(content+'\n\n联系方式：'+(contact||'未填写')+(acct?('\n登录账号：'+acct):''));
   const body = new FormData();
   body.append('_subject','【雅思训练器反馈】'+type);
   body.append('_template','table');
@@ -625,6 +626,8 @@ function submitFeedback(){
   body.append('反馈类型',type);
   body.append('反馈内容',content);
   body.append('联系方式',contact||'未填写');
+  if(acct) body.append('登录账号', acct);          // 登录用户反馈自动附带账号邮箱，便于站长结合学习进度定位
+  if(contact && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) body.append('_replyto', contact); // 填了邮箱→邮件「回复」直达反馈者
   fetch('https://formsubmit.co/ajax/'+FEEDBACK_EMAIL,{method:'POST',body:body})
     .then(r=>r.json().catch(()=>({})))
     .then(res=>{

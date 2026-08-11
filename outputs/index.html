@@ -766,7 +766,7 @@ html[data-theme="dark"] .q-hint{background:var(--card);border-color:var(--line)}
       <div class="about-line" id="set-about"></div>
     </div>
   </section>
-                                                                                                                              <!-- ============ 单词详情弹窗 v2 ============ -->
+                                                                                                                                <!-- ============ 单词详情弹窗 v2 ============ -->
   <div id="word-modal" class="modal-mask hidden" role="dialog" aria-modal="true" aria-label="单词详情">
     <div class="modal">
       <button class="modal-close" id="wm-close" aria-label="关闭">✕</button>
@@ -6576,6 +6576,8 @@ const WORDS = [
 
 
 
+
+
 const BOOKS = [{"id":"default","name":"内置词库","desc":"网站原有全部词","icon":"📖","zone":"both","source":"自有","license":"自有","words":2274},{"id":"jianqiao","name":"真题高频","desc":"剑桥 4-19 真题高频词","icon":"📚","zone":"both","source":"chunsi-w/ielts-vocab-cloudflare","license":"MIT","words":450},{"id":"listening","name":"听力拼写","desc":"听力填空高频答案词","icon":"🎧","zone":"l","source":"yuqingsong71/IELTS-listening-vocabulary（剑桥 4-20 听力填空答案词）","license":"公开仓库（无 LICENSE）· 事实性词表 + 本站原创加工","words":821},{"id":"zhenjing","name":"雅思真经","desc":"雅思真经核心词汇","icon":"📗","zone":"both","source":"hefengxian/ielts-vocabulary","license":"MIT","words":938},{"id":"awl","name":"学术词汇 AWL","desc":"学术词汇表（Coxhead）","icon":"🎓","zone":"both","source":"Coxhead，惠灵顿维多利亚大学","license":"开放教育免费使用","words":570},{"id":"band9","name":"Band 9 高分表达","desc":"高分替换表达","icon":"🏅","zone":"both","source":"learning-zone/ielts-materials","license":"MIT","words":102},{"id":"oxford","name":"牛津基础词","desc":"牛津 3000 基础词（非商用）","icon":"🇬🇧","zone":"both","source":"OUP Oxford 3000","license":"需署名 + 非商用","words":1000}];
 
 
@@ -7437,6 +7439,7 @@ init();
 
 
 
+
 /* ================= v2: 单词详情弹窗 ================= */
 function dictOf(w){ return Object.prototype.hasOwnProperty.call(DICT, w) ? DICT[w] : null; }
 function openWordDetail(word){
@@ -8032,7 +8035,7 @@ function renderFeedbackPanel(){
       '<button class="btn btn-primary btn-sm" id="fb-send">📨 发送反馈</button>'+
       '<span class="fb-status" id="fb-status"></span>'+
     '</div></div>'+
-    '<div class="set-hint">反馈将发送到站长邮箱（'+FEEDBACK_EMAIL+'）。首次发送会收到一封激活确认邮件，点开确认后，之后的反馈就能直接送达；网络不通时可用「📧 邮件直发」兜底。</div>';
+    '<div class="set-hint">反馈将发送到站长邮箱（'+FEEDBACK_EMAIL+'）。已登录时反馈会自动附带你的账号邮箱，方便站长结合你的学习进度定位问题；「联系方式」里填邮箱，站长就能直接回复你。网络不通时可用「📧 邮件直发」兜底。</div>';
   const about = sec.querySelector('#set-about');
   const anchor = about ? about.closest('.panel') : null;
   if(anchor) sec.insertBefore(panel, anchor); else sec.appendChild(panel);
@@ -8056,7 +8059,8 @@ function submitFeedback(){
   if(!content.trim()){ setSt('请先填写反馈内容', 'bad'); return; }
   const btn = $('#fb-send');
   if(btn){ btn.disabled = true; btn.textContent = '发送中…'; }
-  const mailto = 'mailto:'+FEEDBACK_EMAIL+'?subject='+encodeURIComponent('【雅思训练器反馈】'+type)+'&body='+encodeURIComponent(content+'\n\n联系方式：'+(contact||'未填写'));
+  const acct = (typeof window!=='undefined' && window.__CURRENT_USER_EMAIL__) ? window.__CURRENT_USER_EMAIL__ : '';
+  const mailto = 'mailto:'+FEEDBACK_EMAIL+'?subject='+encodeURIComponent('【雅思训练器反馈】'+type)+'&body='+encodeURIComponent(content+'\n\n联系方式：'+(contact||'未填写')+(acct?('\n登录账号：'+acct):''));
   const body = new FormData();
   body.append('_subject','【雅思训练器反馈】'+type);
   body.append('_template','table');
@@ -8064,6 +8068,8 @@ function submitFeedback(){
   body.append('反馈类型',type);
   body.append('反馈内容',content);
   body.append('联系方式',contact||'未填写');
+  if(acct) body.append('登录账号', acct);          // 登录用户反馈自动附带账号邮箱，便于站长结合学习进度定位
+  if(contact && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) body.append('_replyto', contact); // 填了邮箱→邮件「回复」直达反馈者
   fetch('https://formsubmit.co/ajax/'+FEEDBACK_EMAIL,{method:'POST',body:body})
     .then(r=>r.json().catch(()=>({})))
     .then(res=>{
