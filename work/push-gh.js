@@ -1,5 +1,6 @@
 const fs = require('fs');
 const https = require('https');
+const net = require('net');
 
 const TOKEN = process.env.GH_TOKEN;
 if (!TOKEN) { console.error('GH_TOKEN not set'); process.exit(1); }
@@ -8,10 +9,33 @@ const REPO = 'ielts-synonym-trainer';
 const BASE = 'https://api.github.com';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+/* 可选：直连 api.github.com 不通时，用 GH_PROXY 走 HTTP 代理（CONNECT 隧道，纯核心模块）
+   用法：GH_PROXY=http://127.0.0.1:10808 node work/push-gh.js
+   不设 GH_PROXY 时与原来完全一致（直连）。 */
+function proxyTunnel(proxy, hostname, port) {
+  return new Promise((resolve, reject) => {
+    let ph = proxy, pp = 80;
+    try { const u = new URL(proxy); ph = u.hostname; pp = u.port || 80; }
+    catch (e) { const i = proxy.indexOf('://'); const rest = (i >= 0 ? proxy.slice(i + 3) : proxy); const j = rest.lastIndexOf(':'); if (j > 0){ ph = rest.slice(0, j); pp = +rest.slice(j + 1); } }
+    const conn = net.connect(pp, ph, () => {
+      conn.write('CONNECT ' + hostname + ':' + port + ' HTTP/1.1\r\nHost: ' + hostname + ':' + port + '\r\nProxy-Connection: keep-alive\r\n\r\n');
+    });
+    let buf = '';
+    conn.on('data', function onData(d){
+      buf += d.toString('latin1');
+      if (buf.includes('\r\n\r\n')){
+        if (/HTTP\/1\.[01] 200/.test(buf)){ conn.removeListener('data', onData); resolve(conn); }
+        else { conn.destroy(); reject(new Error('CONNECT failed: ' + buf.slice(0, 80))); }
+      }
+    });
+    conn.on('error', reject);
+  });
+}
+
 function gh(method, url, body) {
   return new Promise((resolve, reject) => {
     const u = new URL(url);
-    const req = https.request(u, {
+    const opts = {
       method,
       headers: {
         'Authorization': 'Bearer ' + TOKEN,
@@ -20,7 +44,13 @@ function gh(method, url, body) {
         'User-Agent': 'codex-maintain',
         'Content-Type': 'application/json'
       }
-    }, res => {
+    };
+    if (process.env.GH_PROXY){
+      opts.createConnection = (o, cb) => {
+        proxyTunnel(process.env.GH_PROXY, o.hostname || o.host, o.port || 443).then(s => cb(null, s)).catch(cb);
+      };
+    }
+    const req = https.request(u, opts, res => {
       let d = '';
       res.on('data', c => d += c);
       res.on('end', () => {

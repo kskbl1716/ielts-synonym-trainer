@@ -15,6 +15,12 @@
 - 当前线上状态：**v10.3 已推送上线**（2026-08-11）：词库 **5622 词**（听力 4109 / 书写 1513）；7 本词书全部接入：default 2274 / listening 821 / jianqiao 450 / zhenjing 938 / awl 570（78 新 + 492 标记）/ band9 102（61 新 + 41 标记）/ oxford 1000；v10.0 词书系统/背诵模式/哈希路由、v10.1 词库分页渲染、v10.2 SEO 优化、v10.3 练习自动发音/首页更新内容/反馈可回复/百度统计均上线
 - 下一步：见 `V10-PLAN.md`（状态已更新为「功能与词书全部完成，已推送上线」）；发布/回滚资料见 `V9-RELEASE.md`、`V9-PLAN.md`
 
+## 维护纪律（2026-08-11 定，务必遵守）
+- **能不动就不动**：本机组件（WireGuard/分流/hosts+路由/各 agent 配置/3P 桌面版/站点发布机制）是微妙的平衡，非必要不升级、不重装、不乱改。
+- **动前必备份**：改任何配置文件前，先复制 `xxx.bak-YYYYMMDD` 到同目录；改完验证通过再删。
+- **恢复先查表**：出问题先看根目录 `TROUBLESHOOTING.md`（症状→根因→处理速查）。
+- **发布工具**：一键发布 `node work/release.js "提交信息" [额外新文件...] [--e2e]`（build→copy→可选e2e→commit→push→验证）；线上体检 `node work/check-site.js`。⚠️ release.js 的 git commit 会 `git add -u`（只收已跟踪改动），**新增文件必须作为额外参数传入**。
+
 ## GitHub 令牌与推送机制（重要）
 - 令牌在**系统用户级环境变量 GH_TOKEN**（40 位经典 token，owner=kskbl1716）；Codex 全局配置 `~/.codex/config.toml` 里也有备份
 - **GitHub 主域被墙**：不要用普通 `git push`/`git pull`（会超时）；一律用 `node work/push-gh.js`，它走 api.github.com
