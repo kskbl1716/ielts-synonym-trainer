@@ -12,7 +12,7 @@
 - 主：https://kskbl1716.github.io/ielts-synonym-trainer/（国内可用）
 - 备：https://ielts-trainer-liard.vercel.app/（海外/香港节点，国内网络可能超时属正常）
 - 仓库：https://github.com/kskbl1716/ielts-synonym-trainer.git（默认分支 main）
-- 当前线上状态：**v10.0 全部完成，已推送上线**（2026-08-08）：词库 **5622 词**（听力 4109 / 书写 1513）；7 本词书全部接入：default 2274 / listening 821 / jianqiao 450 / zhenjing 938 / awl 570（78 新 + 492 标记）/ band9 102（61 新 + 41 标记）/ oxford 1000；功能层（词书系统/背诵模式/哈希路由）M1~M4 已推送上线；M5 词条（+3348）已推送上线
+- 当前线上状态：**v10.2 已推送上线**（2026-08-11）：词库 **5622 词**（听力 4109 / 书写 1513）；7 本词书全部接入：default 2274 / listening 821 / jianqiao 450 / zhenjing 938 / awl 570（78 新 + 492 标记）/ band9 102（61 新 + 41 标记）/ oxford 1000；v10.0 词书系统/背诵模式/哈希路由、v10.1 词库分页渲染性能修复、v10.2 SEO 优化均上线
 - 下一步：见 `V10-PLAN.md`（状态已更新为「功能与词书全部完成，已推送上线」）；发布/回滚资料见 `V9-RELEASE.md`、`V9-PLAN.md`
 
 ## GitHub 令牌与推送机制（重要）
@@ -33,6 +33,7 @@
 - 功能注入源：`work/features.js`（详情弹窗/备份/字号/反馈/空状态清除按钮等）、`work/features.css`、`work/modal.html`、`work/cloud.js`（Supabase 登录+云同步）。
 - 推送与校验：`work/push-gh.js`、`work/validate-v7.js`（v7 批次校验，已入库）、`work/validate-v8.js`（v8 批次校验，加 v9 词时把其中 V8NEW 换成新批次源）、`work/.push-filelist.txt`（推送清单，被 gitignore）、`work/.existing-words.txt`（当前 2274 词去重基准）。
 - 部署：`.github/workflows/pages.yml`（GitHub Pages 部署 workflow，push 到 main 自动部署静态文件，已在推送清单）。⚠️ 2026-08-07 legacy Jekyll 构建服务故障（连旧内容也报 Page build failed），已迁移到 Actions 部署，勿改回 legacy。
+- SEO：`robots.txt` + `sitemap.xml`（仓库根，已入推送清单）；SEO 标签（canonical/OG/JSON-LD/keywords）在 `outputs/index.html` 的 `<head>`，改 head 后照常 build + 推送。
 - 测试：`work/e2e-*.ps1`（Chrome CDP + 本地服务器 8000 + 调试端口 9223）、`work/shot-*.ps1`（截图验证）、`work/mock-supa.js`（登录 mock）。
 - `work/_archive/`：历史一次性脚本/旧版本文件归档处（不参与构建、不在推送清单）。
 - `DEPLOY.md`：部署与 Supabase 配置说明。
@@ -76,7 +77,8 @@ Copy-Item outputs\index.html index.html -Force
 - ⚠️ **HTML/CSS/JS 源码文件绝不能带 BOM**：v9 曾因模板 `outputs/index.html` 的 CSS_MARK 行首混入 U+FEFF，注入的 features.css 第一条规则 `.modal-mask` 选择器被污染成「不存在元素+后代选择器」整条失效，导致详情弹窗失去 fixed 定位/遮罩/居中（手机端卡住、电脑端显示不全）。build.js 已加防御（读取 features.css 时剥掉开头 BOM），但写 `outputs/index.html` 时仍要用无 BOM 的 UTF-8 写入。
 
 ## 版本记录
-- v10.1 性能修复：**分页渲染**（2026-08-11，**待推送**）：词库列表/词书详情列表首屏只渲染 100 条 + 「加载更多」按钮（查询/筛选变化自动重置分页；用 var 避免 base init 先于 features 声明导致的 let TDZ 崩溃）。实测 renderLearn 961ms→6ms、单键搜索 412ms→9ms、DOM 节点 8.3万→1.5千；e2e-v7 + v10-m2/m3/m4/m5a-i 共 13 套全绿 + 截图。
+- v10.2 SEO 优化（2026-08-11，已推送）：head 加 canonical / OG / Twitter / JSON-LD（WebApplication 教育类目/免费） / keywords meta，title/description 融入关键词；新增 `robots.txt` + `sitemap.xml`（仓库根，已入推送清单）；页面版本号 v10.1→v10.2。定位国内百度/必应为主（Google 被墙）；注：百度对 github.io 收录不稳属平台限制，真冲国内排名需自定义域名 + ICP 备案。
+- v10.1 性能修复：**分页渲染**（2026-08-11，已推送）：词库列表/词书详情列表首屏只渲染 100 条 + 「加载更多」按钮（查询/筛选变化自动重置分页；用 var 避免 base init 先于 features 声明导致的 let TDZ 崩溃）。实测 renderLearn 961ms→6ms、单键搜索 412ms→9ms、DOM 节点 8.3万→1.5千；e2e-v7 + v10-m2/m3/m4/m5a-i 共 13 套全绿 + 截图。
 - v10.0 M5 词条全部接入并推送上线（2026-08-08）：词库 2274→**5622**。listening 821（剑桥 4-20 听力填空答案，无 LICENSE 公开仓库，两批 a/b）；jianqiao 450（chunsi-w/ielts-vocab-cloudflare MIT，最高频段 450）；zhenjing 938（hefengxian/ielts-vocabulary MIT，两批 d/e，含源笔误修正与占位符剔除）；awl 570（VUW 官方 Coxhead 词表，78 新增 + 492 build 期一词多书标记）；band9 102（learning-zone/ielts-materials MIT vocabulary.md，61 新增 + 41 标记）；oxford 1000（OUP Oxford 3000 公开镜像，两批 j/k，剔除 82 功能词，取净增前 1000）。全部批次经 validate-v10-*.js 校验 0 错 + 13 套 e2e 全绿 + 截图。
 - v10.0 M1~M4（2026-08-07，已推送）：**词书系统**（`work/books.js` 定义 7 本词书：default/jianqiao/listening/zhenjing/awl/band9/oxford，build.js 注入 BOOKS 并校验词条 `b` 字段；新增「📚 词书」tab：书架页 + 词书详情页（封面/来源许可/可搜索词表/开始背诵/开始练习）；词库/闪卡/练习新增词书筛选（learnBook/flashBook/pBook，设置页「默认词书」联动，持久化 state.settings.book）；统计页新增词书进度面板；详情弹窗词书标签可点击跳词库筛选；设置页新增「词书来源」区（含 OUP 牛津非商用声明））；**背诵模式**（选书→顺序/乱序→认识/不认识→首遍错词入重复队列再背一遍→正确率→「再背错词」重背错词，进度存 `state.recite.books`，recordAnswer 联动统计）；**哈希路由**（`#/learn`、`#/book/jianqiao` 等；tab 写 hash、浏览器前进/后退、分享/收藏链接、程序化跳转 replaceState 同步）。专项 e2e：v10-m2 18 项 / v10-m3 15 项 / v10-m4 14 项，e2e-v7 14 项回归全绿。
 - v9.0（2026-08-07，已上线）：首页改造为「学习中心」默认页（hero/目标环/继续学习/词书卡/工具卡/每日一词，每日一词已在 hero 下方置顶）；**配色系统变量化**：浅色 `:root`（`--bg #f6f3ed / --card #fffdf8 / --card-2 #faf5ec` …）与深色 `html[data-theme="dark"]` 变量块（`--bg #0b111c / --card #151e2b / --card-2 #1c2737` …）三级分层，浅色硬编码色值全部变量化；修复深色模式部分文字过暗；主题切换加 `.th-trans` 0.35s 平滑过渡（`features.js applyAppearance` 加类 450ms 后移除）；页面版本号 v8.0→v9.0；v8.0 原版备份到 `backups/v8.0-original-20260807/`；截图验证 7 张（`work/v9-shot-*.png`）；词数仍 2274。发布清单见 `V9-RELEASE.md`，设计过程见 `V9-PLAN.md`。
