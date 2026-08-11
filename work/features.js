@@ -57,6 +57,8 @@ $('#wm-wb').addEventListener('click', ()=>{
 });
 
 /* ================= v2: 词库卡片整卡可点 ================= */
+var learnLimit = 100;          // 词库列表分页步长（性能：避免一次性渲染全量 5600+ 卡片）
+var lastLearnQ = '';           // 记录上次查询，查询变化时重置分页（var：base init 先于本段执行，不能用 let 以免 TDZ）
 function renderLearnList(){
   const q = learnQuery.trim().toLowerCase();
   const list = learnPool().filter(w=>{
@@ -64,6 +66,7 @@ function renderLearnList(){
     return w.w.toLowerCase().includes(q) || w.c.includes(learnQuery.trim()) ||
       w.s.some(s=>s.toLowerCase().includes(q)) || w.e.toLowerCase().includes(q);
   });
+  if(lastLearnQ !== q){ lastLearnQ = q; learnLimit = 100; }
   const box = $('#learn-list');
   if(!list.length){
     const hasFilter = (typeof learnZone==='undefined' ? 'all' : learnZone)!=='all' || (typeof learnTopic==='undefined' ? 'all' : learnTopic)!=='all' || (typeof learnBook==='undefined' ? 'all' : learnBook)!=='all';
@@ -80,7 +83,8 @@ function renderLearnList(){
     if(bf) bf.addEventListener('click', ()=>{ learnZone='all'; learnTopic='all'; learnBook='all'; renderLearn(); });
     return;
   }
-  box.innerHTML = list.map(w=>{
+  const shown = list.slice(0, learnLimit);
+  box.innerHTML = shown.map(w=>{
     const syn = w.s.map(s=>'<button class="syn-chip'+(dictOf(s)?' linkable':'')+'" data-w="'+escapeHtml(s)+'" data-speak="'+escapeHtml(s)+'">'+escapeHtml(s)+(dictOf(s)?' 📖':'')+'</button>').join('');
     const m = isMastered(w.w) ? '<span class="done">✅ 已掌握</span>' : '';
     return '<div class="word-card clickable" data-w="'+escapeHtml(w.w)+'">'+
@@ -90,7 +94,12 @@ function renderLearnList(){
       '<p class="wc-ex">'+highlight(w.e, w.k)+'</p>'+
       '<div class="wc-meta"><span>'+topicName(w.t)+'</span>'+m+'<span class="wc-detail-hint">📖 点击卡片查看详情</span></div>'+
     '</div>';
-  }).join('');
+  }).join('') +
+    (list.length > learnLimit
+      ? '<div class="learn-more-bar"><button class="btn btn-ghost btn-sm" id="learn-more">加载更多（已显示 '+learnLimit+' / '+list.length+'）</button></div>'
+      : '');
+  const more = box.querySelector('#learn-more');
+  if(more) more.addEventListener('click', ()=>{ learnLimit += 100; renderLearnList(); });
 }
 $('#learn-list').addEventListener('click', e=>{
   const chip = e.target.closest('.syn-chip[data-w]');
@@ -394,6 +403,7 @@ learnPool = function(){
 };
 const _v4rl = renderLearn;
 renderLearn = function(){
+  learnLimit = 100;            // 筛选/主题/切换视图均重置分页
   _v4rl();
   const el = $('#learn-zones'); if(!el) return;
   el.innerHTML = zoneChips(learnZone);
@@ -638,6 +648,8 @@ renderSettings = function(){ _rsV8(); renderFeedbackPanel(); };
 /* ================= v10 M2: 词书系统 UI ================= */
 var learnBook='all', flashBook='all', pBook='all';
 var curBookId = null, curBookQuery = '';
+var bookLimit = 100;           // 词书详情列表分页步长
+var lastBookQ = '';            // 记录上次词书内查询，变化时重置分页
 function bookById(id){ return (typeof BOOKS==='undefined' || !Array.isArray(BOOKS)) ? null : BOOKS.find(b=>b.id===id) || null; }
 function bookName(id){ const b = bookById(id); return b ? b.name : String(id); }
 function bookWords(id){ return WORDS.filter(w=>(w.b||['default']).includes(id)); }
@@ -732,6 +744,7 @@ function openBookDetail(id){
   if(!b || !shelf || !detail) return;
   curBookId = id;
   curBookQuery = '';
+  bookLimit = 100; lastBookQ = '';
   shelf.classList.add('hidden');
   detail.classList.remove('hidden');
   const ws = bookWords(id);
@@ -765,16 +778,23 @@ function renderBookWordList(){
   const ws = bookWords(curBookId);
   if(!ws.length){ box.innerHTML = '<div class="empty">该词书将在后续版本接入</div>'; return; }
   const q = curBookQuery.trim().toLowerCase();
+  if(lastBookQ !== q){ lastBookQ = q; bookLimit = 100; }
   const list = q ? ws.filter(w=>w.w.toLowerCase().includes(q) || w.c.includes(curBookQuery.trim()) || w.s.some(s=>s.toLowerCase().includes(q)) || w.e.toLowerCase().includes(q)) : ws;
   if(!list.length){ box.innerHTML = '<div class="empty">没有找到与「<b>'+escapeHtml(curBookQuery.trim())+'</b>」匹配的单词</div>'; return; }
-  box.innerHTML = list.map(w=>{
+  const shown = list.slice(0, bookLimit);
+  box.innerHTML = shown.map(w=>{
     const syn = w.s.map(s=>'<button class="syn-chip'+(dictOf(s)?' linkable':'')+'" data-w="'+escapeHtml(s)+'" data-speak="'+escapeHtml(s)+'">'+escapeHtml(s)+(dictOf(s)?' 📖':'')+'</button>').join('');
     return '<div class="book-word-item" data-w="'+escapeHtml(w.w)+'">'+
       '<span class="bw-word">'+escapeHtml(w.w)+'</span>'+
       '<span class="bw-cn">'+escapeHtml(w.c)+'</span>'+
       '<span class="bw-syn">'+syn+'</span>'+
     '</div>';
-  }).join('');
+  }).join('') +
+    (list.length > bookLimit
+      ? '<div class="learn-more-bar"><button class="btn btn-ghost btn-sm" id="book-more">加载更多（已显示 '+bookLimit+' / '+list.length+'）</button></div>'
+      : '');
+  const more = box.querySelector('#book-more');
+  if(more) more.addEventListener('click', ()=>{ bookLimit += 100; renderBookWordList(); });
 }
 function startBookPractice(){
   if(!curBookId) return;
