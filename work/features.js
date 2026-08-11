@@ -23,9 +23,11 @@ function openWordDetail(word){
   let html = '';
   if(cn) html += '<div class="wm-sec"><div class="wm-sec-t">中文释义</div><div class="wm-cn">'+escapeHtml(cn)+'</div></div>';
   if(def) html += '<div class="wm-sec"><div class="wm-sec-t">英文释义</div><div class="wm-def">'+escapeHtml(def)+'</div></div>';
+  if(entry && (entry.rt||entry.af||entry.mn)) html += '<div class="wm-sec"><div class="wm-sec-t">🔤 词根词缀</div><div class="wm-root">'+(entry.rt?'<div class="wm-rt">'+escapeHtml(entry.rt)+'</div>':'')+(entry.af?'<div class="wm-af">'+escapeHtml(entry.af)+'</div>':'')+(entry.mn?'<div class="wm-mn">💡 '+escapeHtml(entry.mn)+'</div>':'')+'</div></div>';
   if(entry && entry.s.length) html += '<div class="wm-sec"><div class="wm-sec-t">同义替换（点击发音 · 📖 可看详情）</div><div class="wm-syns">'+synChips+'</div></div>';
   if(entry) html += '<div class="wm-sec"><div class="wm-sec-t">例句（听力语境）<button class="icon-btn wm-say" data-speak="'+escapeHtml(entry.e)+'" type="button">🔊 朗读</button></div><p class="wc-ex">'+highlight(entry.e, entry.k)+'</p></div>';
   if(entry) html += '<div class="wm-meta">'+topicName(entry.t)+lvBadge(entry)+masteryBadge(entry)+
+    (entry.rt?'<span class="wm-root-tag">🔤 '+escapeHtml(entry.rt)+'</span>':'')+
     '<div class="wm-books">'+(entry.b||['default']).map(bid=>'<button class="book-tag" data-book="'+escapeHtml(bid)+'">'+escapeHtml(bookName(bid))+'</button>').join('')+'</div></div>';
   $('#wm-body').innerHTML = html;
   const wbBtn = $('#wm-wb');
@@ -64,12 +66,13 @@ function renderLearnList(){
   const list = learnPool().filter(w=>{
     if(!q) return true;
     return w.w.toLowerCase().includes(q) || w.c.includes(learnQuery.trim()) ||
-      w.s.some(s=>s.toLowerCase().includes(q)) || w.e.toLowerCase().includes(q);
+      w.s.some(s=>s.toLowerCase().includes(q)) || w.e.toLowerCase().includes(q) ||
+      (w.rt||'').toLowerCase().includes(q) || (w.af||'').toLowerCase().includes(q);
   });
   if(lastLearnQ !== q){ lastLearnQ = q; learnLimit = 100; }
   const box = $('#learn-list');
   if(!list.length){
-    const hasFilter = (typeof learnZone==='undefined' ? 'all' : learnZone)!=='all' || (typeof learnTopic==='undefined' ? 'all' : learnTopic)!=='all' || (typeof learnBook==='undefined' ? 'all' : learnBook)!=='all' || (typeof learnLv==='undefined' ? 'all' : learnLv)!=='all';
+    const hasFilter = (typeof learnZone==='undefined' ? 'all' : learnZone)!=='all' || (typeof learnTopic==='undefined' ? 'all' : learnTopic)!=='all' || (typeof learnBook==='undefined' ? 'all' : learnBook)!=='all' || (typeof learnLv==='undefined' ? 'all' : learnLv)!=='all' || (typeof learnRoot==='undefined' ? 'all' : learnRoot)!=='all';
     if(q){
       box.innerHTML = '<div class="empty">没有找到与「<b>'+escapeHtml(learnQuery.trim())+'</b>」匹配的单词'+(hasFilter?'（当前还有专区 / 主题筛选）':'')+'<br><button class="btn btn-primary btn-sm empty-btn" id="learn-clear-search" type="button">✕ 清除搜索</button></div>';
     } else if(hasFilter){
@@ -80,7 +83,7 @@ function renderLearnList(){
     const bs = box.querySelector('#learn-clear-search');
     if(bs) bs.addEventListener('click', ()=>{ const inp=$('#learn-search'); if(inp) inp.value=''; learnQuery=''; renderLearnList(); });
     const bf = box.querySelector('#learn-clear-filter');
-    if(bf) bf.addEventListener('click', ()=>{ learnZone='all'; learnTopic='all'; learnBook='all'; learnLv='all'; renderLearn(); });
+    if(bf) bf.addEventListener('click', ()=>{ learnZone='all'; learnTopic='all'; learnBook='all'; learnLv='all'; learnRoot='all'; renderLearn(); });
     return;
   }
   const shown = list.slice(0, learnLimit);
@@ -351,7 +354,7 @@ function renderSettings(){
     const c1 = WORDS.filter(w=>w.lv==='1').length, c2 = WORDS.filter(w=>w.lv==='2').length, c3 = WORDS.filter(w=>w.lv==='3').length;
     let m1=0,m2=0,m3=0,m4=0,m5=0;
     WORDS.forEach(w=>{ const l=masteryLevel(w.w); if(l===5)m5++; else if(l===4)m4++; else if(l===3)m3++; else if(l===2)m2++; else m1++; });
-    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.1<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：艾宾浩斯遗忘曲线复习调度 + 统计页「遗忘曲线 / 学习热力图 / 复习看板」可视化<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
+    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.2<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🔤 词根词缀：学术词标词根+词缀+记忆提示（单词详情可看，词库可按词根筛词）<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：艾宾浩斯遗忘曲线复习调度 + 统计页「遗忘曲线 / 学习热力图 / 复习看板」可视化<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
   }
 }
 function applyPracticePrefs(){
@@ -707,6 +710,33 @@ renderLearn = function(){
   el.innerHTML = levelChips(learnLv);
   el.onclick = e=>{ const b=e.target.closest('[data-lv]'); if(b){ learnLv=b.dataset.lv; renderLearn(); } };
 };
+/* ---- v11.2 P3: 词根筛选 ---- */
+var learnRoot = 'all';
+var _rootCache = null;
+function rootChips(){
+  if(_rootCache) return _rootCache;
+  const cnt = {};
+  WORDS.forEach(w=>{ if(w.rt) cnt[w.rt] = (cnt[w.rt]||0)+1; });
+  _rootCache = Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  return _rootCache;
+}
+function rootChipsHtml(active){
+  const rows = [['all','🔤 全部',WORDS.filter(w=>w.rt).length]].concat(rootChips().map(x=>[x[0],'词根 '+x[0],x[1]]));
+  return rows.map(x=>'<button class="chip'+(active===x[0]?' on':'')+'" data-root="'+escapeHtml(x[0])+'">'+escapeHtml(x[1])+' <i>'+x[2]+'</i></button>').join('');
+}
+const _v11root_lp = learnPool;
+learnPool = function(){
+  let list = _v11root_lp();
+  if(learnRoot!=='all') list = list.filter(w=>w.rt===learnRoot);
+  return list;
+};
+const _v11root_rl = renderLearn;
+renderLearn = function(){
+  _v11root_rl();
+  const el = $('#learn-roots'); if(!el) return;
+  el.innerHTML = rootChipsHtml(learnRoot);
+  el.onclick = e=>{ const b=e.target.closest('[data-root]'); if(b){ learnRoot=b.dataset.root; renderLearn(); } };
+};
 const _v10rfs = renderFlashSetup;
 renderFlashSetup = function(){
   _v10rfs();
@@ -822,7 +852,7 @@ function renderBookWordList(){
   if(lastBookLv !== bookLv){ lastBookLv = bookLv; bookLimit = 100; }
   const lvEl = $('#book-levels');
   if(lvEl){ lvEl.innerHTML = levelChips(bookLv); lvEl.onclick = e=>{ const b=e.target.closest('[data-lv]'); if(b){ bookLv=b.dataset.lv; renderBookWordList(); } }; }
-  let list = q ? ws.filter(w=>w.w.toLowerCase().includes(q) || w.c.includes(curBookQuery.trim()) || w.s.some(s=>s.toLowerCase().includes(q)) || w.e.toLowerCase().includes(q)) : ws;
+  let list = q ? ws.filter(w=>w.w.toLowerCase().includes(q) || w.c.includes(curBookQuery.trim()) || w.s.some(s=>s.toLowerCase().includes(q)) || w.e.toLowerCase().includes(q) || (w.rt||'').toLowerCase().includes(q) || (w.af||'').toLowerCase().includes(q)) : ws;
   if(bookLv!=='all') list = list.filter(w=>String(w.lv)===bookLv);
   if(!list.length){ box.innerHTML = '<div class="empty">'+(bookLv!=='all' ? '该难度下没有单词' : '没有找到与「<b>'+escapeHtml(curBookQuery.trim())+'</b>」匹配的单词')+'</div>'; return; }
   const shown = list.slice(0, bookLimit);
@@ -896,6 +926,58 @@ function renderBookProgressPanel(){
 }
 const _v10rs = renderSettings;
 renderSettings = function(){ _v10rs(); renderBookSettings(); };
+/* ================= v11.2: 网站功能说明（设置页折叠栏，每次更新在此补充） ================= */
+var FEATURES = [
+  { cat:'📚 学习核心', items:[
+    {t:'词库', d:'全量雅思词汇，可按 专区/主题/词书/难度/词根 筛选；搜索支持单词/同义词/中文/词根'},
+    {t:'词书', d:'多本词书：内置词库/真题高频/听力拼写/雅思真经/学术词汇 AWL/Band9 高分表达/牛津基础/NAWL 学术新词/口语话题/剑桥18-20；每本可浏览/背诵/练习'},
+    {t:'闪卡', d:'看词想义，认识/不认识，快速过词'},
+    {t:'练习', d:'6 种题型：选择题/配对题/听力题/听写/看词选义/听音选义 + 背诵模式（顺序/乱序，错词自动重背）'}
+  ]},
+  { cat:'🧠 智能记忆', items:[
+    {t:'掌握度 5 级', d:'陌生/认识/模糊/掌握/熟练，由练习记录自动判定'},
+    {t:'艾宾浩斯复习', d:'答对按 1/3/7/15/30 天自动安排复习，首页「今日待复习」一键刷到期词；答错重置并计入错题本'},
+    {t:'遗忘曲线图', d:'统计页按你的复习间隔自动绘制记忆强度曲线'},
+    {t:'学习热力图', d:'统计页 12 周学习足迹，每天练习自动记录'},
+    {t:'错题本', d:'答错自动记录，统计页查看并一键重练'}
+  ]},
+  { cat:'🔤 词根词缀', items:[
+    {t:'词根拆解', d:'学术词标注 词根+词缀+记忆提示，单词详情点开即看'},
+    {t:'按词根筛词', d:'词库页「词根」筛选条 + 搜索直接匹配词根（如输 spect 出 inspect/respect…）'}
+  ]},
+  { cat:'⚙️ 个性化', items:[
+    {t:'每日目标与打卡', d:'可调每日目标；每天首次练习自动打卡，也可手动；连续打卡统计'},
+    {t:'发音', d:'英音/美音切换、语速调节；单词、例句整句朗读'},
+    {t:'外观', d:'浅色/深色/跟随系统 + 字号调节'}
+  ]},
+  { cat:'💾 数据', items:[
+    {t:'云端同步', d:'邮箱登录后进度自动云端同步，换设备不丢'},
+    {t:'备份与恢复', d:'一键导出/导入备份；可重置全部数据'}
+  ]},
+  { cat:'📣 反馈', items:[
+    {t:'反馈建议', d:'设置页反馈表单（留邮箱可收到回复）'}
+  ]}
+];
+var FEATURE_LOG = [
+  {v:'v11.2', t:'词根词缀记忆（词根拆解 + 按词根筛词）'},
+  {v:'v11.1', t:'遗忘曲线图 / 学习热力图 / 复习看板'},
+  {v:'v11.0', t:'智能记忆引擎（掌握度 / 艾宾浩斯调度 / 今日待复习 / 错题本 / 例句朗读）'},
+  {v:'v10.4', t:'单词难度分级 + 三批扩词'},
+  {v:'v10.3', t:'练习自动发音 / 首页更新内容 / 反馈可回复'},
+  {v:'v10.2', t:'SEO 优化（搜索收录）'},
+  {v:'v10.1', t:'词库/词书列表分页（打开不卡）'},
+  {v:'v10.0', t:'词书系统 / 背诵模式 / 哈希路由'},
+  {v:'v9.0', t:'首页改版学习中心 / 深色模式'}
+];
+function renderFeatureGuide(){
+  const body = $('#feature-guide-body'); if(!body) return;
+  const cats = FEATURES.map(c=>'<div class="fg-cat"><div class="fg-cat-t">'+escapeHtml(c.cat)+'</div>'+
+    c.items.map(it=>'<div class="fg-item"><span class="fg-it">'+escapeHtml(it.t)+'</span><span class="fg-id">'+escapeHtml(it.d)+'</span></div>').join('')+'</div>').join('');
+  const log = '<div class="fg-cat"><div class="fg-cat-t">📈 版本更新记录</div>'+FEATURE_LOG.map(l=>'<div class="fg-item"><span class="fg-it">'+escapeHtml(l.v)+'</span><span class="fg-id">'+escapeHtml(l.t)+'</span></div>').join('')+'</div>';
+  body.innerHTML = cats + log;
+}
+const _v112rs = renderSettings;
+renderSettings = function(){ _v112rs(); renderFeatureGuide(); };
 function renderBookSettings(){
   const sec = $('#view-settings');
   if(!sec) return;
@@ -1180,6 +1262,7 @@ applyRoute();
 
 /* ================= v10.3: 首页更新内容 ================= */
 var UPDATES = [
+  {d:'2026-08-11', v:'v11.2', t:'词根词缀记忆：学术词根标注 + 单词详情词根拆解 + 词库按词根筛词'},
   {d:'2026-08-11', v:'v11.1', t:'记忆可视化：统计页新增遗忘曲线图（按你的复习间隔自动绘制）+ 学习热力图 + 复习看板'},
   {d:'2026-08-11', v:'v11.0', t:'智能记忆引擎：掌握度 5 级分级 + 艾宾浩斯遗忘曲线复习调度 + 首页今日待复习 + 错题本 + 例句整句朗读'},
   {d:'2026-08-11', v:'v10.4', t:'新增单词难度分级（基础/进阶/高级），词库、词书、练习界面均可按难度筛选'},

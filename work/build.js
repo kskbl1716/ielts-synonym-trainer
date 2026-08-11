@@ -8,6 +8,7 @@ const { V7NEW } = require('./v7-words.js');
 const { V8NEW } = require('./v8-words.js');
 const { BOOKS } = require('./books.js');
 const { assignLv } = require('./lv-assign.js');
+const { ROOTDATA } = require('./rootdata.js');
 const V10LISTEN = [].concat(
   require('./v10-listening-a1.js').V10LIST_A1,
   require('./v10-listening-a2.js').V10LIST_A2,
@@ -183,6 +184,14 @@ console.log('CAMB tagged onto existing words:', cambTagged);
 /* 在词书 tagging 之后跑，使 awl/band9 锚点生效；不修改词源文件 */
 assignLv(all);
 
+/* ---------- 1.46 词根词缀（P3）：查表注入 rt/af/mn，缺省空串（可选字段） ---------- */
+all.forEach(w => {
+  const d = ROOTDATA[w.w];
+  w.rt = d ? d.rt : '';
+  w.af = d ? d.af : '';
+  w.mn = d ? d.mn : '';
+});
+
 /* ---------- 1.5 词书校验 ---------- */
 const bc = {};
 all.forEach(w => { w.b.forEach(id => { bc[id] = (bc[id]||0)+1; }); });
@@ -197,7 +206,7 @@ console.log('book counts:', JSON.stringify(bc));
 function jsStr(s){ return "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r/g, '').replace(/\n/g, '\\n') + "'"; }
 function entryStr(o){
   return '{t:' + jsStr(o.t) + ',w:' + jsStr(o.w) + ',s:[' + o.s.map(jsStr).join(',') + '],c:' + jsStr(o.c) +
-    ',e:' + jsStr(o.e) + ',k:' + jsStr(o.k) + ',p:' + jsStr(o.p) + ',pos:' + jsStr(o.pos) + ',d:' + jsStr(o.d) + ',z:' + jsStr(o.z) + ',lv:' + jsStr(String(o.lv)) + ',b:[' + o.b.map(jsStr).join(',') + ']}';
+    ',e:' + jsStr(o.e) + ',k:' + jsStr(o.k) + ',p:' + jsStr(o.p) + ',pos:' + jsStr(o.pos) + ',d:' + jsStr(o.d) + ',z:' + jsStr(o.z) + ',lv:' + jsStr(String(o.lv)) + ',rt:' + jsStr(o.rt||'') + ',af:' + jsStr(o.af||'') + ',mn:' + jsStr(o.mn||'') + ',b:[' + o.b.map(jsStr).join(',') + ']}';
 }
 const newBlock = 'const WORDS = [\n' + all.map(entryStr).join(',\n') + '\n];';
 html = html.replace(block, newBlock);

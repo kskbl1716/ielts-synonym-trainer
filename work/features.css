@@ -290,3 +290,26 @@ html[data-theme="dark"] .hm-cell{background:var(--card);border-color:var(--line)
 html[data-theme="dark"] .hm-cell.lv1{background:#24405f;border-color:#24405f}
 html[data-theme="dark"] .hm-cell.lv2{background:#3a5f96;border-color:#3a5f96}
 html[data-theme="dark"] .hm-cell.lv3{background:var(--primary);border-color:var(--primary)}
+/* ===== v11.2: 词根词缀 ===== */
+.wm-root{display:flex;flex-direction:column;gap:4px;font-size:13px}
+.wm-rt{font-weight:800;color:var(--primary);font-family:var(--serif);font-size:15px}
+.wm-af{color:var(--ink);font-size:13px}
+.wm-mn{font-size:12px;color:var(--amber);background:var(--amber-l);border-radius:8px;padding:6px 10px;margin-top:4px;line-height:1.6}
+.wm-root-tag{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;background:var(--primary-l);color:var(--primary);border:1px solid transparent;vertical-align:middle}
+html[data-theme="dark"] .wm-mn{background:#3a2e0a;color:#ffd966}
+html[data-theme="dark"] .wm-root-tag{background:#12283f;color:#9cc4ef}
+/* ===== v11.2: 网站功能说明（设置页折叠栏）+ 首页提示 ===== */
+.feature-guide summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--primary);list-style:none;display:flex;align-items:center;gap:6px}
+.feature-guide summary::-webkit-details-marker{display:none}
+.feature-guide summary::before{content:'▸';transition:transform .2s}
+.feature-guide[open] summary::before{transform:rotate(90deg)}
+.fg-hint{font-size:12px;color:var(--muted);font-weight:400}
+.feature-guide[open] .fg-body{margin-top:12px}
+.fg-cat{margin-bottom:14px}
+.fg-cat-t{font-weight:700;font-size:13px;color:var(--primary);margin-bottom:6px}
+.fg-item{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:13px;line-height:1.6}
+.fg-item:last-child{border-bottom:none}
+.fg-it{font-weight:700;color:var(--ink);min-width:88px;white-space:nowrap}
+.fg-id{color:var(--muted);flex:1}
+.home-hint{margin-top:18px;text-align:center;font-size:12px;color:var(--muted)}
+html[data-theme="dark"] .fg-item{border-bottom-color:var(--line)}
