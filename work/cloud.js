@@ -240,6 +240,7 @@
     });
     out.stats = st;
     out.wordbook = Array.from(new Set((base.wordbook || []).concat(local.wordbook || [])));
+    out.starred = Array.from(new Set((base.starred || []).concat(local.starred || [])));
     out.checkins = Array.from(new Set((base.checkins || []).concat(local.checkins || []))).sort();
     var lLast = local.lastDate || '', bLast = base.lastDate || '';
     if(lLast > bLast){

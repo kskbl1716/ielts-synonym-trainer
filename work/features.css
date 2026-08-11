@@ -316,6 +316,12 @@ html[data-theme="dark"] .fg-item{border-bottom-color:var(--line)}
 /* ===== v11.4: 近义词辨析 ===== */
 .wm-note{font-size:13px;color:var(--ink);background:var(--green-l);border:1px dashed var(--green);border-radius:10px;padding:9px 12px;line-height:1.7}
 html[data-theme="dark"] .wm-note{background:#0d2b1c;border-color:#1f4a33;color:#c9e9d8}
+/* ===== v11.5 P5: 星标 / 提醒 / 错题主题分析 ===== */
+.star-btn{font-size:16px;padding:3px;line-height:1}
+.star-btn.on{filter:drop-shadow(0 0 3px rgba(201,138,46,.7))}
+#set-remind-time{width:130px;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;background:var(--card);color:var(--ink)}
+.wrong-topic-tip{font-size:13px;color:var(--ink);background:var(--amber-l);border:1px dashed var(--amber);border-radius:10px;padding:9px 12px;margin-bottom:12px;line-height:1.7}
+html[data-theme="dark"] .wrong-topic-tip{background:#3a2e0a;color:#ffd966}
 
 /* ===== v11.3: 手机布局（html[data-layout="mobile"]，≤640px 自动或手动强制） ===== */
 html[data-layout="mobile"] .topbar{padding:12px 14px 10px}

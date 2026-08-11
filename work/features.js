@@ -34,6 +34,8 @@ function openWordDetail(word){
   const wbBtn = $('#wm-wb');
   wbBtn.dataset.w = w;
   wbBtn.textContent = state.wordbook.includes(w) ? '★ 已在生词本' : '☆ 加入生词本';
+  const stBtn = $('#wm-star');
+  if(stBtn){ stBtn.dataset.w = w; stBtn.textContent = isStarred(w) ? '⭐ 已收藏' : '☆ 收藏'; }
   $('#word-modal').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 }
@@ -58,6 +60,11 @@ $('#wm-wb').addEventListener('click', ()=>{
   saveState(); renderStats();
   $('#wm-wb').textContent = state.wordbook.includes(w) ? '★ 已在生词本' : '☆ 加入生词本';
 });
+$('#wm-star').addEventListener('click', ()=>{
+  const w = $('#wm-star').dataset.w; if(!w) return;
+  toggleStar(w);
+  $('#wm-star').textContent = isStarred(w) ? '⭐ 已收藏' : '☆ 收藏';
+});
 
 /* ================= v2: 词库卡片整卡可点 ================= */
 var learnLimit = 100;          // 词库列表分页步长（性能：避免一次性渲染全量 5600+ 卡片）
@@ -73,7 +80,7 @@ function renderLearnList(){
   if(lastLearnQ !== q){ lastLearnQ = q; learnLimit = 100; }
   const box = $('#learn-list');
   if(!list.length){
-    const hasFilter = (typeof learnZone==='undefined' ? 'all' : learnZone)!=='all' || (typeof learnTopic==='undefined' ? 'all' : learnTopic)!=='all' || (typeof learnBook==='undefined' ? 'all' : learnBook)!=='all' || (typeof learnLv==='undefined' ? 'all' : learnLv)!=='all' || (typeof learnRoot==='undefined' ? 'all' : learnRoot)!=='all';
+    const hasFilter = (typeof learnZone==='undefined' ? 'all' : learnZone)!=='all' || (typeof learnTopic==='undefined' ? 'all' : learnTopic)!=='all' || (typeof learnBook==='undefined' ? 'all' : learnBook)!=='all' || (typeof learnLv==='undefined' ? 'all' : learnLv)!=='all' || (typeof learnRoot==='undefined' ? 'all' : learnRoot)!=='all' || (typeof learnStar==='undefined' ? 'all' : learnStar)!=='all';
     if(q){
       box.innerHTML = '<div class="empty">没有找到与「<b>'+escapeHtml(learnQuery.trim())+'</b>」匹配的单词'+(hasFilter?'（当前还有专区 / 主题筛选）':'')+'<br><button class="btn btn-primary btn-sm empty-btn" id="learn-clear-search" type="button">✕ 清除搜索</button></div>';
     } else if(hasFilter){
@@ -84,7 +91,7 @@ function renderLearnList(){
     const bs = box.querySelector('#learn-clear-search');
     if(bs) bs.addEventListener('click', ()=>{ const inp=$('#learn-search'); if(inp) inp.value=''; learnQuery=''; renderLearnList(); });
     const bf = box.querySelector('#learn-clear-filter');
-    if(bf) bf.addEventListener('click', ()=>{ learnZone='all'; learnTopic='all'; learnBook='all'; learnLv='all'; learnRoot='all'; renderLearn(); });
+    if(bf) bf.addEventListener('click', ()=>{ learnZone='all'; learnTopic='all'; learnBook='all'; learnLv='all'; learnRoot='all'; learnStar='all'; renderLearn(); });
     return;
   }
   const shown = list.slice(0, learnLimit);
@@ -93,7 +100,7 @@ function renderLearnList(){
     const m = isMastered(w.w) ? '<span class="done">✅ 已掌握</span>' : '';
     return '<div class="word-card clickable" data-w="'+escapeHtml(w.w)+'">'+
       '<div class="wc-top"><div><div class="wc-word">'+escapeHtml(w.w)+'</div><div class="wc-cn">'+escapeHtml(w.c)+'</div></div>'+
-      '<button class="icon-btn" data-speak="'+escapeHtml(w.w)+'">🔊</button></div>'+
+      starBtn(w.w)+'<button class="icon-btn" data-speak="'+escapeHtml(w.w)+'">🔊</button></div>'+
       '<div class="wc-syn">'+syn+'</div>'+
       '<p class="wc-ex">'+highlight(w.e, w.k)+'</p>'+
       '<div class="wc-meta"><span>'+topicName(w.t)+'</span>'+lvBadge(w)+m+'<span class="wc-detail-hint">📖 点击卡片查看详情</span></div>'+
@@ -108,6 +115,8 @@ function renderLearnList(){
 $('#learn-list').addEventListener('click', e=>{
   const chip = e.target.closest('.syn-chip[data-w]');
   if(chip){ const cw=chip.dataset.w; if(dictOf(cw)){ openWordDetail(cw); } else { speak(cw); } return; }
+  const st = e.target.closest('[data-star]');
+  if(st){ toggleStar(st.dataset.star); return; }
   const sp = e.target.closest('[data-speak]');
   if(sp) return;
   const card = e.target.closest('.word-card[data-w]');
@@ -318,9 +327,26 @@ renderStats = function(){ _rsV3(); renderCheckinPanel(); };
 
 
 /* ================= v4: 设置 + 专区 + 新模式 ================= */
-function defaultSettings(){ return { voice:'auto', rate:0.85, theme:'light', font:'m', pCount:10, pDir:'forward', book:'all', pHint:'c', layout:'auto' }; }
+function defaultSettings(){ return { voice:'auto', rate:0.85, theme:'light', font:'m', pCount:10, pDir:'forward', book:'all', pHint:'c', layout:'auto', remindOn:false, remindTime:'20:00' }; }
 function sett(){ if(!state.settings || typeof state.settings!=='object') state.settings = defaultSettings(); return state.settings; }
-function saveSett(patch){ state.settings = Object.assign(sett(), patch||{}); saveState(); applyAppearance(); renderSettings(); }
+function saveSett(patch){ state.settings = Object.assign(sett(), patch||{}); saveState(); applyAppearance(); renderSettings(); scheduleReminder(); }
+/* v11.5 P5: 每日提醒（前台 Notification；页面打开时到点触发，浏览器会节流后台标签页定时器） */
+function scheduleReminder(){
+  if(scheduleReminder._t) clearTimeout(scheduleReminder._t);
+  if(!('Notification' in window)) return;
+  const s = sett();
+  if(!s.remindOn || Notification.permission !== 'granted') return;
+  const now = new Date();
+  const parts = String(s.remindTime || '20:00').split(':').map(Number);
+  const target = new Date(now); target.setHours(parts[0]||20, parts[1]||0, 0, 0);
+  if(target <= now) target.setDate(target.getDate() + 1);
+  scheduleReminder._t = setTimeout(()=>{
+    let due = 0;
+    try { due = (typeof dueWords==='function') ? dueWords().length : 0; } catch(e){}
+    try { new Notification('📚 每日复习提醒', { body: due ? '今天有 '+due+' 个词待复习，点开继续学习！' : '今日待复习已清空，继续保持！' }); } catch(e){}
+    scheduleReminder();
+  }, target - now);
+}
 function applyAppearance(){
   const s = sett();
   const root = document.documentElement;
@@ -361,13 +387,17 @@ function renderSettings(){
   if(ft) ft.innerHTML = [['xs','极小'],['s','小号'],['m','中号'],['l','大号'],['xl','超大']].map(o=>'<button class="chip'+(s.font===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
   const ly = $('#set-layout');
   if(ly) ly.innerHTML = [['auto','🔄 自动'],['mobile','📱 手机版'],['desktop','🖥️ 桌面版']].map(o=>'<button class="chip'+(s.layout===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
+  const rm = $('#set-remind');
+  if(rm) rm.innerHTML = [['on','🔔 开启'],['off','静音']].map(o=>'<button class="chip'+(((s.remindOn===true && o[0]==='on') || (s.remindOn!==true && o[0]==='off')) ? ' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('');
+  const rmt = $('#set-remind-time');
+  if(rmt) rmt.value = s.remindTime || '20:00';
   const ab = $('#set-about');
   if(ab){
     const zl = WORDS.filter(w=>w.z==='l').length, zw = WORDS.filter(w=>w.z==='w').length;
     const c1 = WORDS.filter(w=>w.lv==='1').length, c2 = WORDS.filter(w=>w.lv==='2').length, c3 = WORDS.filter(w=>w.lv==='3').length;
     let m1=0,m2=0,m3=0,m4=0,m5=0;
     WORDS.forEach(w=>{ const l=masteryLevel(w.w); if(l===5)m5++; else if(l===4)m4++; else if(l===3)m3++; else if(l===2)m2++; else m1++; });
-    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.4<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🔤 词根词缀：学术词标词根+词缀+记忆提示；🔀 近义词辨析：高频同义词用法区分（单词详情可看）<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：艾宾浩斯遗忘曲线复习调度 + 统计页「遗忘曲线 / 学习热力图 / 复习看板」可视化<br>📱 手机适配：手机自动切换手机版布局，也可在「外观」手动选 手机版/桌面版<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
+    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.5<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🔤 词根词缀：学术词标词根+词缀+记忆提示；🔀 近义词辨析：高频同义词用法区分（单词详情可看）<br>⭐ 星标收藏 + 🔔 每日提醒（设置里开启）+ 🎯 错题主题分析<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：艾宾浩斯遗忘曲线复习调度 + 统计页「遗忘曲线 / 学习热力图 / 复习看板」可视化<br>📱 手机适配：手机自动切换手机版布局，也可在「外观」手动选 手机版/桌面版<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
   }
 }
 function applyPracticePrefs(){
@@ -390,6 +420,13 @@ function bindSettingsEvents(){
   on('#set-theme', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({theme:b.dataset.v}); });
   on('#set-font', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({font:b.dataset.v}); });
   on('#set-layout', e=>{ const b=e.target.closest('[data-v]'); if(b) saveSett({layout:b.dataset.v}); });
+  on('#set-remind', e=>{ const b=e.target.closest('[data-v]'); if(!b) return;
+    if(b.dataset.v==='on'){
+      if(!('Notification' in window)){ toast('当前浏览器不支持通知'); return; }
+      Notification.requestPermission().then(p=>{ if(p==='granted'){ saveSett({remindOn:true}); toast('🔔 已开启每日提醒'); } else { toast('通知被拒绝，请在浏览器设置里允许'); } });
+    } else { saveSett({remindOn:false}); }
+  });
+  const rmt = $('#set-remind-time'); if(rmt) rmt.addEventListener('change', ()=>{ if(rmt.value) saveSett({remindTime:rmt.value}); });
   on('#set-export', ()=>{ if(typeof exportProgress==='function') exportProgress(); });
   on('#set-import-btn', ()=>{ const f=$('#set-import-file'); if(f) f.click(); });
   const imp = $('#set-import-file');
@@ -751,6 +788,34 @@ renderLearn = function(){
   el.innerHTML = rootChipsHtml(learnRoot);
   el.onclick = e=>{ const b=e.target.closest('[data-root]'); if(b){ learnRoot=b.dataset.root; renderLearn(); } };
 };
+/* ---- v11.5 P5: 单词星标 ---- */
+var learnStar = 'all';
+function starredStore(){ if(!Array.isArray(state.starred)) state.starred = []; return state.starred; }
+function isStarred(w){ return starredStore().includes(w); }
+function starBtn(w){ const on = isStarred(w); return '<button class="icon-btn star-btn'+(on?' on':'')+'" data-star="'+escapeHtml(w)+'" title="'+(on?'取消收藏':'收藏')+'">'+(on?'⭐':'☆')+'</button>'; }
+function toggleStar(w){
+  const s = starredStore();
+  if(s.includes(w)){ s.splice(s.indexOf(w),1); toast('已取消收藏'); }
+  else { s.push(w); toast('⭐ 已收藏'); }
+  saveState(); renderLearnList();
+}
+function starChipsHtml(active){
+  return [['all','📚 全部',WORDS.length],['on','⭐ 已收藏',starredStore().length]].map(x=>
+    '<button class="chip'+(active===x[0]?' on':'')+'" data-star-f="'+x[0]+'">'+x[1]+' <i>'+x[2]+'</i></button>').join('');
+}
+const _v11star_lp = learnPool;
+learnPool = function(){
+  let list = _v11star_lp();
+  if(learnStar==='on') list = list.filter(w=>isStarred(w.w));
+  return list;
+};
+const _v11star_rl = renderLearn;
+renderLearn = function(){
+  _v11star_rl();
+  const el = $('#learn-stars'); if(!el) return;
+  el.innerHTML = starChipsHtml(learnStar);
+  el.onclick = e=>{ const b=e.target.closest('[data-star-f]'); if(b){ learnStar=b.dataset.starF; renderLearn(); } };
+};
 const _v10rfs = renderFlashSetup;
 renderFlashSetup = function(){
   _v10rfs();
@@ -953,7 +1018,7 @@ var FEATURES = [
     {t:'艾宾浩斯复习', d:'答对按 1/3/7/15/30 天自动安排复习，首页「今日待复习」一键刷到期词；答错重置并计入错题本'},
     {t:'遗忘曲线图', d:'统计页按你的复习间隔自动绘制记忆强度曲线'},
     {t:'学习热力图', d:'统计页 12 周学习足迹，每天练习自动记录'},
-    {t:'错题本', d:'答错自动记录，统计页查看并一键重练'}
+    {t:'错题本', d:'答错自动记录，统计页查看并一键重练；「错题主题分析」看你的薄弱主题并推荐词书'}
   ]},
   { cat:'🔤 词根词缀 · 🔀 近义词辨析', items:[
     {t:'词根拆解', d:'学术词标注 词根+词缀+记忆提示，单词详情点开即看'},
@@ -962,6 +1027,8 @@ var FEATURES = [
   ]},
   { cat:'⚙️ 个性化', items:[
     {t:'每日目标与打卡', d:'可调每日目标；每天首次练习自动打卡，也可手动；连续打卡统计'},
+    {t:'星标收藏', d:'单词卡片/详情点 ⭐ 收藏，词库可按「⭐ 已收藏」筛选'},
+    {t:'每日提醒', d:'设置里开启后，到点浏览器通知提醒复习当天到期单词'},
     {t:'发音', d:'英音/美音切换、语速调节；单词、例句整句朗读'},
     {t:'外观', d:'浅色/深色/跟随系统 + 字号调节（5 档）+ 布局（手机自动切换手机版，可手动强制）'}
   ]},
@@ -974,6 +1041,7 @@ var FEATURES = [
   ]}
 ];
 var FEATURE_LOG = [
+  {v:'v11.5', t:'增强：单词星标 / 每日提醒 / 错题主题分析'},
   {v:'v11.4', t:'扩词：写作图表词 / 口语Part2专题 / 学术短语动词 词书 + 近义词辨析'},
   {v:'v11.3', t:'手机布局优化（自动/手动切换）'},
   {v:'v11.2', t:'词根词缀记忆（词根拆解 + 按词根筛词）'},
@@ -1279,6 +1347,7 @@ applyRoute();
 
 /* ================= v10.3: 首页更新内容 ================= */
 var UPDATES = [
+  {d:'2026-08-11', v:'v11.5', t:'增强：单词星标收藏（词库按⭐筛选）+ 每日提醒（浏览器通知）+ 错题主题分析（统计页看薄弱主题）'},
   {d:'2026-08-11', v:'v11.4', t:'扩词：写作图表词 / 口语Part2专题 / 学术短语动词 三本新词书 + 近义词辨析（单词详情可看用法区分）'},
   {d:'2026-08-11', v:'v11.3', t:'手机布局优化：手机自动切换手机版（导航/筛选单行滑动、紧凑排版），设置可手动选 手机版/桌面版'},
   {d:'2026-08-11', v:'v11.2', t:'词根词缀记忆：学术词根标注 + 单词详情词根拆解 + 词库按词根筛词'},
@@ -1533,3 +1602,39 @@ function renderActivityHeatmap(){
 }
 const _v112stats = renderStats;
 renderStats = function(){ _v112stats(); renderMemoryPanel(); renderActivityHeatmap(); };
+
+/* ================= v11.5 P5: 增强 ================= */
+/* 错题主题分析（按 TOPICS 统计错题 + 建议薄弱主题词书） */
+function wrongTopicPanel(){
+  const sec = $('#view-stats'); if(!sec) return;
+  let panel = $('#wrong-topic-panel');
+  if(!panel){ panel = document.createElement('div'); panel.className = 'panel'; panel.id = 'wrong-topic-panel'; sec.appendChild(panel); }
+  const nb = notebookStore();
+  const words = wrongWords();
+  if(!words.length){
+    panel.innerHTML = '<h3>🎯 错题主题分析 <span style="font-weight:400;color:var(--muted)">（按主题看你的薄弱点）</span></h3><div class="empty">还没有错题记录，去练习一下吧</div>';
+    return;
+  }
+  /* 按主题统计错题数 */
+  const byTopic = {};
+  words.forEach(w=>{ const e = WORDS.find(x=>x.w===w); if(!e) return; const t = e.t || 'core'; byTopic[t] = (byTopic[t]||0) + (nb[w].count||1); });
+  const total = words.reduce((a,w)=>a+(nb[w].count||1),0);
+  const rows = TOPICS.filter(t=>byTopic[t.id]).sort((a,b)=>byTopic[b.id]-byTopic[a.id]);
+  if(!rows.length){ panel.innerHTML = '<h3>🎯 错题主题分析</h3><div class="empty">暂无主题数据</div>'; return; }
+  const weakest = rows[0];
+  const bookMap = { env:'camb（环境/剑桥）', academic:'nawl（学术）', core:'default（内置）', health:'zhenjing', travel:'camb', work:'spoken', edu:'awl', shopping:'part2', living:'spoken', feelings:'band9' };
+  const suggest = bookMap[weakest.id] || 'default（内置词库）';
+  const bars = rows.map(t=>{
+    const n = byTopic[t.id];
+    const pct = Math.round(n/total*100);
+    return '<div class="topic-bar"><span class="tn">'+escapeHtml(t.icon)+' '+escapeHtml(t.name)+'</span>'+
+      '<div class="track"><div class="fill" style="width:'+pct+'%"></div></div>'+
+      '<span class="pct">'+n+' 次</span></div>';
+  }).join('');
+  panel.innerHTML = '<h3>🎯 错题主题分析 <span style="font-weight:400;color:var(--muted)">（'+total+' 次错题）</span></h3>'+
+    '<div class="wrong-topic-tip">💡 最薄弱主题：<b>'+escapeHtml(weakest.name)+'</b> — 推荐刷「<b>'+escapeHtml(suggest)+'</b>」巩固</div>'+
+    '<div class="topic-progress">'+bars+'</div>';
+}
+const _v11star_stats = renderStats;
+renderStats = function(){ _v11star_stats(); wrongTopicPanel(); };
+scheduleReminder(); // 初始化：页面加载时若有提醒设置则重新武装
