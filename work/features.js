@@ -345,7 +345,7 @@ function renderSettings(){
   const ab = $('#set-about');
   if(ab){
     const zl = WORDS.filter(w=>w.z==='l').length, zw = WORDS.filter(w=>w.z==='w').length;
-    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v10.2<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
+    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v10.3<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
   }
 }
 function applyPracticePrefs(){
@@ -511,6 +511,7 @@ function renderW2C(q){
       '<div class="next-row hidden" id="next-row"><button class="btn btn-primary btn-sm" id="next-btn">下一题 →</button></div>'+
     '</div>';
   $('#speak-word').addEventListener('click', ()=>speak(q.w));
+  setTimeout(()=>speak(q.w), 400);   // 看词选义：显示单词后自动发音
   bindOptionClicks();
   $('#next-btn').addEventListener('click', nextQuestion);
 }
@@ -1136,3 +1137,23 @@ $$('.tab').forEach(tab=>{
 });
 window.addEventListener('hashchange', applyRoute);
 applyRoute();
+
+/* ================= v10.3: 首页更新内容 ================= */
+var UPDATES = [
+  {d:'2026-08-11', v:'v10.3', t:'练习自动发音（看词/选择题自动朗读、配对点卡即念）；首页新增「更新内容」'},
+  {d:'2026-08-11', v:'v10.2', t:'词库/词书列表分页优化，打开不再卡顿；反馈支持直接回复；SEO 优化'},
+  {d:'2026-08-08', v:'v10.0', t:'词库扩至 5622 词、7 本词书；新增背诵模式、词书系统、哈希路由'},
+  {d:'2026-08-07', v:'v9.0', t:'首页改版为学习中心；配色系统升级、深色模式优化'}
+];
+function renderHomeUpdates(){
+  var el = $('#home-updates');
+  if(!el) return;
+  el.innerHTML = UPDATES.map(u=>
+    '<div class="upd-item"><span class="upd-v">'+escapeHtml(u.v)+'</span>'+
+    '<span class="upd-d">'+escapeHtml(u.d)+'</span>'+
+    '<span class="upd-t">'+escapeHtml(u.t)+'</span></div>'
+  ).join('');
+}
+const _v10up = renderHome;
+renderHome = function(){ _v10up(); renderHomeUpdates(); };
+renderHomeUpdates(); // 首页是默认视图，features 加载时立即渲染一次更新内容
