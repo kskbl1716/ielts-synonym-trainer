@@ -12,7 +12,7 @@
 - 主：https://kskbl1716.github.io/ielts-synonym-trainer/（国内可用）
 - 备：https://ielts-trainer-liard.vercel.app/（海外/香港节点，国内网络可能超时属正常）
 - 仓库：https://github.com/kskbl1716/ielts-synonym-trainer.git（默认分支 main）
-- 当前线上状态：**v10.3 已推送上线**（2026-08-11）：词库 **5622 词**（听力 4109 / 书写 1513）；7 本词书全部接入：default 2274 / listening 821 / jianqiao 450 / zhenjing 938 / awl 570（78 新 + 492 标记）/ band9 102（61 新 + 41 标记）/ oxford 1000；v10.0 词书系统/背诵模式/哈希路由、v10.1 词库分页渲染、v10.2 SEO 优化、v10.3 练习自动发音/首页更新内容/反馈可回复/百度统计均上线
+- 当前线上状态：**v10.4 已推送上线**（2026-08-11）：词库 **6141 词**（听力 4181 / 书写 1960）；**10 本词书**全部接入：default 2274 / listening 821 / jianqiao 450 / zhenjing 938 / awl 570 / band9 102 / oxford 1000 / **nawl 950**（NAWL 963 学术词：431 新增 + 519 标记）/ **spoken 227**（口语话题：32 新增 + 195 标记）/ **camb 200**（剑桥 18-20：56 新增 + 144 标记）；**新增单词难度分级**（lv 基础/进阶/高级，build 时用词频表自动打标，词库/词书/练习/闪卡均可筛选）；v10.0 词书系统/背诵模式/哈希路由、v10.1 词库分页渲染、v10.2 SEO 优化、v10.3 练习自动发音/首页更新内容/反馈可回复/百度统计均上线
 - 下一步：见 `V10-PLAN.md`（状态已更新为「功能与词书全部完成，已推送上线」）；发布/回滚资料见 `V9-RELEASE.md`、`V9-PLAN.md`
 
 ## 维护纪律（2026-08-11 定，务必遵守）
@@ -83,7 +83,8 @@ Copy-Item outputs\index.html index.html -Force
 - ⚠️ **HTML/CSS/JS 源码文件绝不能带 BOM**：v9 曾因模板 `outputs/index.html` 的 CSS_MARK 行首混入 U+FEFF，注入的 features.css 第一条规则 `.modal-mask` 选择器被污染成「不存在元素+后代选择器」整条失效，导致详情弹窗失去 fixed 定位/遮罩/居中（手机端卡住、电脑端显示不全）。build.js 已加防御（读取 features.css 时剥掉开头 BOM），但写 `outputs/index.html` 时仍要用无 BOM 的 UTF-8 写入。
 
 ## 版本记录
-- v10.3（2026-08-11，已推送）：练习自动发音（看词选义/选择题显示单词自动朗读、配对题点卡即念，按用户反馈）；首页顶部新增「📣 最近更新」横条（只显示最近 2 条，数据在 features.js `UPDATES` 数组，更新时加顶部一条）；反馈表单支持直接回复（联系方式填邮箱设 `_replyto`）+ 登录用户自动附带账号邮箱；接入百度统计（tongji hm.js）；页面版本号 v10.2→v10.3。⚠️ 惯例：**每次版本更新都要同步更新本版本记录 + features.js `UPDATES` 数组 + DEPLOY.md 当前状态**。
+- v10.4（2026-08-11，大更新）：**单词难度分级**：新增 `lv` 字段（1基础/2进阶/3高级），build 时用公开词频表（`work/lv/freq-en.txt`，hermitdave/FrequencyWords，**仅本地不进推送清单**）自动打标，规则=awl/band9 词书→高级 → 词频榜 ≤2500 基础/2501-9000 进阶/>9000或缺失 高级 → 多词短语缺失→进阶 → `work/lv-overrides.js` 人工微调兜底；词库/词书详情/练习/闪卡新增难度筛选（`learnLv/bookLv/pLv/flashLv` + `levelChips()`，复用 zone/book 模式），词卡片/词书列表/详情弹窗加 lv 彩色徽章（features.css `.lv-badge`）；分级分布 基础1447/进阶1942/高级2752。**三批扩词**（5622→**6141**）：① NAWL 学术 963 词书 `nawl`（Browne, Culligan & Phillips 公开词表，431 新增分 4 批 v10-nawl-a1..a4 + 519 build 期标记，validate-v10-nawl.js 0 错）；② 口语话题词书 `spoken`（12 大口语话题汇编，32 新增 v10-spoken-add.js + 195 标记）；③ 剑桥 18-20 话题词书 `camb`（按剑桥 18/19/20 高频话题知识库汇编，**非抓取原文**，56 新增 v10-camb-add.js + 144 标记）。页面版本号 v10.3→v10.4；check-site.js 词数断言 5622→6141。⚠️ 惯例：**每次版本更新都要同步更新本版本记录 + features.js `UPDATES` 数组 + DEPLOY.md 当前状态**。
+- v10.3（2026-08-11，已推送）：练习自动发音（看词选义/选择题显示单词自动朗读、配对题点卡即念，按用户反馈）；首页顶部新增「📣 最近更新」横条（只显示最近 2 条，数据在 features.js `UPDATES` 数组，更新时加顶部一条）；反馈表单支持直接回复（联系方式填邮箱设 `_replyto`）+ 登录用户自动附带账号邮箱；接入百度统计（tongji hm.js）；页面版本号 v10.2→v10.3。
   - 非版本更新（不升版本号、不进 UPDATES，仅记日志）：顶部常驻反馈提示条（「欢迎大家到设置里反馈…」）。⚠️ 推送协议（2026-08-11 起）：**除重大更新（大功能/风险改动/涉及数据）需先确认外，小版本更新可直接推送**。
 - v10.2 SEO 优化（2026-08-11，已推送）：head 加 canonical / OG / Twitter / JSON-LD（WebApplication 教育类目/免费） / keywords meta，title/description 融入关键词；新增 `robots.txt` + `sitemap.xml`（仓库根，已入推送清单）；页面版本号 v10.1→v10.2。定位国内百度/必应为主（Google 被墙）；注：百度对 github.io 收录不稳属平台限制，真冲国内排名需自定义域名 + ICP 备案。
 - v10.1 性能修复：**分页渲染**（2026-08-11，已推送）：词库列表/词书详情列表首屏只渲染 100 条 + 「加载更多」按钮（查询/筛选变化自动重置分页；用 var 避免 base init 先于 features 声明导致的 let TDZ 崩溃）。实测 renderLearn 961ms→6ms、单键搜索 412ms→9ms、DOM 节点 8.3万→1.5千；e2e-v7 + v10-m2/m3/m4/m5a-i 共 13 套全绿 + 截图。

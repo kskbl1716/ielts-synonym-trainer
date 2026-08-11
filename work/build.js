@@ -7,6 +7,7 @@ const { V6NEW } = require('./v6-words.js');
 const { V7NEW } = require('./v7-words.js');
 const { V8NEW } = require('./v8-words.js');
 const { BOOKS } = require('./books.js');
+const { assignLv } = require('./lv-assign.js');
 const V10LISTEN = [].concat(
   require('./v10-listening-a1.js').V10LIST_A1,
   require('./v10-listening-a2.js').V10LIST_A2,
@@ -47,6 +48,17 @@ const { V10AWL } = require('./v10-awl-f1.js');
 const { AWL_WORDS } = require('./v10-awl-words.js');
 const { V10B9 } = require('./v10-band9-h1.js');
 const { BAND9_WORDS } = require('./v10-band9-words.js');
+const V10NAWL = [].concat(
+  require('./v10-nawl-a1.js').V10NAWL_A1,
+  require('./v10-nawl-a2.js').V10NAWL_A2,
+  require('./v10-nawl-a3.js').V10NAWL_A3,
+  require('./v10-nawl-a4.js').V10NAWL_A4
+);
+const { NAWL_WORDS } = require('./v10-nawl-words.js');
+const { V10SPOKEN_ADD } = require('./v10-spoken-add.js');
+const { SPOKEN_WORDS } = require('./v10-spoken-words.js');
+const { V10CAMB_ADD } = require('./v10-camb-add.js');
+const { CAMB_WORDS } = require('./v10-camb-words.js');
 const V10OX = [].concat(
   require('./v10-oxford-j1.js').V10OX_J1,
   require('./v10-oxford-j2.js').V10OX_J2,
@@ -126,7 +138,7 @@ const existing = entries.map(l => {
   if (K_FIX[obj.w]) obj.k = K_FIX[obj.w];
   return obj;
 });
-const all = existing.concat(NEW.map(w => Object.assign({}, w, { z: w.z || 'l' }))).concat(V4NEW).concat(V5NEW).concat(V6NEW).concat(V7NEW).concat(V8NEW).concat(V10LISTEN).concat(V10JQ).concat(V10ZJ).concat(V10AWL).concat(V10B9).concat(V10OX);
+const all = existing.concat(NEW.map(w => Object.assign({}, w, { z: w.z || 'l' }))).concat(V4NEW).concat(V5NEW).concat(V6NEW).concat(V7NEW).concat(V8NEW).concat(V10LISTEN).concat(V10JQ).concat(V10ZJ).concat(V10AWL).concat(V10B9).concat(V10OX).concat(V10NAWL).concat(V10SPOKEN_ADD).concat(V10CAMB_ADD);
 const seen = new Set();
 all.forEach(w => {
   if (seen.has(w.w)) throw new Error('duplicate word: ' + w.w);
@@ -151,6 +163,25 @@ const band9Set = new Set(BAND9_WORDS);
 let band9Tagged = 0;
 all.forEach(w => { if (band9Set.has(w.w) && !w.b.includes('band9')){ w.b.push('band9'); band9Tagged++; } });
 console.log('band9 tagged onto existing words:', band9Tagged);
+/* NAWL 963 词表中已在词库的词补 b:['nawl']，使 nawl 词书 = 完整 963 学术词 */
+const nawlSet = new Set(NAWL_WORDS);
+let nawlTagged = 0;
+all.forEach(w => { if (nawlSet.has(w.w) && !w.b.includes('nawl')){ w.b.push('nawl'); nawlTagged++; } });
+console.log('NAWL tagged onto existing words:', nawlTagged);
+/* 口语话题词表中已在词库的词补 b:['spoken'] */
+const spokenSet = new Set(SPOKEN_WORDS);
+let spokenTagged = 0;
+all.forEach(w => { if (spokenSet.has(w.w) && !w.b.includes('spoken')){ w.b.push('spoken'); spokenTagged++; } });
+console.log('SPOKEN tagged onto existing words:', spokenTagged);
+/* 剑桥 18-20 话题词表中已在词库的词补 b:['camb'] */
+const cambSet = new Set(CAMB_WORDS);
+let cambTagged = 0;
+all.forEach(w => { if (cambSet.has(w.w) && !w.b.includes('camb')){ w.b.push('camb'); cambTagged++; } });
+console.log('CAMB tagged onto existing words:', cambTagged);
+
+/* ---------- 1.45 难度自动分级（lv：1基础 2进阶 3高级） ---------- */
+/* 在词书 tagging 之后跑，使 awl/band9 锚点生效；不修改词源文件 */
+assignLv(all);
 
 /* ---------- 1.5 词书校验 ---------- */
 const bc = {};
@@ -166,7 +197,7 @@ console.log('book counts:', JSON.stringify(bc));
 function jsStr(s){ return "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r/g, '').replace(/\n/g, '\\n') + "'"; }
 function entryStr(o){
   return '{t:' + jsStr(o.t) + ',w:' + jsStr(o.w) + ',s:[' + o.s.map(jsStr).join(',') + '],c:' + jsStr(o.c) +
-    ',e:' + jsStr(o.e) + ',k:' + jsStr(o.k) + ',p:' + jsStr(o.p) + ',pos:' + jsStr(o.pos) + ',d:' + jsStr(o.d) + ',z:' + jsStr(o.z) + ',b:[' + o.b.map(jsStr).join(',') + ']}';
+    ',e:' + jsStr(o.e) + ',k:' + jsStr(o.k) + ',p:' + jsStr(o.p) + ',pos:' + jsStr(o.pos) + ',d:' + jsStr(o.d) + ',z:' + jsStr(o.z) + ',lv:' + jsStr(String(o.lv)) + ',b:[' + o.b.map(jsStr).join(',') + ']}';
 }
 const newBlock = 'const WORDS = [\n' + all.map(entryStr).join(',\n') + '\n];';
 html = html.replace(block, newBlock);

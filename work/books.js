@@ -10,6 +10,9 @@ const BOOKS = [
   {id:'zhenjing',  name:'雅思真经',     desc:'雅思真经核心词汇',        icon:'📗', zone:'both', source:'hefengxian/ielts-vocabulary',      license:'MIT',            words:938},
   {id:'awl',       name:'学术词汇 AWL', desc:'学术词汇表（Coxhead）',   icon:'🎓', zone:'both', source:'Coxhead，惠灵顿维多利亚大学',      license:'开放教育免费使用', words:570},
   {id:'band9',     name:'Band 9 高分表达', desc:'高分替换表达',         icon:'🏅', zone:'both', source:'learning-zone/ielts-materials',    license:'MIT',            words:102},
-  {id:'oxford',    name:'牛津基础词',   desc:'牛津 3000 基础词（非商用）', icon:'🇬🇧', zone:'both', source:'OUP Oxford 3000',                 license:'需署名 + 非商用', words:1000}
+  {id:'oxford',    name:'牛津基础词',   desc:'牛津 3000 基础词（非商用）', icon:'🇬🇧', zone:'both', source:'OUP Oxford 3000',                 license:'需署名 + 非商用', words:1000},
+  {id:'nawl',      name:'NAWL 学术新词', desc:'非 AWL 的高频学术词',        icon:'🔬', zone:'both', source:'NAWL（Browne, Culligan & Phillips, newgeneralservicelist.org）', license:'开放学术词表（需署名）', words:950},
+  {id:'spoken',    name:'口语话题词',     desc:'雅思口语 Part1-3 话题词汇',  icon:'🗣️', zone:'l',    source:'本工具链按雅思口语高频话题汇编',   license:'自有',           words:227},
+  {id:'camb',      name:'剑桥18-20话题词', desc:'剑桥 18-20 真题高频话题词',  icon:'📕', zone:'both', source:'本工具链按剑桥 18-20 高频话题汇编（非抓取原文）', license:'自有', words:200}
 ];
 module.exports = { BOOKS };

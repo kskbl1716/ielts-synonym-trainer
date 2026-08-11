@@ -39,7 +39,7 @@ const get = (url, headers) => new Promise((res) => {
   /* 词数：数 WORDS 数组条目（原始 HTML 里是内联 JS，渲染数字不在源码中） */
   const ws = home.body.match(/const WORDS = \[([\s\S]*?)\n\];/);
   const wordCount = ws ? (ws[1].match(/\{t:'/g) || []).length : 0;
-  T('词库 WORDS 计数', wordCount === 5622, 'count=' + wordCount);
+  T('词库 WORDS 计数', wordCount === 6141, 'count=' + wordCount);
 
   /* 2. 静态文件 */
   const robots = await get(SITE + 'robots.txt');

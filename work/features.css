@@ -224,3 +224,11 @@ html[data-theme="dark"] .announce-bar{background:var(--card-2);border-color:var(
 .upd-t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px}
 html[data-theme="dark"] .updates-bar{background:var(--card);border-color:var(--line)}
 html[data-theme="dark"] .upd-item{background:var(--card-2);border-color:var(--line)}
+/* ===== v10.4: 难度分级徽章（基础/进阶/高级） ===== */
+.lv-badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;line-height:1.7;border:1px solid transparent;white-space:nowrap;vertical-align:middle}
+.lv-badge.lv-1{color:#0a7d4f;background:#e5f6ec;border-color:#bfe8d2}
+.lv-badge.lv-2{color:#8a6100;background:#fdf3d7;border-color:#f0dfae}
+.lv-badge.lv-3{color:#b02a2a;background:#fdeceb;border-color:#f4c9c6}
+html[data-theme="dark"] .lv-badge.lv-1{color:#7ee2a8;background:#0d2b1c;border-color:#1f4a33}
+html[data-theme="dark"] .lv-badge.lv-2{color:#ffd966;background:#3a2e0a;border-color:#5c4a14}
+html[data-theme="dark"] .lv-badge.lv-3{color:#ff8a8a;background:#3a1212;border-color:#5c2020}
