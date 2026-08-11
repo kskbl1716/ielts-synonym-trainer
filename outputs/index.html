@@ -3,8 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>雅思同义替换训练营（听力 · 书写）</title>
-<meta name="description" content="训练雅思听力同义替换词：词库、闪卡、选择题、配对题、听力题，本地保存进度。">
+<title>雅思同义替换训练营 · 雅思听力写作词汇学习网站（免费）</title>
+<meta name="description" content="免费雅思学习网站：5622 个雅思听力与写作同义替换词，7 本词书，闪卡、听写、选择题、配对题、背诵模式，无需注册即可使用。">
+<meta name="robots" content="index,follow">
+<meta name="keywords" content="雅思学习,雅思词汇,雅思同义词,同义替换,雅思听力,雅思写作,雅思机经,免费雅思,英语学习,IELTS,synonym,IELTS vocabulary">
+<link rel="canonical" href="https://kskbl1716.github.io/ielts-synonym-trainer/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="雅思同义替换训练营">
+<meta property="og:title" content="雅思同义替换训练营 · 雅思听力写作词汇学习网站">
+<meta property="og:description" content="免费雅思学习网站：5622 个雅思同义替换词，7 本词书，闪卡、听写、选择题、配对题、背诵模式。">
+<meta property="og:url" content="https://kskbl1716.github.io/ielts-synonym-trainer/">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="雅思同义替换训练营 · 雅思听力写作词汇学习网站">
+<meta name="twitter:description" content="免费雅思学习网站：5622 个雅思同义替换词，7 本词书，闪卡、听写、选择题、配对题、背诵模式。">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "雅思同义替换训练营",
+  "alternateName": "IELTS Synonym Trainer",
+  "url": "https://kskbl1716.github.io/ielts-synonym-trainer/",
+  "description": "免费雅思学习网站：5622 个雅思听力与写作同义替换词，7 本词书，闪卡、听写、选择题、配对题、背诵模式。",
+  "inLanguage": "zh-CN",
+  "applicationCategory": "EducationalApplication",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "CNY"},
+  "operatingSystem": "Any",
+  "audience": {"@type": "EducationalAudience", "educationalRole": "student"}
+}
+</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎧</text></svg>">
 <style>
 :root{
@@ -739,7 +766,7 @@ html[data-theme="dark"] .q-hint{background:var(--card);border-color:var(--line)}
       <div class="about-line" id="set-about"></div>
     </div>
   </section>
-                                                                                                                        <!-- ============ 单词详情弹窗 v2 ============ -->
+                                                                                                                            <!-- ============ 单词详情弹窗 v2 ============ -->
   <div id="word-modal" class="modal-mask hidden" role="dialog" aria-modal="true" aria-label="单词详情">
     <div class="modal">
       <button class="modal-close" id="wm-close" aria-label="关闭">✕</button>
@@ -6543,6 +6570,10 @@ const WORDS = [
 
 
 
+
+
+
+
 const BOOKS = [{"id":"default","name":"内置词库","desc":"网站原有全部词","icon":"📖","zone":"both","source":"自有","license":"自有","words":2274},{"id":"jianqiao","name":"真题高频","desc":"剑桥 4-19 真题高频词","icon":"📚","zone":"both","source":"chunsi-w/ielts-vocab-cloudflare","license":"MIT","words":450},{"id":"listening","name":"听力拼写","desc":"听力填空高频答案词","icon":"🎧","zone":"l","source":"yuqingsong71/IELTS-listening-vocabulary（剑桥 4-20 听力填空答案词）","license":"公开仓库（无 LICENSE）· 事实性词表 + 本站原创加工","words":821},{"id":"zhenjing","name":"雅思真经","desc":"雅思真经核心词汇","icon":"📗","zone":"both","source":"hefengxian/ielts-vocabulary","license":"MIT","words":938},{"id":"awl","name":"学术词汇 AWL","desc":"学术词汇表（Coxhead）","icon":"🎓","zone":"both","source":"Coxhead，惠灵顿维多利亚大学","license":"开放教育免费使用","words":570},{"id":"band9","name":"Band 9 高分表达","desc":"高分替换表达","icon":"🏅","zone":"both","source":"learning-zone/ielts-materials","license":"MIT","words":102},{"id":"oxford","name":"牛津基础词","desc":"牛津 3000 基础词（非商用）","icon":"🇬🇧","zone":"both","source":"OUP Oxford 3000","license":"需署名 + 非商用","words":1000}];
 
 
@@ -7337,6 +7368,8 @@ function init(){
   renderPracticeSetup();
 }
 init();
+
+
 
 
 
