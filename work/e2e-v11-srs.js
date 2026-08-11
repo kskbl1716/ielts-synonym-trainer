@@ -55,8 +55,14 @@ class CDP {
   await T('s7-wrong-panel', "(()=>{ switchView('stats'); const p=document.getElementById('wrong-panel'); return {has:!!p, txt:p?p.textContent.replace(/\\s+/g,' ').trim().slice(0,60):null, btn:!!document.getElementById('wrong-review-btn')}; })()");
   /* 8. 单词详情例句整句朗读按钮 */
   await T('s8-sentence-speak', "(()=>{ openWordDetail('able'); const b=document.querySelector('.wm-say'); const out={has:!!b, isSentence:(b&&b.dataset.speak||'').split(' ').length>2}; closeWordDetail(); return out; })()");
-  /* 9. 无 JS 报错 */
-  await T('s9-no-errors', "window.__errs.join('|')");
+  /* 9. P2 记忆看板 + 遗忘曲线（有复习数据时渲染） */
+  await T('s9-memory-panel', "(()=>{ state=defaultState(); saveState(); const rv=reviewStore(); rv['able']={int:3,next:todayStr(),lapses:0,last:todayStr()}; rv['ability']={int:7,next:todayStr(),lapses:0,last:todayStr()}; state.activity={}; state.activity[todayStr()]=5; saveState(); switchView('stats'); const mp=document.getElementById('memory-panel'); return {has:!!mp, svg:!!(mp&&mp.querySelector('svg.mem-curve')), dueLabel:mp?mp.textContent.includes('今日到期'):false}; })()");
+  /* 10. P2 学习热力图（今日格子高亮） */
+  await T('s10-heatmap', "(()=>{ const hp=document.getElementById('heatmap-panel'); return {has:!!hp, activeCells:hp?hp.querySelectorAll('.hm-cell.lv1,.hm-cell.lv2,.hm-cell.lv3').length:0, today:!!(hp&&hp.querySelector('.hm-cell.today'))}; })()");
+  /* 11. P2 每日活动自动记录 */
+  await T('s11-activity-recorded', "(()=>{ const before=state.activity[todayStr()]||0; recordAnswer('able', true); return (state.activity[todayStr()]||0) > before; })()");
+  /* 12. 无 JS 报错 */
+  await T('s12-no-errors', "window.__errs.join('|')");
 
   console.log('==== E2E V11-SRS 智能记忆引擎 (' + results.length + ' 项) ====');
   let fail = 0;

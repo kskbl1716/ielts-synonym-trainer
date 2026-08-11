@@ -348,7 +348,7 @@ function renderSettings(){
     const c1 = WORDS.filter(w=>w.lv==='1').length, c2 = WORDS.filter(w=>w.lv==='2').length, c3 = WORDS.filter(w=>w.lv==='3').length;
     let m1=0,m2=0,m3=0,m4=0,m5=0;
     WORDS.forEach(w=>{ const l=masteryLevel(w.w); if(l===5)m5++; else if(l===4)m4++; else if(l===3)m3++; else if(l===2)m2++; else m1++; });
-    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.0<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：练习过的词按艾宾浩斯遗忘曲线自动安排复习（首页「今日待复习」）<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
+    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.1<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：艾宾浩斯遗忘曲线复习调度 + 统计页「遗忘曲线 / 学习热力图 / 复习看板」可视化<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
   }
 }
 function applyPracticePrefs(){
@@ -1177,6 +1177,7 @@ applyRoute();
 
 /* ================= v10.3: 首页更新内容 ================= */
 var UPDATES = [
+  {d:'2026-08-11', v:'v11.1', t:'记忆可视化：统计页新增遗忘曲线图（按你的复习间隔自动绘制）+ 学习热力图 + 复习看板'},
   {d:'2026-08-11', v:'v11.0', t:'智能记忆引擎：掌握度 5 级分级 + 艾宾浩斯遗忘曲线复习调度 + 首页今日待复习 + 错题本 + 例句整句朗读'},
   {d:'2026-08-11', v:'v10.4', t:'新增单词难度分级（基础/进阶/高级），词库、词书、练习界面均可按难度筛选'},
   {d:'2026-08-11', v:'v10.3', t:'练习自动发音（看词/选择题自动朗读、配对点卡即念）；首页新增「更新内容」'},
@@ -1231,6 +1232,9 @@ recordAnswer = function(w, ok){
   r.next = addDays(r.int);
   r.last = todayStr();
   rv[w] = r;
+  /* P2: 每日活动记录（热力图数据源；懒加载 state.activity，云合并见 cloud.js mergeActivity） */
+  if(!state.activity || typeof state.activity!=='object') state.activity = {};
+  state.activity[todayStr()] = (state.activity[todayStr()]||0) + 1;
   saveState();   // base 已 save 一次，这里再 save 一次（廉价）
 };
 function dueWords(){
@@ -1314,3 +1318,110 @@ function renderWrongPanel(){
 }
 const _v11stats = renderStats;
 renderStats = function(){ _v11stats(); renderWrongPanel(); };
+
+/* ================= v11.1: 记忆可视化 ================= */
+/* 账户平均记忆强度曲线（基于各词当前复习间隔估算留存率 R=e^(-t/S)） */
+function avgRetentionCurve(){
+  const rv = reviewStore();
+  const words = Object.keys(rv);
+  if(!words.length) return null;
+  const pts = [];
+  for(let t=0; t<=30; t++){
+    let sum = 0;
+    words.forEach(w => { const S = rv[w].int || 1; sum += Math.exp(-t / S); });
+    pts.push(sum / words.length);
+  }
+  return pts;
+}
+/* inline SVG 曲线（站点首个 SVG 绘图，无图表库） */
+function curveSVG(points){
+  const W = 520, H = 240, PAD = 34;
+  const plotW = W - PAD*2, plotH = H - PAD*2;
+  const x = t => PAD + plotW * t / 30;
+  const y = r => PAD + plotH * (1 - r);
+  const path = points.map((r,i)=>(i===0?'M':'L')+x(i).toFixed(1)+','+y(r).toFixed(1)).join(' ');
+  const grid = [0.2,0.4,0.6,0.8,1].map(g=>'<line x1="'+PAD+'" y1="'+y(g).toFixed(1)+'" x2="'+(W-PAD)+'" y2="'+y(g).toFixed(1)+'" class="cur-grid"/>').join('');
+  const xlabels = [0,7,14,21,30].map(t=>'<text x="'+x(t).toFixed(1)+'" y="'+(H-8)+'" class="cur-label" text-anchor="middle">'+t+'</text>').join('');
+  const ylabels = [0,0.5,1].map(g=>'<text x="'+(PAD-6)+'" y="'+(y(g)+4).toFixed(1)+'" class="cur-label" text-anchor="end">'+Math.round(g*100)+'%</text>').join('');
+  return '<svg viewBox="0 0 '+W+' '+H+'" class="mem-curve" role="img" aria-label="遗忘曲线" preserveAspectRatio="xMidYMid meet">'+
+    grid +
+    '<line x1="'+PAD+'" y1="'+y(0.6).toFixed(1)+'" x2="'+(W-PAD)+'" y2="'+y(0.6).toFixed(1)+'" class="cur-threshold"/>'+
+    '<text x="'+(W-PAD-2)+'" y="'+(y(0.6)-6).toFixed(1)+'" class="cur-threshold-label" text-anchor="end">复习阈值 60%</text>'+
+    '<path d="'+path+'" class="cur-line"/>'+
+    '<circle cx="'+x(0).toFixed(1)+'" cy="'+y(points[0]).toFixed(1)+'" r="3.5" class="cur-dot"/>'+
+    '<text x="'+x(0).toFixed(1)+'" y="'+(H-8)+'" class="cur-label" text-anchor="middle">今天</text>'+
+    '<text x="'+(W-PAD+40)+'" y="'+(H-8)+'" class="cur-axis-title" text-anchor="middle">天数 →</text>'+
+    xlabels + ylabels +
+  '</svg>';
+}
+/* 复习看板 + 遗忘曲线（合并面板，插在打卡面板后、统计卡前） */
+function renderMemoryPanel(){
+  const sec = $('#view-stats'); if(!sec) return;
+  const statsEl = $('#stat-cards'); if(!statsEl) return;
+  let panel = $('#memory-panel');
+  if(!panel){ panel = document.createElement('div'); panel.className = 'panel memory-panel'; panel.id = 'memory-panel'; statsEl.parentNode.insertBefore(panel, statsEl); }
+  const rv = reviewStore();
+  const words = Object.keys(rv);
+  const due = dueWords();
+  const week7 = words.filter(w => rv[w].next <= addDays(7)).length;
+  const avgInt = words.length ? Math.round(words.reduce((a,w)=>a+(rv[w].int||0),0)/words.length) : 0;
+  let m2=0,m3=0,m4=0,m5=0;
+  words.forEach(w=>{ const l = masteryLevel(w); if(l===5)m5++; else if(l===4)m4++; else if(l===3)m3++; else if(l===2)m2++; });
+  const streak = (typeof checkinStreak==='function') ? checkinStreak() : 0;
+  const pts = avgRetentionCurve();
+  let body;
+  if(!words.length){
+    body = '<div class="empty">🧠 练习过的词会自动进入记忆曲线。<br><span style="font-size:12px;color:var(--muted)">先去练习几轮，这里会显示你的记忆强度和遗忘曲线。</span></div>';
+  } else {
+    body = '<div class="memo-stats">'+
+      '<div class="ms-item"><div class="num">'+words.length+'</div><div class="lbl">复习中</div></div>'+
+      '<div class="ms-item"><div class="num">'+due.length+'</div><div class="lbl">今日到期</div></div>'+
+      '<div class="ms-item"><div class="num">'+week7+'</div><div class="lbl">未来7天</div></div>'+
+      '<div class="ms-item"><div class="num">'+avgInt+'</div><div class="lbl">平均间隔(天)</div></div>'+
+      '<div class="ms-item"><div class="num">'+streak+'</div><div class="lbl">连续打卡</div></div>'+
+    '</div>'+
+    '<div class="memo-dist"><span class="lv-mastery m2">认识 '+m2+'</span><span class="lv-mastery m3">模糊 '+m3+'</span><span class="lv-mastery m4">掌握 '+m4+'</span><span class="lv-mastery m5">熟练 '+m5+'</span></div>'+
+    '<div class="curve-wrap">'+curveSVG(pts)+'</div>';
+  }
+  panel.innerHTML = '<h3>🧠 智能记忆 <span style="font-weight:400;color:var(--muted)">（按你的复习间隔自动绘制的遗忘曲线）</span></h3>'+body;
+}
+/* 学习热力图数据：activity 计数 + checkins/review.last 补历史 */
+function activityByDate(){
+  const map = {};
+  if(state.activity && typeof state.activity==='object') Object.keys(state.activity).forEach(d=>{ map[d] = (map[d]||0) + (state.activity[d]||0); });
+  if(Array.isArray(state.checkins)) state.checkins.forEach(d=>{ if(!(map[d]||0)) map[d] = 1; });
+  Object.keys(reviewStore()).forEach(w=>{ const d = reviewStore()[w].last; if(d && !(map[d]||0)) map[d] = 1; });
+  return map;
+}
+/* 学习热力图（12 周 GitHub 风格，周一为一周起点） */
+function renderActivityHeatmap(){
+  const sec = $('#view-stats'); if(!sec) return;
+  let panel = $('#heatmap-panel');
+  if(!panel){ panel = document.createElement('div'); panel.className = 'panel'; panel.id = 'heatmap-panel'; sec.appendChild(panel); }
+  const map = activityByDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dowMon = (today.getDay()+6)%7;
+  const start = new Date(today); start.setDate(today.getDate() - dowMon - 77);  // 11 周前那周的周一
+  const cells = []; let days = 0, total = 0;
+  for(let w=0; w<12; w++){
+    for(let dow=0; dow<7; dow++){
+      const d = new Date(start); d.setDate(start.getDate() + w*7 + dow);
+      const ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      if(d > today){ cells.push('<div class="hm-cell future"></div>'); continue; }
+      const c = map[ds] || 0;
+      if(c > 0){ days++; total += c; }
+      const cls = 'hm-cell lv'+(c>=3?3:(c===2?2:(c===1?1:0))) + (ds===todayStr() ? ' today' : '');
+      cells.push('<div class="'+cls+'" title="'+ds+'：'+(c?c+' 次':'无')+'"></div>');
+    }
+  }
+  if(!days){
+    panel.innerHTML = '<h3>🔥 学习热力图 <span style="font-weight:400;color:var(--muted)">（最近 12 周学习足迹）</span></h3>'+
+      '<div class="empty">开始练习后，这里会显示你的学习足迹</div>';
+    return;
+  }
+  const legend = '<div class="hm-legend"><span>少</span><div class="hm-cell lv0"></div><div class="hm-cell lv1"></div><div class="hm-cell lv2"></div><div class="hm-cell lv3"></div><span>多</span></div>';
+  panel.innerHTML = '<h3>🔥 学习热力图 <span style="font-weight:400;color:var(--muted)">（最近 12 周 · 活跃 '+days+' 天 · 累计 '+total+' 次）</span></h3>'+
+    '<div class="hm-grid">'+cells.join('')+'</div>'+legend;
+}
+const _v112stats = renderStats;
+renderStats = function(){ _v112stats(); renderMemoryPanel(); renderActivityHeatmap(); };

@@ -221,6 +221,13 @@
     });
     return out;
   }
+  /* v11.1: 每日活动计数合并——按天取较大计数 */
+  function mergeActivity(a, b){
+    var out = {};
+    var keys = new Set(Object.keys(a || {}).concat(Object.keys(b || {})));
+    keys.forEach(function(k){ out[k] = Math.max((a && a[k]) || 0, (b && b[k]) || 0); });
+    return out;
+  }
   function mergeState(cloud, local){
     var base = JSON.parse(JSON.stringify(cloud && typeof cloud === 'object' ? cloud : {}));
     var out = Object.assign(defaultState(), base);
@@ -254,6 +261,7 @@
     }
     out.review = mergeByLast(base.review, local.review);
     out.notebook = mergeByLast(base.notebook, local.notebook);
+    out.activity = mergeActivity(base.activity, local.activity);
     return out;
   }
   async function loadFromCloud(){
