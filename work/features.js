@@ -283,7 +283,10 @@ function renderCalendar(){
       '<div class="cal-grid" id="cal-grid"></div>'+
       '<div class="cal-foot" id="cal-foot"></div>'+
     '</div>';
-  view.insertBefore(panel, view.firstChild);
+  /* 补丁（不升版本）：打卡面板移到统计卡之后——顶部留给遗忘曲线+累积题数 */
+  const sc = $('#stat-cards');
+  if(sc) sc.parentNode.insertBefore(panel, sc.nextSibling);
+  else view.appendChild(panel);
   $('#goal-presets').addEventListener('click', e=>{
     const b = e.target.closest('[data-goal]');
     if(b) setGoal(parseInt(b.dataset.goal,10));
@@ -1235,6 +1238,9 @@ recordAnswer = function(w, ok){
   /* P2: 每日活动记录（热力图数据源；懒加载 state.activity，云合并见 cloud.js mergeActivity） */
   if(!state.activity || typeof state.activity!=='object') state.activity = {};
   state.activity[todayStr()] = (state.activity[todayStr()]||0) + 1;
+  /* 补丁（不升版本）：每天首次练习自动打卡（手动打卡按钮保留，幂等） */
+  if(!Array.isArray(state.checkins)) state.checkins = [];
+  if(!state.checkins.includes(todayStr())) state.checkins.push(todayStr());
   saveState();   // base 已 save 一次，这里再 save 一次（廉价）
 };
 function dueWords(){

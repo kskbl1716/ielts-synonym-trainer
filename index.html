@@ -859,7 +859,7 @@ var _hmt = _hmt || [];
       <div class="about-line" id="set-about"></div>
     </div>
   </section>
-                                                                                                                                                                <!-- ============ 单词详情弹窗 v2 ============ -->
+                                                                                                                                                                  <!-- ============ 单词详情弹窗 v2 ============ -->
   <div id="word-modal" class="modal-mask hidden" role="dialog" aria-modal="true" aria-label="单词详情">
     <div class="modal">
       <button class="modal-close" id="wm-close" aria-label="关闭">✕</button>
@@ -7222,6 +7222,8 @@ const WORDS = [
 
 
 
+
+
 const BOOKS = [{"id":"default","name":"内置词库","desc":"网站原有全部词","icon":"📖","zone":"both","source":"自有","license":"自有","words":2274},{"id":"jianqiao","name":"真题高频","desc":"剑桥 4-19 真题高频词","icon":"📚","zone":"both","source":"chunsi-w/ielts-vocab-cloudflare","license":"MIT","words":450},{"id":"listening","name":"听力拼写","desc":"听力填空高频答案词","icon":"🎧","zone":"l","source":"yuqingsong71/IELTS-listening-vocabulary（剑桥 4-20 听力填空答案词）","license":"公开仓库（无 LICENSE）· 事实性词表 + 本站原创加工","words":821},{"id":"zhenjing","name":"雅思真经","desc":"雅思真经核心词汇","icon":"📗","zone":"both","source":"hefengxian/ielts-vocabulary","license":"MIT","words":938},{"id":"awl","name":"学术词汇 AWL","desc":"学术词汇表（Coxhead）","icon":"🎓","zone":"both","source":"Coxhead，惠灵顿维多利亚大学","license":"开放教育免费使用","words":570},{"id":"band9","name":"Band 9 高分表达","desc":"高分替换表达","icon":"🏅","zone":"both","source":"learning-zone/ielts-materials","license":"MIT","words":102},{"id":"oxford","name":"牛津基础词","desc":"牛津 3000 基础词（非商用）","icon":"🇬🇧","zone":"both","source":"OUP Oxford 3000","license":"需署名 + 非商用","words":1000},{"id":"nawl","name":"NAWL 学术新词","desc":"非 AWL 的高频学术词","icon":"🔬","zone":"both","source":"NAWL（Browne, Culligan & Phillips, newgeneralservicelist.org）","license":"开放学术词表（需署名）","words":950},{"id":"spoken","name":"口语话题词","desc":"雅思口语 Part1-3 话题词汇","icon":"🗣️","zone":"l","source":"本工具链按雅思口语高频话题汇编","license":"自有","words":227},{"id":"camb","name":"剑桥18-20话题词","desc":"剑桥 18-20 真题高频话题词","icon":"📕","zone":"both","source":"本工具链按剑桥 18-20 高频话题汇编（非抓取原文）","license":"自有","words":200}];
 
 
@@ -8102,6 +8104,7 @@ init();
 
 
 
+
 /* ================= v2: 单词详情弹窗 ================= */
 function dictOf(w){ return Object.prototype.hasOwnProperty.call(DICT, w) ? DICT[w] : null; }
 function openWordDetail(word){
@@ -8387,7 +8390,10 @@ function renderCalendar(){
       '<div class="cal-grid" id="cal-grid"></div>'+
       '<div class="cal-foot" id="cal-foot"></div>'+
     '</div>';
-  view.insertBefore(panel, view.firstChild);
+  /* 补丁（不升版本）：打卡面板移到统计卡之后——顶部留给遗忘曲线+累积题数 */
+  const sc = $('#stat-cards');
+  if(sc) sc.parentNode.insertBefore(panel, sc.nextSibling);
+  else view.appendChild(panel);
   $('#goal-presets').addEventListener('click', e=>{
     const b = e.target.closest('[data-goal]');
     if(b) setGoal(parseInt(b.dataset.goal,10));
@@ -9339,6 +9345,9 @@ recordAnswer = function(w, ok){
   /* P2: 每日活动记录（热力图数据源；懒加载 state.activity，云合并见 cloud.js mergeActivity） */
   if(!state.activity || typeof state.activity!=='object') state.activity = {};
   state.activity[todayStr()] = (state.activity[todayStr()]||0) + 1;
+  /* 补丁（不升版本）：每天首次练习自动打卡（手动打卡按钮保留，幂等） */
+  if(!Array.isArray(state.checkins)) state.checkins = [];
+  if(!state.checkins.includes(todayStr())) state.checkins.push(todayStr());
   saveState();   // base 已 save 一次，这里再 save 一次（廉价）
 };
 function dueWords(){
