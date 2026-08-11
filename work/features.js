@@ -1148,10 +1148,9 @@ var UPDATES = [
 function renderHomeUpdates(){
   var el = $('#home-updates');
   if(!el) return;
-  el.innerHTML = UPDATES.map(u=>
-    '<div class="upd-item"><span class="upd-v">'+escapeHtml(u.v)+'</span>'+
-    '<span class="upd-d">'+escapeHtml(u.d)+'</span>'+
-    '<span class="upd-t">'+escapeHtml(u.t)+'</span></div>'
+  el.innerHTML = '<span class="upd-label">📣 最近更新</span>' + UPDATES.slice(0, 2).map(u=>
+    '<span class="upd-item"><span class="upd-v">'+escapeHtml(u.v)+'</span>'+
+    '<span class="upd-t">'+escapeHtml(u.t)+'</span></span>'
   ).join('');
 }
 const _v10up = renderHome;

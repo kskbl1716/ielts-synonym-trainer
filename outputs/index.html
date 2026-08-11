@@ -510,13 +510,14 @@ html[data-theme="dark"] .q-hint{background:var(--card);border-color:var(--line)}
 /* ===== 词库/词书列表分页「加载更多」 ===== */
 .learn-more-bar{text-align:center;padding:16px 0 8px}
 .learn-more-bar .btn{min-width:180px}
-/* ===== 首页更新内容 ===== */
-.updates-card{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
-.upd-item{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;line-height:1.5;flex-wrap:wrap}
-.upd-v{font-weight:700;color:var(--primary);background:var(--primary-l);border-radius:6px;padding:1px 8px;font-size:12px;white-space:nowrap}
-.upd-d{font-size:12px;color:var(--muted);white-space:nowrap;padding-top:2px}
-.upd-t{font-size:13px;flex:1;min-width:180px}
-html[data-theme="dark"] .upd-item{background:var(--card);border-color:var(--line)}
+/* ===== 首页顶部更新内容（横条） ===== */
+.updates-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:linear-gradient(120deg,var(--primary-l),#f3efe0);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:0 0 16px;line-height:1.4}
+.upd-label{font-weight:700;color:var(--primary);font-size:13px;white-space:nowrap}
+.upd-item{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 10px;max-width:100%}
+.upd-v{font-weight:700;color:var(--primary);background:var(--primary-l);border-radius:6px;padding:0 6px;font-size:11px;white-space:nowrap}
+.upd-t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px}
+html[data-theme="dark"] .updates-bar{background:var(--card);border-color:var(--line)}
+html[data-theme="dark"] .upd-item{background:var(--card-2);border-color:var(--line)}
 
 </style>
 <script>
@@ -567,6 +568,7 @@ var _hmt = _hmt || [];
         </div>
       </div>
     </div>
+    <div class="updates-bar" id="home-updates"></div>
     <div class="home-sec-title"><h2>📌 每日一词</h2></div>
     <div class="daily-card" id="home-daily-word"></div>
     <div class="continue-card">
@@ -586,8 +588,6 @@ var _hmt = _hmt || [];
     <div class="book-grid" id="home-books"></div>
     <div class="home-sec-title"><h2>⚡ 快捷工具</h2></div>
     <div class="tools-grid" id="home-tools"></div>
-    <div class="home-sec-title"><h2>📣 更新内容</h2></div>
-    <div class="updates-card" id="home-updates"></div>
   </section>
   <section id="view-books" class="view">
     <div class="tip">📚 选择一本词书开始学习：内置词库是网站原有全部词；真题高频/听力拼写/雅思真经/学术词汇 AWL/Band 9 高分表达/牛津基础词陆续接入中。</div>
@@ -784,7 +784,7 @@ var _hmt = _hmt || [];
       <div class="about-line" id="set-about"></div>
     </div>
   </section>
-                                                                                                                                      <!-- ============ 单词详情弹窗 v2 ============ -->
+                                                                                                                                        <!-- ============ 单词详情弹窗 v2 ============ -->
   <div id="word-modal" class="modal-mask hidden" role="dialog" aria-modal="true" aria-label="单词详情">
     <div class="modal">
       <button class="modal-close" id="wm-close" aria-label="关闭">✕</button>
@@ -6602,6 +6602,8 @@ const WORDS = [
 
 
 
+
+
 const BOOKS = [{"id":"default","name":"内置词库","desc":"网站原有全部词","icon":"📖","zone":"both","source":"自有","license":"自有","words":2274},{"id":"jianqiao","name":"真题高频","desc":"剑桥 4-19 真题高频词","icon":"📚","zone":"both","source":"chunsi-w/ielts-vocab-cloudflare","license":"MIT","words":450},{"id":"listening","name":"听力拼写","desc":"听力填空高频答案词","icon":"🎧","zone":"l","source":"yuqingsong71/IELTS-listening-vocabulary（剑桥 4-20 听力填空答案词）","license":"公开仓库（无 LICENSE）· 事实性词表 + 本站原创加工","words":821},{"id":"zhenjing","name":"雅思真经","desc":"雅思真经核心词汇","icon":"📗","zone":"both","source":"hefengxian/ielts-vocabulary","license":"MIT","words":938},{"id":"awl","name":"学术词汇 AWL","desc":"学术词汇表（Coxhead）","icon":"🎓","zone":"both","source":"Coxhead，惠灵顿维多利亚大学","license":"开放教育免费使用","words":570},{"id":"band9","name":"Band 9 高分表达","desc":"高分替换表达","icon":"🏅","zone":"both","source":"learning-zone/ielts-materials","license":"MIT","words":102},{"id":"oxford","name":"牛津基础词","desc":"牛津 3000 基础词（非商用）","icon":"🇬🇧","zone":"both","source":"OUP Oxford 3000","license":"需署名 + 非商用","words":1000}];
 
 
@@ -7398,6 +7400,7 @@ function init(){
   renderPracticeSetup();
 }
 init();
+
 
 
 
@@ -8619,10 +8622,9 @@ var UPDATES = [
 function renderHomeUpdates(){
   var el = $('#home-updates');
   if(!el) return;
-  el.innerHTML = UPDATES.map(u=>
-    '<div class="upd-item"><span class="upd-v">'+escapeHtml(u.v)+'</span>'+
-    '<span class="upd-d">'+escapeHtml(u.d)+'</span>'+
-    '<span class="upd-t">'+escapeHtml(u.t)+'</span></div>'
+  el.innerHTML = '<span class="upd-label">📣 最近更新</span>' + UPDATES.slice(0, 2).map(u=>
+    '<span class="upd-item"><span class="upd-v">'+escapeHtml(u.v)+'</span>'+
+    '<span class="upd-t">'+escapeHtml(u.t)+'</span></span>'
   ).join('');
 }
 const _v10up = renderHome;
