@@ -212,6 +212,10 @@ html[data-theme="dark"] .q-hint{background:var(--card);border-color:var(--line)}
 /* ===== 词库/词书列表分页「加载更多」 ===== */
 .learn-more-bar{text-align:center;padding:16px 0 8px}
 .learn-more-bar .btn{min-width:180px}
+/* ===== 顶部常驻反馈提示条 ===== */
+.announce-bar{background:linear-gradient(120deg,var(--amber-l),var(--primary-l));border-bottom:1px solid var(--line);color:var(--ink);text-align:center;font-size:12.5px;padding:7px 14px;line-height:1.5}
+.announce-bar a{color:var(--primary);font-weight:700;text-decoration:underline}
+html[data-theme="dark"] .announce-bar{background:var(--card-2);border-color:var(--line)}
 /* ===== 首页顶部更新内容（横条） ===== */
 .updates-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:linear-gradient(120deg,var(--primary-l),#f3efe0);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:0 0 16px;line-height:1.4}
 .upd-label{font-weight:700;color:var(--primary);font-size:13px;white-space:nowrap}

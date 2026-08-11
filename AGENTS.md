@@ -78,6 +78,7 @@ Copy-Item outputs\index.html index.html -Force
 
 ## 版本记录
 - v10.3（2026-08-11，已推送）：练习自动发音（看词选义/选择题显示单词自动朗读、配对题点卡即念，按用户反馈）；首页顶部新增「📣 最近更新」横条（只显示最近 2 条，数据在 features.js `UPDATES` 数组，更新时加顶部一条）；反馈表单支持直接回复（联系方式填邮箱设 `_replyto`）+ 登录用户自动附带账号邮箱；接入百度统计（tongji hm.js）；页面版本号 v10.2→v10.3。⚠️ 惯例：**每次版本更新都要同步更新本版本记录 + features.js `UPDATES` 数组 + DEPLOY.md 当前状态**。
+  - 非版本更新（不升版本号、不进 UPDATES，仅记日志）：顶部常驻反馈提示条（「欢迎大家到设置里反馈…」）。⚠️ 推送协议（2026-08-11 起）：**除重大更新（大功能/风险改动/涉及数据）需先确认外，小版本更新可直接推送**。
 - v10.2 SEO 优化（2026-08-11，已推送）：head 加 canonical / OG / Twitter / JSON-LD（WebApplication 教育类目/免费） / keywords meta，title/description 融入关键词；新增 `robots.txt` + `sitemap.xml`（仓库根，已入推送清单）；页面版本号 v10.1→v10.2。定位国内百度/必应为主（Google 被墙）；注：百度对 github.io 收录不稳属平台限制，真冲国内排名需自定义域名 + ICP 备案。
 - v10.1 性能修复：**分页渲染**（2026-08-11，已推送）：词库列表/词书详情列表首屏只渲染 100 条 + 「加载更多」按钮（查询/筛选变化自动重置分页；用 var 避免 base init 先于 features 声明导致的 let TDZ 崩溃）。实测 renderLearn 961ms→6ms、单键搜索 412ms→9ms、DOM 节点 8.3万→1.5千；e2e-v7 + v10-m2/m3/m4/m5a-i 共 13 套全绿 + 截图。
 - v10.0 M5 词条全部接入并推送上线（2026-08-08）：词库 2274→**5622**。listening 821（剑桥 4-20 听力填空答案，无 LICENSE 公开仓库，两批 a/b）；jianqiao 450（chunsi-w/ielts-vocab-cloudflare MIT，最高频段 450）；zhenjing 938（hefengxian/ielts-vocabulary MIT，两批 d/e，含源笔误修正与占位符剔除）；awl 570（VUW 官方 Coxhead 词表，78 新增 + 492 build 期一词多书标记）；band9 102（learning-zone/ielts-materials MIT vocabulary.md，61 新增 + 41 标记）；oxford 1000（OUP Oxford 3000 公开镜像，两批 j/k，剔除 82 功能词，取净增前 1000）。全部批次经 validate-v10-*.js 校验 0 错 + 13 套 e2e 全绿 + 截图。
