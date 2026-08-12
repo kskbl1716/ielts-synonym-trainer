@@ -88,6 +88,12 @@ const CSS_MARK = '/* ===== v2: 单词详情弹窗 / 备份 ===== */';
 const HTML_MARK = '<!-- ============ 单词详情弹窗 v2 ============ -->';
 const JS_MARK = '/* ================= v2: 单词详情弹窗 ================= */';
 const UTIL_ANCHOR = '/* ===UTIL=== */';
+/* 保守压缩：去块注释 + 去行首/行尾空白 + 折叠空行（不动变量名、不动 // 注释、不合并行） */
+function minify(src){
+  src = src.replace(/\/\*[\s\S]*?\*\//g, '');
+  src = src.split('\n').map(l => l.trim()).join('\n').replace(/\n{2,}/g, '\n');
+  return src;
+}
 let html = fs.readFileSync(OUT, 'utf8');
 
 /* ---------- 0. 清理上一次注入（幂等） ---------- */
@@ -101,16 +107,28 @@ const cut = (from, to, keepTo) => {
 };
 while (cut(JS_MARK, '</script>', true)) {}
 while (cut(HTML_MARK, '</main>', true)) {}
-while (cut(CSS_MARK, '</style>', true)) {}
 while (cut('const BOOKS = ', UTIL_ANCHOR, true)) {}
 while (cut('const DICT = {', UTIL_ANCHOR, true)) {}
 
 /* ---------- 1. 提取并合并词库 ---------- */
-const arrStart = html.indexOf('const WORDS = [');
-if (arrStart < 0) throw new Error('WORDS block not found');
-const arrEnd = html.indexOf('];', arrStart);
-if (arrEnd < 0) throw new Error('WORDS array end not found');
-const block = html.slice(arrStart, arrEnd + 2);
+/* 词库块用标记包裹，保证幂等重建（元组序列化后不再依赖 'const WORDS = ['） */
+const WORDS_START = '/*===WORDS_START===*/';
+const WORDS_END = '/*===WORDS_END===*/';
+let wordsIns = -1;
+const oldMark = html.indexOf(WORDS_START);
+if (oldMark >= 0){
+  const oldEnd = html.indexOf(WORDS_END, oldMark);
+  if (oldEnd < 0) throw new Error('WORDS_END anchor missing');
+  wordsIns = oldMark;
+  html = html.slice(0, oldMark) + html.slice(oldEnd + WORDS_END.length);
+} else {
+  const arrStart = html.indexOf('const WORDS = [');
+  if (arrStart < 0) throw new Error('WORDS block not found');
+  const arrEnd = html.indexOf('];', arrStart);
+  if (arrEnd < 0) throw new Error('WORDS array end not found');
+  wordsIns = arrStart;
+  html = html.slice(0, arrStart) + html.slice(arrEnd + 2);
+}
 function extractEntries(src){
   const out = []; let cur = '', depth = 0, inStr = false, esc = false;
   for (const ch of src){
@@ -220,14 +238,18 @@ BOOKS.forEach(b => {
 });
 console.log('book counts:', JSON.stringify(bc));
 
-/* ---------- 2. 序列化 ---------- */
+/* ---------- 2. 序列化（紧凑元组：省 ~570KB，运行时一次映射为对象） ---------- */
 function jsStr(s){ return "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r/g, '').replace(/\n/g, '\\n') + "'"; }
+const WORDS_K = ['t','w','s','c','e','k','p','pos','d','z','lv','b','rt','af','mn','note'];
 function entryStr(o){
-  return '{t:' + jsStr(o.t) + ',w:' + jsStr(o.w) + ',s:[' + o.s.map(jsStr).join(',') + '],c:' + jsStr(o.c) +
-    ',e:' + jsStr(o.e) + ',k:' + jsStr(o.k) + ',p:' + jsStr(o.p) + ',pos:' + jsStr(o.pos) + ',d:' + jsStr(o.d) + ',z:' + jsStr(o.z) + ',lv:' + jsStr(String(o.lv)) + ',rt:' + jsStr(o.rt||'') + ',af:' + jsStr(o.af||'') + ',mn:' + jsStr(o.mn||'') + ',note:' + jsStr(o.note||'') + ',b:[' + o.b.map(jsStr).join(',') + ']}';
+  const fields = [o.t, o.w, o.s, o.c, o.e, o.k, o.p, o.pos, o.d, o.z, String(o.lv), o.b, (o.rt||''), (o.af||''), (o.mn||''), (o.note||'')];
+  let last = fields.length - 1;
+  while (last > 11 && fields[last] === '') last--;
+  return '[' + fields.slice(0, last + 1).map(v => Array.isArray(v) ? '[' + v.map(jsStr).join(',') + ']' : jsStr(v)).join(',') + ']';
 }
-const newBlock = 'const WORDS = [\n' + all.map(entryStr).join(',\n') + '\n];';
-html = html.replace(block, newBlock);
+const WORDS_RAW_LIT = 'const WORDS_K=' + JSON.stringify(WORDS_K) + ';\nconst WORDS_RAW=[\n' + all.map(entryStr).join(',\n') + '\n];\nconst WORDS=WORDS_RAW.map(function(r){var o={},i;for(i=0;i<r.length;i++)o[WORDS_K[i]]=r[i];o.rt=o.rt||"";o.af=o.af||"";o.mn=o.mn||"";o.note=o.note||"";return o;});';
+const newBlock = WORDS_START + '\n' + WORDS_RAW_LIT + '\n' + WORDS_END;
+html = html.slice(0, wordsIns) + newBlock + html.slice(wordsIns);
 
 /* ---------- 3. 注入 BOOKS + DICT ---------- */
 if (!html.includes(UTIL_ANCHOR)) throw new Error('UTIL anchor not found');
@@ -236,10 +258,33 @@ html = html.replace(UTIL_ANCHOR, booksConst);
 const dictConst = '\n\nconst DICT = {\n' + Object.keys(DICT).map(k => '  ' + jsStr(k) + ':[' + DICT[k].map(jsStr).join(',') + ']').join(',\n') + '\n};\n\n' + UTIL_ANCHOR;
 html = html.replace(UTIL_ANCHOR, dictConst);
 
-/* ---------- 4. 注入 CSS ---------- */
-const styleEnd = html.lastIndexOf('</style>');
-if (styleEnd < 0) throw new Error('style end not found');
-html = html.slice(0, styleEnd) + fs.readFileSync('work/features.css', 'utf8').replace(/^\uFEFF/, '') + '\n' + html.slice(styleEnd);
+/* ---------- 4. 注入 CSS（SEO：<style> 整体移到 body 末尾，head 只留 ~1KB 引导样式） ---------- */
+const styleBlocks = [];
+{
+  const re = /<style[^>]*>([\s\S]*?)<\/style>/g;
+  let mm;
+  while ((mm = re.exec(html))) styleBlocks.push(mm[1]);
+  html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/g, '');
+}
+let baseCss = styleBlocks.filter(s => !s.includes('/*===BOOT===*/')).join('\n');
+/* 去掉上一次注入的 features.css（CSS_START .. CSS_END 标记之间），保证幂等 */
+const cssStart = baseCss.indexOf('/*@CSS_START@*/');
+if (cssStart >= 0){
+  const cssEnd = baseCss.indexOf('/*@CSS_END@*/', cssStart);
+  baseCss = baseCss.slice(0, cssStart) + (cssEnd >= 0 ? baseCss.slice(cssEnd + 13) : '');
+}
+/* 兼容旧格式：base 里若还残留 CSS_MARK 注释（旧 features.css 头部），只保留其前部分 */
+const markAt = baseCss.indexOf(CSS_MARK);
+if (markAt >= 0) baseCss = baseCss.slice(0, markAt);
+const minifiedCss = minify(fs.readFileSync('work/features.css', 'utf8').replace(/^﻿/, ''));
+const fullCss = baseCss + '\n/*@CSS_START@*/\n' + minifiedCss + '\n/*@CSS_END@*/';
+const bootStyle = '<style>/*===BOOT===*/html,body{margin:0}.view{display:none}.view.active{display:block}.modal-mask.hidden{display:none}</style>';
+const headEnd = html.indexOf('</head>');
+if (headEnd < 0) throw new Error('</head> not found');
+html = html.slice(0, headEnd) + bootStyle + html.slice(headEnd);
+const bodyEnd = html.lastIndexOf('</body>');
+if (bodyEnd < 0) throw new Error('</body> not found');
+html = html.slice(0, bodyEnd) + '<style>/*===FULL===*/' + fullCss + '</style>' + html.slice(bodyEnd);
 
 /* ---------- 5. 注入弹窗 HTML ---------- */
 const mainEnd = html.lastIndexOf('</main>');
@@ -249,11 +294,12 @@ html = html.slice(0, mainEnd) + fs.readFileSync('work/modal.html', 'utf8') + htm
 /* ---------- 6. 注入 JS ---------- */
 const scriptEnd = html.lastIndexOf('</script>');
 if (scriptEnd < 0) throw new Error('script end not found');
-const js = fs.readFileSync('work/features.js', 'utf8');
+const js = minify(fs.readFileSync('work/features.js', 'utf8'));
 if (js.includes('</script')) throw new Error('features.js contains script close tag!');
-let jsAll = js;
+/* 补回 JS_MARK 标记头：minify 会剥掉 features.js 首行注释，这里重新注入，保证下次构建能幂等裁剪 */
+let jsAll = JS_MARK + '\n' + js;
 if (fs.existsSync('work/cloud.js')){
-  const cloud = fs.readFileSync('work/cloud.js', 'utf8');
+  const cloud = minify(fs.readFileSync('work/cloud.js', 'utf8'));
   if (cloud.includes('</script')) throw new Error('cloud.js contains script close tag!');
   jsAll += '\n' + cloud;
 }

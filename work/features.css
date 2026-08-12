@@ -385,3 +385,29 @@ html[data-font="xs"] .btn{font-size:12px}
 html[data-font="s"] .btn{font-size:13px}
 html[data-font="l"] .btn{font-size:15px}
 html[data-font="xl"] .btn{font-size:16px}
+
+/* ===== v11.6: 发音检测 / 新手引导 / 今日学习报告 ===== */
+.voice-pick{display:inline-flex;align-items:center;gap:6px;margin:0 8px;flex-wrap:wrap}
+.voice-pick select{background:var(--card-2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:12.5px;max-width:280px}
+.voice-prev{margin-left:8px}
+.onboard-modal{max-width:460px;text-align:center}
+.ob-slide{padding:8px 4px 4px}
+.ob-icon{font-size:46px;margin-bottom:10px}
+.ob-title{font-size:19px;font-weight:800;margin-bottom:10px}
+.ob-desc{font-size:13.5px;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.ob-list{list-style:none;margin:0 auto 6px;padding:0;text-align:left;max-width:330px}
+.ob-list li{background:var(--card-2);border-radius:10px;padding:9px 12px;margin-bottom:8px;font-size:13px;color:var(--ink)}
+.ob-nav{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.ob-dots{display:flex;gap:6px;align-items:center}
+.ob-dot{width:8px;height:8px;border-radius:50%;background:var(--line-2);cursor:pointer;transition:all .2s}
+.ob-dot.on{background:var(--primary);width:18px;border-radius:4px}
+.rp-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13.5px;flex-wrap:wrap}
+.rp-l{color:var(--muted);flex:none}
+.rp-v{font-weight:600;text-align:right}
+.rp-bar{height:8px;background:var(--card-2);border-radius:6px;overflow:hidden;margin:2px 0 8px}
+.rp-bar .fill{height:100%;background:var(--primary);border-radius:6px;transition:width .4s}
+.rp-sum{margin-top:10px;background:var(--card-2);border-radius:10px;padding:10px 14px;font-size:13.5px;color:var(--ink)}
+@media (max-width:520px){
+  .onboard-modal{max-width:92vw}
+  .ob-list{max-width:100%}
+}

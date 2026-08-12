@@ -82,13 +82,27 @@
       card.innerHTML = '<div class="cc-row"><span>☁️ 云同步：<b>未配置</b></span></div><div class="cc-sub">在代码中填入 Supabase 项目地址与 Key 并重新构建部署后，即可启用邮箱登录与云端备份（见部署指南）。</div>';
       return;
     }
+    /* v11.6: 上次同步时间（localStorage 记录） */
+    function lastSyncText(){
+      try{
+        var v = localStorage.getItem('ielts-lastsync');
+        if(!v) return '';
+        var d = new Date(v), s = Math.round((Date.now() - d) / 1000);
+        if(s < 60) return '刚刚';
+        if(s < 3600) return Math.round(s/60) + ' 分钟前';
+        if(s < 86400) return Math.round(s/3600) + ' 小时前';
+        return '昨天';
+      }catch(e){ return ''; }
+    }
+    var syncInfo = '<div class="cc-row"><span>🔄 上次同步：<b>' + (lastSyncText() || '尚未同步') + '</b></span><button class="btn btn-ghost btn-sm" id="cc-sync" type="button">立即同步</button></div>';
     if(sessionUser){
-      card.innerHTML = '<div class="cc-row"><span>☁️ 已登录：<b>' + esc(sessionUser.email || sessionUser.id) + '</b></span><button class="btn btn-ghost btn-sm" id="cc-logout" type="button">退出登录</button></div><div class="cc-sub">学习进度与设置会自动云端同步，换设备 / 清缓存不丢失。</div>';
+      card.innerHTML = '<div class="cc-row"><span>☁️ 已登录：<b>' + esc(sessionUser.email || sessionUser.id) + '</b></span><button class="btn btn-ghost btn-sm" id="cc-logout" type="button">退出登录</button></div><div class="cc-sub">学习进度与设置会自动云端同步，换设备 / 清缓存不丢失。</div>' + syncInfo;
     } else {
       card.innerHTML = '<div class="cc-row"><span>☁️ 未登录（数据仅存本机）</span><button class="btn btn-primary btn-sm" id="cc-login" type="button">登录 / 注册</button></div><div class="cc-sub">登录后进度自动云端备份，换设备不丢失。</div>';
     }
     var l = document.getElementById('cc-login'); if(l) l.addEventListener('click', openLoginModal);
     var o = document.getElementById('cc-logout'); if(o) o.addEventListener('click', doLogout);
+    var sy = document.getElementById('cc-sync'); if(sy) sy.addEventListener('click', function(){ loadFromCloud(); });
   }
 
   /* ---------- 登录弹窗 ---------- */
@@ -203,6 +217,8 @@
       };
       var r = await c.from(TABLE).upsert(payload, { onConflict: 'user_id' });
       if(r && r.error) throw r.error;
+      try{ localStorage.setItem('ielts-lastsync', new Date().toISOString()); }catch(e){}
+      renderCloudCard();
     }catch(e){
       console.error('[cloud] push error', e);
       var now = Date.now();
@@ -226,6 +242,16 @@
     var out = {};
     var keys = new Set(Object.keys(a || {}).concat(Object.keys(b || {})));
     keys.forEach(function(k){ out[k] = Math.max((a && a[k]) || 0, (b && b[k]) || 0); });
+    return out;
+  }
+  /* v11.6: dayStats 按日合并（今日正确率 {n,c,w}）——n 较大者胜并保留其 c/w */
+  function mergeDayStats(a, b){
+    var out = {};
+    var keys = new Set(Object.keys(a || {}).concat(Object.keys(b || {})));
+    keys.forEach(function(k){
+      var av = (a && a[k]) || {n:0,c:0,w:0}, bv = (b && b[k]) || {n:0,c:0,w:0};
+      out[k] = (bv.n > av.n) ? bv : av;
+    });
     return out;
   }
   function mergeState(cloud, local){
@@ -263,6 +289,7 @@
     out.review = mergeByLast(base.review, local.review);
     out.notebook = mergeByLast(base.notebook, local.notebook);
     out.activity = mergeActivity(base.activity, local.activity);
+    out.dayStats = mergeDayStats(base.dayStats, local.dayStats);
     return out;
   }
   async function loadFromCloud(){
@@ -283,6 +310,8 @@
         if(typeof applyAppearance === 'function') applyAppearance();
         if(typeof applyPracticePrefs === 'function') applyPracticePrefs();
         toast('☁️ 已同步云端进度');
+        try{ localStorage.setItem('ielts-lastsync', new Date().toISOString()); }catch(e){}
+        renderCloudCard();
       } else {
         pushNow();
       }
@@ -340,6 +369,16 @@
     if(ee) ee.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ var p = document.getElementById('lm-pass'); if(p) p.focus(); } });
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLoginModal(); });
   }
+
+  /* v11.6: 切回前台时自动拉取云端合并（30s 节流；合并规则按 mergeState 无损处理） */
+  var lastAutoSyncAt = 0;
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden || !sessionUser || !cloudReady()) return;
+    var now = Date.now();
+    if(now - lastAutoSyncAt < 30000) return;
+    lastAutoSyncAt = now;
+    loadFromCloud();
+  });
 
   function init(){
     ensureTopbarUI();

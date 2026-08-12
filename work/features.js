@@ -75,7 +75,9 @@ function renderLearnList(){
     if(!q) return true;
     return w.w.toLowerCase().includes(q) || w.c.includes(learnQuery.trim()) ||
       w.s.some(s=>s.toLowerCase().includes(q)) || w.e.toLowerCase().includes(q) ||
-      (w.rt||'').toLowerCase().includes(q) || (w.af||'').toLowerCase().includes(q);
+      (w.rt||'').toLowerCase().includes(q) || (w.af||'').toLowerCase().includes(q) ||
+      (w.d||'').toLowerCase().includes(q) || (w.note||'').toLowerCase().includes(q) ||
+      (w.mn||'').toLowerCase().includes(q) || (w.pos||'').toLowerCase().includes(q);
   });
   if(lastLearnQ !== q){ lastLearnQ = q; learnLimit = 100; }
   const box = $('#learn-list');
@@ -138,8 +140,7 @@ function renderFlashCard(){
   flash.curKey = shown;
   $('#flash-card').classList.remove('flipped');
   $('#flash-front').innerHTML = '<div class="f-word">'+escapeHtml(shown)+'</div>'+
-    (fwd ? '<div class="f-cn">'+escapeHtml(e.c)+'</div>' : '<div class="f-cn">找出与它意思相同的单词</div>')+
-    '<div class="f-hint">点击卡片翻转</div>';
+    (fwd ? '<div class="f-hint">点击卡片翻转查看释义</div>' : '<div class="f-cn">找出与它意思相同的单词</div><div class="f-hint">点击卡片翻转</div>');
   const synChips = e.s.map(s=>'<button class="syn-chip" data-speak="'+escapeHtml(s)+'">'+escapeHtml(s)+'</button>').join('');
   $('#flash-back').innerHTML =
     (fwd ? '<div class="f-word">'+escapeHtml(e.w)+'</div><div class="f-cn">'+escapeHtml(e.c)+'</div>' : '<div class="f-syns">'+synChips+'</div>')+
@@ -173,6 +174,8 @@ function importProgress(file){
       if(!obj || typeof obj!=='object' || !Array.isArray(obj.wordbook)) throw new Error('文件格式不正确');
       const s = defaultState();
       Object.keys(s).forEach(k=>{ if(obj[k]!==undefined) s[k]=obj[k]; });
+      /* v11.6: 懒加载键也一并还原（旧版导入会丢 星标/复习/错题/活动） */
+      ['starred','review','notebook','activity','dayStats'].forEach(k=>{ if(obj[k]!==undefined) s[k]=obj[k]; });
       if(typeof s.daily!=='object' || s.daily===null) s.daily={date:'',count:0};
       if(typeof s.stats!=='object' || s.stats===null) s.stats={};
       state = s; saveState(); renderHeaderStats(); renderStats();
@@ -327,7 +330,7 @@ renderStats = function(){ _rsV3(); renderCheckinPanel(); };
 
 
 /* ================= v4: 设置 + 专区 + 新模式 ================= */
-function defaultSettings(){ return { voice:'auto', rate:0.85, theme:'light', font:'m', pCount:10, pDir:'forward', book:'all', pHint:'c', layout:'auto', remindOn:false, remindTime:'20:00' }; }
+function defaultSettings(){ return { voice:'auto', rate:0.85, theme:'light', font:'m', pCount:10, pDir:'forward', book:'all', pHint:'c', layout:'auto', remindOn:false, remindTime:'20:00', voiceName:'' }; }
 function sett(){ if(!state.settings || typeof state.settings!=='object') state.settings = defaultSettings(); return state.settings; }
 function saveSett(patch){ state.settings = Object.assign(sett(), patch||{}); saveState(); applyAppearance(); renderSettings(); scheduleReminder(); }
 /* v11.5 P5: 每日提醒（前台 Notification；页面打开时到点触发，浏览器会节流后台标签页定时器） */
@@ -397,8 +400,9 @@ function renderSettings(){
     const c1 = WORDS.filter(w=>w.lv==='1').length, c2 = WORDS.filter(w=>w.lv==='2').length, c3 = WORDS.filter(w=>w.lv==='3').length;
     let m1=0,m2=0,m3=0,m4=0,m5=0;
     WORDS.forEach(w=>{ const l=masteryLevel(w.w); if(l===5)m5++; else if(l===4)m4++; else if(l===3)m3++; else if(l===2)m2++; else m1++; });
-    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.5<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🔤 词根词缀：学术词标词根+词缀+记忆提示；🔀 近义词辨析：高频同义词用法区分（单词详情可看）<br>⭐ 星标收藏 + 🔔 每日提醒（设置里开启）+ 🎯 错题主题分析<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：艾宾浩斯遗忘曲线复习调度 + 统计页「遗忘曲线 / 学习热力图 / 复习看板」可视化<br>📱 手机适配：手机自动切换手机版布局，也可在「外观」手动选 手机版/桌面版<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入备份。';
+    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.6<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🔤 词根词缀：学术词标词根+词缀+记忆提示；🔀 近义词辨析：高频同义词用法区分（单词详情可看）<br>⭐ 星标收藏 + 🔔 每日提醒（设置里开启）+ 🎯 错题主题分析 + 📋 今日学习报告<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：艾宾浩斯遗忘曲线复习调度 + 统计页「遗忘曲线 / 学习热力图 / 复习看板」可视化<br>📱 手机适配：手机自动切换手机版布局，也可在「外观」手动选 手机版/桌面版<br>🔊 发音：设置里可切 英音/美音/具体语音 + 语速，并有语音检测与试听<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入/导出图片/打印 PDF 备份。';
   }
+  renderVoiceInfo();
 }
 function applyPracticePrefs(){
   const s = sett();
@@ -428,6 +432,8 @@ function bindSettingsEvents(){
   });
   const rmt = $('#set-remind-time'); if(rmt) rmt.addEventListener('change', ()=>{ if(rmt.value) saveSett({remindTime:rmt.value}); });
   on('#set-export', ()=>{ if(typeof exportProgress==='function') exportProgress(); });
+  on('#set-export-img', ()=>{ if(typeof exportImage==='function') exportImage(); });
+  on('#set-export-pdf', ()=>{ if(typeof exportPDF==='function') exportPDF(); });
   on('#set-import-btn', ()=>{ const f=$('#set-import-file'); if(f) f.click(); });
   const imp = $('#set-import-file');
   if(imp) imp.addEventListener('change', e=>{ if(e.target.files && e.target.files[0] && typeof importProgress==='function') importProgress(e.target.files[0]); e.target.value=''; });
@@ -436,16 +442,19 @@ function bindSettingsEvents(){
 /* ---- 语音设置：口音 + 语速 ---- */
 speak = function(text, rate){
   const s = sett();
-  const acc = s.voice || 'auto';
   const r = (typeof rate==='number') ? rate : (s.rate || 0.85);
   if(!('speechSynthesis' in window)){ toast('当前浏览器不支持语音合成，请使用 Chrome / Edge'); return; }
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   let v = null;
-  if(acc==='us') v = voices.find(x=>x.lang==='en-US') || voices.find(x=>x.lang && x.lang.startsWith('en'));
-  else v = voices.find(x=>x.lang==='en-GB') || voices.find(x=>x.lang && x.lang.startsWith('en'));
+  if(s.voiceName){ v = voices.find(x=>x.name===s.voiceName) || null; }
+  if(!v){
+    const acc = s.voice || 'auto';
+    if(acc==='us') v = voices.find(x=>x.lang==='en-US') || voices.find(x=>x.lang && x.lang.startsWith('en'));
+    else v = voices.find(x=>x.lang==='en-GB') || voices.find(x=>x.lang && x.lang.startsWith('en'));
+  }
   if(v) u.voice = v;
-  u.lang = (v && v.lang) || (acc==='us' ? 'en-US' : 'en-GB');
+  u.lang = (v && v.lang) || (s.voice==='us' ? 'en-US' : 'en-GB');
   u.rate = r;
   speechSynthesis.speak(u);
 };/* ---- 专区过滤：听力 / 书写 ---- */
@@ -931,7 +940,7 @@ function renderBookWordList(){
   if(lastBookLv !== bookLv){ lastBookLv = bookLv; bookLimit = 100; }
   const lvEl = $('#book-levels');
   if(lvEl){ lvEl.innerHTML = levelChips(bookLv); lvEl.onclick = e=>{ const b=e.target.closest('[data-lv]'); if(b){ bookLv=b.dataset.lv; renderBookWordList(); } }; }
-  let list = q ? ws.filter(w=>w.w.toLowerCase().includes(q) || w.c.includes(curBookQuery.trim()) || w.s.some(s=>s.toLowerCase().includes(q)) || w.e.toLowerCase().includes(q) || (w.rt||'').toLowerCase().includes(q) || (w.af||'').toLowerCase().includes(q)) : ws;
+  let list = q ? ws.filter(w=>w.w.toLowerCase().includes(q) || w.c.includes(curBookQuery.trim()) || w.s.some(s=>s.toLowerCase().includes(q)) || w.e.toLowerCase().includes(q) || (w.rt||'').toLowerCase().includes(q) || (w.af||'').toLowerCase().includes(q) || (w.d||'').toLowerCase().includes(q) || (w.note||'').toLowerCase().includes(q) || (w.mn||'').toLowerCase().includes(q) || (w.pos||'').toLowerCase().includes(q)) : ws;
   if(bookLv!=='all') list = list.filter(w=>String(w.lv)===bookLv);
   if(!list.length){ box.innerHTML = '<div class="empty">'+(bookLv!=='all' ? '该难度下没有单词' : '没有找到与「<b>'+escapeHtml(curBookQuery.trim())+'</b>」匹配的单词')+'</div>'; return; }
   const shown = list.slice(0, bookLimit);
@@ -1029,18 +1038,20 @@ var FEATURES = [
     {t:'每日目标与打卡', d:'可调每日目标；每天首次练习自动打卡，也可手动；连续打卡统计'},
     {t:'星标收藏', d:'单词卡片/详情点 ⭐ 收藏，词库可按「⭐ 已收藏」筛选'},
     {t:'每日提醒', d:'设置里开启后，到点浏览器通知提醒复习当天到期单词'},
-    {t:'发音', d:'英音/美音切换、语速调节；单词、例句整句朗读'},
+    {t:'今日学习报告', d:'统计页按日汇总：今日练习/正确率/连续打卡/明日待复习/薄弱主题+建议'},
+    {t:'发音', d:'英音/美音/具体语音 + 语速，设置里可检测本机语音并试听；单词、例句整句朗读'},
     {t:'外观', d:'浅色/深色/跟随系统 + 字号调节（5 档）+ 布局（手机自动切换手机版，可手动强制）'}
   ]},
   { cat:'💾 数据', items:[
     {t:'云端同步', d:'邮箱登录后进度自动云端同步，换设备不丢'},
-    {t:'备份与恢复', d:'一键导出/导入备份；可重置全部数据'}
+    {t:'备份与恢复', d:'一键导出/导入备份；学习小结可导出图片 / 打印 PDF；可重置全部数据'}
   ]},
   { cat:'📣 反馈', items:[
     {t:'反馈建议', d:'设置页反馈表单（留邮箱可收到回复）'}
   ]}
 ];
 var FEATURE_LOG = [
+  {v:'v11.6', t:'发音设置补全 / 闪卡修正 / 新手引导 / 今日学习报告 / 技术体验（搜索·导出·云同步）'},
   {v:'v11.5', t:'增强：单词星标 / 每日提醒 / 错题主题分析'},
   {v:'v11.4', t:'扩词：写作图表词 / 口语Part2专题 / 学术短语动词 词书 + 近义词辨析'},
   {v:'v11.3', t:'手机布局优化（自动/手动切换）'},
@@ -1347,6 +1358,7 @@ applyRoute();
 
 /* ================= v10.3: 首页更新内容 ================= */
 var UPDATES = [
+  {d:'2026-08-12', v:'v11.6', t:'体验完善：发音设置补全（语音检测/试听/具体语音）+ 闪卡正面去中文 + 新手引导 + 今日学习报告 + 搜索强化/导出图片PDF/云同步优化'},
   {d:'2026-08-11', v:'v11.5', t:'增强：单词星标收藏（词库按⭐筛选）+ 每日提醒（浏览器通知）+ 错题主题分析（统计页看薄弱主题）'},
   {d:'2026-08-11', v:'v11.4', t:'扩词：写作图表词 / 口语Part2专题 / 学术短语动词 三本新词书 + 近义词辨析（单词详情可看用法区分）'},
   {d:'2026-08-11', v:'v11.3', t:'手机布局优化：手机自动切换手机版（导航/筛选单行滑动、紧凑排版），设置可手动选 手机版/桌面版'},
@@ -1409,6 +1421,11 @@ recordAnswer = function(w, ok){
   /* P2: 每日活动记录（热力图数据源；懒加载 state.activity，云合并见 cloud.js mergeActivity） */
   if(!state.activity || typeof state.activity!=='object') state.activity = {};
   state.activity[todayStr()] = (state.activity[todayStr()]||0) + 1;
+  /* v11.6: 今日正确率数据（dayStats 按日 {n,c,w}，学习报告用） */
+  if(!state.dayStats || typeof state.dayStats!=='object') state.dayStats = {};
+  const ds = state.dayStats[todayStr()] || {n:0,c:0,w:0};
+  ds.n++; ok ? ds.c++ : ds.w++;
+  state.dayStats[todayStr()] = ds;
   /* 补丁（不升版本）：每天首次练习自动打卡（手动打卡按钮保留，幂等） */
   if(!Array.isArray(state.checkins)) state.checkins = [];
   if(!state.checkins.includes(todayStr())) state.checkins.push(todayStr());
@@ -1638,3 +1655,176 @@ function wrongTopicPanel(){
 const _v11star_stats = renderStats;
 renderStats = function(){ _v11star_stats(); wrongTopicPanel(); };
 scheduleReminder(); // 初始化：页面加载时若有提醒设置则重新武装
+
+/* ================= v11.6: 体验完善批处理 ================= */
+
+/* ---- A. 发音设置补全：语音检测 + 具体语音下拉 + 试听 ---- */
+function enVoices(){ return voices.filter(v=>v && v.lang && String(v.lang).toLowerCase().indexOf('en')===0); }
+function renderVoiceInfo(){
+  const el = $('#voice-detail'); if(!el) return;
+  const s = sett();
+  const en = enVoices();
+  const gb = en.filter(v=>/en[-_ ]?gb/i.test(v.lang));
+  const us = en.filter(v=>/en[-_ ]?us/i.test(v.lang));
+  let html = '';
+  if(!('speechSynthesis' in window)){
+    html = '⚠️ 当前浏览器不支持语音合成，请使用 Chrome / Edge。';
+  } else if(!en.length){
+    html = '⚠️ 本机未检测到英文语音，发音可能无声。可在系统「时间和语言 → 语音」或浏览器设置里添加英文语音包。';
+  } else {
+    html = '🖥️ 本机英文语音：英音 <b>'+gb.length+'</b> 个 · 美音 <b>'+us.length+'</b> 个'+(gb.length ? '' : '（未装英音语音包，英音将与美音同音）');
+    if(en.length > 1){
+      html += '<span class="voice-pick">具体语音 <select id="voice-name">' +
+        '<option value="">跟随上方口音设置</option>' +
+        en.map(v=>'<option value="'+escapeHtml(v.name)+'"'+(s.voiceName===v.name?' selected':'')+'>'+escapeHtml(v.name)+'（'+(v.lang||'')+'）</option>').join('') +
+        '</select></span>';
+    }
+    html += '<button class="btn btn-ghost btn-sm voice-prev" id="voice-preview" type="button">🔊 试听</button>';
+  }
+  el.innerHTML = html;
+  const sel = $('#voice-name');
+  if(sel) sel.onchange = function(){ saveSett({voiceName: sel.value}); };
+  const pv = $('#voice-preview');
+  if(pv) pv.onclick = function(){ speak('IELTS vocabulary practice, international English language testing system'); };
+}
+if('speechSynthesis' in window){
+  try { speechSynthesis.addEventListener('voiceschanged', function(){ if($('#voice-detail')) renderVoiceInfo(); }); } catch(e){}
+}
+
+/* ---- B. 新手引导（首次访问 3 步） ---- */
+var OB_SLIDES = [
+  {icon:'🎯', t:'欢迎来到 雅思同义替换训练营', d:'用「同义替换」的方式记雅思词：每个词都带 3+ 个同义表达，一个词顶一组词。', items:['🎧 听力专区：抓同义替换、听写拼写、听音选义','✍️ 书写专区：写作 Task1 图表词 + Task2 论证词']},
+  {icon:'🧠', t:'智能记忆，越练越熟', d:'每词有掌握度 5 级；答对按 1/3/7/15/30 天自动安排复习，答错自动进错题本。', items:['📅 每天先看首页「今日待复习」，把到期词刷掉','📊 统计页看遗忘曲线、学习热力图、今日学习报告']},
+  {icon:'🚀', t:'推荐路径：从一本词书开始', d:'按目标挑一本词书：浏览 → 闪卡 → 练习，一路刷到「掌握」。', items:['📚 新手推荐「内置词库」，或按 真题/听力/写作 挑','⚙️ 设置里可登录邮箱，进度自动云端同步']}
+];
+function renderOnboardSlide(i){
+  const slide = $('#ob-slide'); if(!slide) return;
+  const s = OB_SLIDES[i] || OB_SLIDES[0];
+  slide.innerHTML = '<div class="ob-icon">'+s.icon+'</div>'+
+    '<div class="ob-title">'+escapeHtml(s.t)+'</div>'+
+    '<div class="ob-desc">'+escapeHtml(s.d)+'</div>'+
+    (s.items ? '<ul class="ob-list">'+s.items.map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ul>' : '');
+  const dots = $('#ob-dots'); if(dots) dots.innerHTML = OB_SLIDES.map(function(_,j){ return '<span class="ob-dot'+(j===i?' on':'')+'" data-ob="'+j+'"></span>'; }).join('');
+  const next = $('#ob-next'); if(next) next.textContent = (i >= OB_SLIDES.length-1) ? '🚀 开始学习' : '下一步 →';
+  const prev = $('#ob-prev'); if(prev) prev.style.visibility = i===0 ? 'hidden' : 'visible';
+}
+function maybeShowOnboard(){
+  try { if(localStorage.getItem('ielts-onboard-v1')) return; } catch(e){ return; }
+  const m = $('#onboard-modal'); if(!m) return;
+  var st = { i: 0 };
+  m.classList.remove('hidden');
+  renderOnboardSlide(0);
+  const show = function(i){ st.i = i; renderOnboardSlide(i); };
+  const close = function(){ m.classList.add('hidden'); try { localStorage.setItem('ielts-onboard-v1','1'); } catch(e){} };
+  const pv = $('#ob-prev'); if(pv) pv.onclick = function(){ show(Math.max(0, st.i-1)); };
+  const nx = $('#ob-next'); if(nx) nx.onclick = function(){ if(st.i >= OB_SLIDES.length-1){ close(); } else { show(st.i+1); } };
+  const sk = $('#ob-skip'); if(sk) sk.onclick = close;
+  const dots = $('#ob-dots'); if(dots) dots.onclick = function(e){ const d = e.target.closest('[data-ob]'); if(d) show(+d.dataset.ob); };
+  m.addEventListener('click', function(e){ if(e.target === m) close(); });
+}
+
+/* ---- C. 今日学习报告（统计页面板） ---- */
+function dayStatsStore(){ if(!state.dayStats || typeof state.dayStats!=='object') state.dayStats = {}; return state.dayStats; }
+function tomorrowStr(){ const d = new Date(); d.setDate(d.getDate()+1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function renderReportPanel(){
+  const sec = $('#view-stats'); if(!sec) return;
+  let panel = $('#report-panel');
+  if(!panel){ panel = document.createElement('div'); panel.className = 'panel'; panel.id = 'report-panel'; sec.appendChild(panel); }
+  const t = todayStr();
+  const ds = dayStatsStore()[t] || {n:0,c:0,w:0};
+  const acc = ds.n ? Math.round(ds.c/ds.n*100) : 0;
+  const goal = state.goal || 30;
+  const dueNow = (typeof dueWords==='function') ? dueWords().length : 0;
+  let tomorrowDue = 0;
+  try { const rv = reviewStore(), tm = tomorrowStr(); tomorrowDue = Object.keys(rv).filter(w=>rv[w].next===tm).length; } catch(e){}
+  let weakTip = '';
+  try {
+    const nb = notebookStore(), ws = Object.keys(nb);
+    if(ws.length){
+      const byT = {};
+      ws.forEach(w=>{ const e = WORDS.find(x=>x.w===w); if(!e) return; const tt = e.t||'core'; byT[tt]=(byT[tt]||0)+(nb[w].count||1); });
+      const top = Object.keys(byT).sort((a,b)=>byT[b]-byT[a])[0];
+      const tp = TOPICS.find(x=>x.id===top);
+      const bookMap = { env:'camb', academic:'nawl', core:'default', health:'zhenjing', travel:'camb', work:'spoken', edu:'awl', shopping:'part2', living:'spoken', feelings:'band9' };
+      weakTip = '<div class="rp-row"><span class="rp-l">最薄弱主题</span><span class="rp-v">'+(tp?tp.icon+' '+tp.name:top)+' — 推荐刷「'+escapeHtml(bookMap[top]||'default')+'」</span></div>';
+    }
+  } catch(e){}
+  let sum;
+  if(!ds.n && !dueNow && !tomorrowDue) sum = '今天还没开始，去刷几个词热热身吧 💪';
+  else if(ds.n && acc >= 90) sum = '正确率 '+acc+'%，状态极佳，继续保持！🌟';
+  else if(ds.n && acc >= 70) sum = '正确率 '+acc+'%，整体不错，薄弱点可以回头看看错题本。👍';
+  else if(ds.n) sum = '正确率 '+acc+'%，别灰心——把错题重练一遍，效果更好。💪';
+  else sum = '今天有 '+dueNow+' 个到期词，先清掉再学新的。📅';
+  const barPct = goal ? Math.min(100, Math.round(ds.n/goal*100)) : 0;
+  panel.innerHTML = '<h3>📋 今日学习报告 <span style="font-weight:400;color:var(--muted)">（'+t+'）</span></h3>'+
+    '<div class="rp-row"><span class="rp-l">今日练习</span><span class="rp-v">'+ds.n+' / '+goal+' 词</span></div>'+
+    '<div class="rp-bar"><div class="fill" style="width:'+barPct+'%"></div></div>'+
+    '<div class="rp-row"><span class="rp-l">今日正确率</span><span class="rp-v">'+acc+'%</span></div>'+
+    '<div class="rp-row"><span class="rp-l">连续打卡</span><span class="rp-v">'+(state.streak||0)+' 天（累计 '+(Array.isArray(state.checkins)?state.checkins.length:0)+' 天）</span></div>'+
+    '<div class="rp-row"><span class="rp-l">复习任务</span><span class="rp-v">今日 '+dueNow+' 词到期 · 明日 '+tomorrowDue+' 词</span></div>'+
+    weakTip +
+    '<div class="rp-sum">'+sum+'</div>';
+}
+const _v116_stats = renderStats;
+renderStats = function(){ _v116_stats(); renderReportPanel(); };
+
+/* ---- D. 导出图片 / 打印 PDF（学习小结） ---- */
+function exportImage(){
+  const t = todayStr();
+  const ds = dayStatsStore()[t] || {n:0,c:0,w:0};
+  const acc = ds.n ? Math.round(ds.c/ds.n*100) : 0;
+  const canvas = document.createElement('canvas');
+  canvas.width = 1200; canvas.height = 700;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#f4f6fb'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#0f1b33'; ctx.font = '700 44px "Microsoft YaHei",sans-serif';
+  ctx.fillText('雅思同义替换训练营 · 学习小结', 60, 90);
+  ctx.font = '400 26px "Microsoft YaHei",sans-serif'; ctx.fillStyle = '#5a6b8c';
+  ctx.fillText(t, 60, 135);
+  const boxes = [
+    ['今日练习', ds.n+' / '+(state.goal||30)+' 词'],
+    ['今日正确率', acc+'%'],
+    ['连续打卡', (state.streak||0)+' 天'],
+    ['累计打卡', (Array.isArray(state.checkins)?state.checkins.length:0)+' 天']
+  ];
+  ctx.font = '600 24px "Microsoft YaHei",sans-serif';
+  boxes.forEach(function(b,i){
+    const x = 60 + (i%2)*560, y = 200 + Math.floor(i/2)*150;
+    ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#e2e8f4'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(x,y,500,110,14); else ctx.rect(x,y,500,110);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#8a9bbf'; ctx.fillText(b[0], x+24, y+44);
+    ctx.fillStyle = '#0f1b33'; ctx.font = '700 34px "Microsoft YaHei",sans-serif';
+    ctx.fillText(b[1], x+24, y+90);
+    ctx.font = '600 24px "Microsoft YaHei",sans-serif';
+  });
+  ctx.fillStyle = '#9aa7c4'; ctx.font = '400 22px "Microsoft YaHei",sans-serif';
+  ctx.fillText('· 雅思同义替换训练营 · 免费雅思学习网站 · 设置页可导出完整备份', 60, 630);
+  const a = document.createElement('a');
+  a.download = 'ielts-report-'+t+'.png';
+  a.href = canvas.toDataURL('image/png');
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('已导出学习小结图片 ✅');
+}
+function exportPDF(){
+  const t = todayStr();
+  const ds = dayStatsStore()[t] || {n:0,c:0,w:0};
+  const acc = ds.n ? Math.round(ds.c/ds.n*100) : 0;
+  const w = window.open('', '_blank');
+  if(!w){ toast('浏览器拦截了打印窗口，请允许弹窗'); return; }
+  w.document.write('<html><head><meta charset="utf-8"><title>雅思学习小结 '+t+'</title>'+
+    '<style>body{font-family:"Microsoft YaHei",sans-serif;padding:40px;color:#1a2438}h1{font-size:26px}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{border:1px solid #d8e0ef;padding:14px 16px;text-align:left}th{background:#f1f5fb}td.k{color:#8a9bbf;width:150px;font-weight:600}.note{color:#9aa7c4;margin-top:30px}</style></head><body>'+
+    '<h1>雅思同义替换训练营 · 学习小结</h1><p>'+t+'</p>'+
+    '<table><tr><th>指标</th><th>数值</th></tr>'+
+    '<tr><td class="k">今日练习</td><td>'+ds.n+' / '+(state.goal||30)+' 词</td></tr>'+
+    '<tr><td class="k">今日正确率</td><td>'+acc+'%</td></tr>'+
+    '<tr><td class="k">连续打卡</td><td>'+(state.streak||0)+' 天</td></tr>'+
+    '<tr><td class="k">累计打卡</td><td>'+(Array.isArray(state.checkins)?state.checkins.length:0)+' 天</td></tr>'+
+    '</table><p class="note">· 雅思同义替换训练营 · 免费雅思学习网站</p>'+
+    '</body></html>');
+  w.document.close();
+  setTimeout(function(){ w.focus(); w.print(); }, 300);
+}
+
+maybeShowOnboard(); // v11.6 新手引导：首次访问展示

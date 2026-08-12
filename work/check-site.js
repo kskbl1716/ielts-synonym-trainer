@@ -36,9 +36,9 @@ const get = (url, headers) => new Promise((res) => {
   ];
   for (const [name, ok] of markers) T('标记:' + name, ok200 && ok, ok ? '存在' : '缺失');
 
-  /* 词数：数 WORDS 数组条目（原始 HTML 里是内联 JS，渲染数字不在源码中） */
-  const ws = home.body.match(/const WORDS = \[([\s\S]*?)\n\];/);
-  const wordCount = ws ? (ws[1].match(/\{t:'/g) || []).length : 0;
+  /* 词数：数 WORDS_RAW 元组条目（v11.6 起词库为紧凑元组序列化，每行一个 [ 开头元组） */
+  const ws = home.body.match(/const WORDS_RAW=\[([\s\S]*?)\n\];/);
+  const wordCount = ws ? (ws[1].match(/\n\[/g) || []).length : 0;
   T('词库 WORDS 计数', wordCount === 6533, 'count=' + wordCount);
 
   /* 2. 静态文件 */
