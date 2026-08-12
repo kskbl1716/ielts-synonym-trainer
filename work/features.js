@@ -400,7 +400,7 @@ function renderSettings(){
     const c1 = WORDS.filter(w=>w.lv==='1').length, c2 = WORDS.filter(w=>w.lv==='2').length, c3 = WORDS.filter(w=>w.lv==='3').length;
     let m1=0,m2=0,m3=0,m4=0,m5=0;
     WORDS.forEach(w=>{ const l=masteryLevel(w.w); if(l===5)m5++; else if(l===4)m4++; else if(l===3)m3++; else if(l===2)m2++; else m1++; });
-    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.6<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🔤 词根词缀：学术词标词根+词缀+记忆提示；🔀 近义词辨析：高频同义词用法区分（单词详情可看）<br>⭐ 星标收藏 + 🔔 每日提醒（设置里开启）+ 🎯 错题主题分析 + 📋 今日学习报告<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：艾宾浩斯遗忘曲线复习调度 + 统计页「遗忘曲线 / 学习热力图 / 复习看板」可视化<br>📱 手机适配：手机自动切换手机版布局，也可在「外观」手动选 手机版/桌面版<br>🔊 发音：设置里可切 英音/美音/具体语音 + 语速，并有语音检测与试听<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入/导出图片/打印 PDF 备份。';
+    ab.innerHTML = '📚 词库共 <b>'+WORDS.length+'</b> 词（🎧 听力 '+zl+' · ✍️ 书写 '+zw+'）· 版本 v11.7<br>🔵 基础 '+c1+' · 🟢 进阶 '+c2+' · 🔴 高级 '+c3+'（在词库/词书/练习里可按难度筛选）<br>🔤 词根词缀：学术词标词根+词缀+记忆提示；🔀 近义词辨析：高频同义词用法区分（单词详情可看）<br>⭐ 星标收藏 + 🔔 每日提醒（设置里开启）+ 🎯 错题主题分析 + 📋 今日学习报告<br>🎯 掌握度：陌生 '+m1+' · 认识 '+m2+' · 模糊 '+m3+' · 掌握 '+m4+' · 熟练 '+m5+'<br>🧠 智能记忆：艾宾浩斯遗忘曲线复习调度 + 统计页「遗忘曲线 / 学习热力图 / 复习看板」可视化<br>📱 手机适配：手机自动切换手机版布局，也可在「外观」手动选 手机版/桌面版<br>🔊 发音：设置里可切 英音/美音/具体语音 + 语速，并有语音检测与试听<br>🎧 听力专区：听录音抓同义替换、听写拼写、听音选义，对应雅思听力场景。<br>✍️ 书写专区：写作 Task 1 图表词汇与 Task 2 论证词汇，对应雅思写作高频表达。<br>💾 数据只存本机浏览器，登录账号后进度自动云端同步，也可用「数据管理」导出/导入/导出图片/打印 PDF 备份。';
   }
   renderVoiceInfo();
 }
@@ -517,6 +517,7 @@ renderQuestion = function(){
   if(prac.type==='dict'){ renderDict(q); return; }
   if(prac.type==='word2cn'){ renderW2C(q); return; }
   if(prac.type==='l2cn'){ renderL2C(q); return; }
+  if(prac.type==='syn'){ renderSyn(q); return; }
   _v4rq();
 };
 function distractorCn(entry, n){
@@ -883,8 +884,10 @@ function renderBooksShelf(){
     const ws = bookWords(b.id);
     const cnt = ws.length;
     const m = ws.filter(w=>isMastered(w.w)).length;
+    const pct = cnt ? Math.round(m/cnt*100) : 0;
     return '<div class="book-card" data-book="'+escapeHtml(b.id)+'">'+
       '<span class="bk-ico">'+escapeHtml(b.icon)+'</span>'+
+      '<span class="bk-ring'+(cnt?'' : ' empty')+'" style="--p:'+pct+'" title="完成度 '+pct+'%（已掌握 '+m+'/'+cnt+'）"><span class="in">'+pct+'%</span></span>'+
       '<span class="bk-name">'+escapeHtml(b.name)+'</span>'+
       '<span class="bk-desc">'+escapeHtml(b.desc)+'</span>'+
       '<span class="bk-foot"><span>'+cnt+' 词</span><span>'+escapeHtml(bookSourceShort(b))+'</span><span class="bk-flag '+(cnt>0 ? (m>0?'live':'soon') : 'soon')+'">'+(cnt>0 ? ('已掌握 '+m) : '该词书将在后续版本接入')+'</span></span>'+
@@ -1020,14 +1023,15 @@ var FEATURES = [
     {t:'词库', d:'全量雅思词汇，可按 专区/主题/词书/难度/词根 筛选；搜索支持单词/同义词/中文/词根'},
     {t:'词书', d:'多本词书：内置词库/真题高频/听力拼写/雅思真经/学术词汇 AWL/Band9 高分表达/牛津基础/NAWL 学术新词/口语话题/口语Part2专题/剑桥18-20/写作图表词/学术短语动词；每本可浏览/背诵/练习'},
     {t:'闪卡', d:'看词想义，认识/不认识，快速过词'},
-    {t:'练习', d:'6 种题型：选择题/配对题/听力题/听写/看词选义/听音选义 + 背诵模式（顺序/乱序，错词自动重背）'}
+    {t:'练习', d:'6 种题型：选择题/配对题/听力题/听写/看词选义/听音选义 + 背诵模式（顺序/乱序，错词自动重背）'},
+    {t:'同义替换挑战', d:'专项练习：句内替换 4 选 1（正向/反向/混合），答对连击，练「同义替换」技能'}
   ]},
   { cat:'🧠 智能记忆', items:[
     {t:'掌握度 5 级', d:'陌生/认识/模糊/掌握/熟练，由练习记录自动判定'},
     {t:'艾宾浩斯复习', d:'答对按 1/3/7/15/30 天自动安排复习，首页「今日待复习」一键刷到期词；答错重置并计入错题本'},
     {t:'遗忘曲线图', d:'统计页按你的复习间隔自动绘制记忆强度曲线'},
     {t:'学习热力图', d:'统计页 12 周学习足迹，每天练习自动记录'},
-    {t:'错题本', d:'答错自动记录，统计页查看并一键重练；「错题主题分析」看你的薄弱主题并推荐词书'}
+    {t:'错题本', d:'答错自动记录并立即进入今日复习队列，统计页可一键重练；「错题主题分析」看你的薄弱主题并推荐词书'}
   ]},
   { cat:'🔤 词根词缀 · 🔀 近义词辨析', items:[
     {t:'词根拆解', d:'学术词标注 词根+词缀+记忆提示，单词详情点开即看'},
@@ -1040,7 +1044,8 @@ var FEATURES = [
     {t:'每日提醒', d:'设置里开启后，到点浏览器通知提醒复习当天到期单词'},
     {t:'今日学习报告', d:'统计页按日汇总：今日练习/正确率/连续打卡/明日待复习/薄弱主题+建议'},
     {t:'发音', d:'英音/美音/具体语音 + 语速，设置里可检测本机语音并试听；单词、例句整句朗读'},
-    {t:'外观', d:'浅色/深色/跟随系统 + 字号调节（5 档）+ 布局（手机自动切换手机版，可手动强制）'}
+    {t:'外观', d:'浅色/深色/跟随系统 + 字号调节（5 档）+ 布局（手机自动切换手机版，可手动强制）'},
+    {t:'键盘快捷键', d:'WASD / 方向键 选答案 · 空格 下一题 / 翻转 · 左/上=认识 · 右/下=不认识'}
   ]},
   { cat:'💾 数据', items:[
     {t:'云端同步', d:'邮箱登录后进度自动云端同步，换设备不丢'},
@@ -1051,6 +1056,7 @@ var FEATURES = [
   ]}
 ];
 var FEATURE_LOG = [
+  {v:'v11.7', t:'同义替换专项挑战 / 键盘快捷键 / 错题入复习队列 / 词书完成度环形 / 每日一词高级化'},
   {v:'v11.6', t:'发音设置补全 / 闪卡修正 / 新手引导 / 今日学习报告 / 技术体验（搜索·导出·云同步）'},
   {v:'v11.5', t:'增强：单词星标 / 每日提醒 / 错题主题分析'},
   {v:'v11.4', t:'扩词：写作图表词 / 口语Part2专题 / 学术短语动词 词书 + 近义词辨析'},
@@ -1358,6 +1364,7 @@ applyRoute();
 
 /* ================= v10.3: 首页更新内容 ================= */
 var UPDATES = [
+  {d:'2026-08-12', v:'v11.7', t:'同义替换专项挑战（句内替换·连击）+ 键盘快捷键（WASD/方向键/空格）+ 错题自动进复习队列 + 词书完成度环形 + 每日一词改高级词汇'},
   {d:'2026-08-12', v:'v11.6', t:'体验完善：发音设置补全（语音检测/试听/具体语音）+ 闪卡正面去中文 + 新手引导 + 今日学习报告 + 搜索强化/导出图片PDF/云同步优化'},
   {d:'2026-08-11', v:'v11.5', t:'增强：单词星标收藏（词库按⭐筛选）+ 每日提醒（浏览器通知）+ 错题主题分析（统计页看薄弱主题）'},
   {d:'2026-08-11', v:'v11.4', t:'扩词：写作图表词 / 口语Part2专题 / 学术短语动词 三本新词书 + 近义词辨析（单词详情可看用法区分）'},
@@ -1415,7 +1422,8 @@ recordAnswer = function(w, ok){
     r.lapses = (r.lapses||0) + 1;
     nb[w] = { count:(nb[w]?nb[w].count:0)+1, last:todayStr() };
   }
-  r.next = addDays(r.int);
+  /* v11.7: 答错立即到期（混入今日待复习）；答对按 1/3/7/15/30 天 */
+  r.next = ok ? addDays(r.int) : todayStr();
   r.last = todayStr();
   rv[w] = r;
   /* P2: 每日活动记录（热力图数据源；懒加载 state.activity，云合并见 cloud.js mergeActivity） */
@@ -1828,3 +1836,93 @@ function exportPDF(){
 }
 
 maybeShowOnboard(); // v11.6 新手引导：首次访问展示
+
+/* ================= v11.7: 同义替换专项挑战 + 学习深度 ================= */
+
+/* ---- A. 同义替换挑战（练习类型 syn）：句内替换 4 选 1，正/反向 + 连击 ---- */
+var synCombo = 0, synBest = 0;
+function synDistractors(correct, shown, n){
+  const pool = [];
+  WORDS.forEach(function(w){ (w.s||[]).forEach(function(s){ if(s!==correct && s!==shown && !pool.includes(s)) pool.push(s); }); });
+  return shuffle(pool).slice(0, n);
+}
+function renderSyn(word){
+  const w = word || prac.queue[prac.idx];
+  const s = (w.s && w.s.length) ? w.s : [w.w];
+  const dir = pDir === 'forward' ? true : (pDir === 'reverse' ? false : (Math.random() < 0.5));
+  const shown = dir ? w.w : s[Math.floor(Math.random()*s.length)];
+  const correct = dir ? s[Math.floor(Math.random()*s.length)] : w.w;
+  const opts = shuffle([correct].concat(synDistractors(correct, shown, 3)));
+  prac.q = { type:'syn', fwd:dir, correct, opts, shown, w:w.w, cn:w.c, e:w.e, k:w.k, s:w.s };
+  if(prac.idx === 0){ synCombo = 0; synBest = 0; }
+  $('#quiz-body').innerHTML =
+    '<div class="syn-combo" id="syn-combo">'+(synCombo>=2 ? '🔥 连击 '+synCombo : '')+'</div>'+
+    '<div class="q-card">'+
+      '<div class="syn-q-word"><span class="w">'+escapeHtml(prac.q.shown)+'</span> <button class="icon-btn" id="syn-speak" type="button">🔊</button></div>'+
+      (prac.q.e ? '<div class="syn-q-ex">📝 '+highlight(prac.q.e, prac.q.k)+'</div>' : '')+
+      '<div class="syn-q-hint">'+(prac.q.fwd ? '选出能替换句中加粗词的高分同义表达' : '选出加粗表达对应的基础词')+'</div>'+
+      '<div class="opts">'+prac.q.opts.map(function(o,i){ return '<button class="opt" data-opt="'+escapeHtml(o)+'"><span class="k">'+(i+1)+'</span>'+escapeHtml(o)+'</button>'; }).join('')+'</div>'+
+      '<div class="feedback" id="feedback"></div>'+
+      '<div class="next-row hidden" id="next-row"><button class="btn btn-primary btn-sm" id="next-btn">下一题 →</button></div>'+
+    '</div>';
+  const sp = $('#syn-speak'); if(sp) sp.addEventListener('click', function(){ speak(prac.q.shown); });
+  const nb = $('#next-btn'); if(nb) nb.addEventListener('click', nextQuestion);
+  bindOptionClicks();
+}
+/* 连击：包装 answer（syn 模式按对错累计/清零） */
+const _v117_ans = answer;
+answer = function(btn){
+  const isSyn = prac && prac.type === 'syn';
+  const wasRight = isSyn && !prac.answered && prac.q && btn.dataset.opt === prac.q.correct;
+  _v117_ans(btn);
+  if(isSyn){
+    if(wasRight){ synCombo++; if(synCombo > synBest) synBest = synCombo; }
+    else synCombo = 0;
+    const el = $('#syn-combo');
+    if(el) el.textContent = synCombo >= 2 ? '🔥 连击 '+synCombo : '';
+  }
+};
+/* 结算：syn 显示最佳连击 */
+const _v117_end = endPractice;
+endPractice = function(){
+  const isSyn = prac && prac.type === 'syn';
+  _v117_end();
+  if(isSyn && synBest >= 2){
+    const sub = $('#res-sub');
+    if(sub) sub.innerHTML = '同义替换专项 · 🔥 最佳连击 '+synBest + (sub.innerHTML ? ' · ' + sub.innerHTML : '');
+  }
+};
+
+/* ---- B. 键盘快捷键：WASD / 方向键 / 空格 ---- */
+document.addEventListener('keydown', function(e){
+  const k = e.key;
+  const t = e.target;
+  if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+  if(document.querySelector('.modal-mask:not(.hidden)')) return;
+  /* 练习答题：WASD/方向键 选 4 选项，空格=下一题（需练习视图激活，避免切走后误触） */
+  const practiceActive = $('#view-practice') && $('#view-practice').classList.contains('active');
+  const opts = $$('#quiz-body .opt');
+  if(opts.length && prac && prac.type !== 'match' && practiceActive && $('#practice-game') && !$('#practice-game').classList.contains('hidden')){
+    const map = { w:0, ArrowUp:0, a:1, ArrowLeft:1, s:2, ArrowDown:2, d:3, ArrowRight:3 };
+    if(k in map){ e.preventDefault(); const b = opts[map[k]]; if(b && !b.disabled) b.click(); return; }
+    if(k === ' '){ e.preventDefault(); const nb = $('#next-btn'); if(nb) nb.click(); return; }
+    return;
+  }
+  /* 空格：闪卡翻转 */
+  if(k === ' '){
+    if($('#flash-game') && !$('#flash-game').classList.contains('hidden')){ e.preventDefault(); const fc = $('#flash-card'); if(fc) fc.click(); return; }
+  }
+  /* 认识/不认识：A←/W↑ = 是，D→/S↓ = 否（闪卡 + 背诵） */
+  const yesKey = { a:1, ArrowLeft:1, w:1, ArrowUp:1 };
+  const noKey = { d:1, ArrowRight:1, s:1, ArrowDown:1 };
+  if(k in yesKey || k in noKey){
+    const recVisible = $('#book-recite') && !$('#book-recite').classList.contains('hidden');
+    const flVisible = $('#flash-game') && !$('#flash-game').classList.contains('hidden');
+    if(recVisible || flVisible){
+      e.preventDefault();
+      const yes = k in yesKey;
+      const btn = recVisible ? (yes ? $('#br-yes') : $('#br-no')) : (yes ? $('#flash-yes') : $('#flash-no'));
+      if(btn) btn.click();
+    }
+  }
+});

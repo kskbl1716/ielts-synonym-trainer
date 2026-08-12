@@ -411,3 +411,19 @@ html[data-font="xl"] .btn{font-size:16px}
   .onboard-modal{max-width:92vw}
   .ob-list{max-width:100%}
 }
+
+/* ===== v11.7: 同义替换挑战 / 词书完成度环形 / 快捷键提示 ===== */
+.book-card{position:relative}
+.syn-combo{min-height:22px;text-align:center;font-size:13px;font-weight:700;color:var(--amber);margin-bottom:8px}
+.syn-q-word{font-size:30px;font-weight:800;text-align:center;padding:8px 0}
+.syn-q-word .w{color:var(--primary)}
+.syn-q-word .icon-btn{vertical-align:middle;margin-left:6px}
+.syn-q-ex{font-size:13.5px;color:var(--muted);text-align:center;padding:8px 12px;background:var(--card-2);border-radius:10px;margin:8px 0;line-height:1.7}
+.syn-q-ex mark{background:var(--amber-l);color:var(--ink);font-weight:700;border-radius:4px;padding:0 3px}
+.syn-q-hint{font-size:12.5px;color:var(--muted);text-align:center;margin-bottom:12px}
+.bk-ring{position:absolute;top:12px;right:12px;width:42px;height:42px;border-radius:50%;background:conic-gradient(var(--primary) calc(var(--p,0)*1%), var(--line-2) 0);display:flex;align-items:center;justify-content:center;z-index:1}
+.bk-ring .in{width:32px;height:32px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--primary);font-size:10px}
+.bk-ring.empty{opacity:.35}
+.shortcut-hint{font-size:12px;color:var(--muted);margin-top:10px;text-align:center;line-height:1.6}
+html[data-layout="mobile"] .bk-ring{width:36px;height:36px;top:8px;right:8px}
+html[data-layout="mobile"] .bk-ring .in{width:27px;height:27px;font-size:9px}
