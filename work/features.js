@@ -47,7 +47,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeWordDetail()
 $('#wm-word-head').addEventListener('click', e=>{ const t=e.target.closest('[data-speak]'); if(t) speak(t.dataset.speak); });
 $('#wm-body').addEventListener('click', e=>{
   const tb = e.target.closest('.book-tag[data-book]');
-  if(tb){ if(typeof learnBook!=='undefined') learnBook = tb.dataset.book; switchView('learn'); return; }
+  if(tb){ if(typeof learnBook!=='undefined') learnBook = tb.dataset.book; closeWordDetail(); switchView('learn'); return; }
   const chip = e.target.closest('[data-w]');
   if(chip){ const cw=chip.dataset.w; if(dictOf(cw)){ openWordDetail(cw); } else { speak(cw); } return; }
   const t = e.target.closest('[data-speak]');
@@ -174,8 +174,8 @@ function importProgress(file){
       if(!obj || typeof obj!=='object' || !Array.isArray(obj.wordbook)) throw new Error('文件格式不正确');
       const s = defaultState();
       Object.keys(s).forEach(k=>{ if(obj[k]!==undefined) s[k]=obj[k]; });
-      /* v11.6: 懒加载键也一并还原（旧版导入会丢 星标/复习/错题/活动） */
-      ['starred','review','notebook','activity','dayStats'].forEach(k=>{ if(obj[k]!==undefined) s[k]=obj[k]; });
+      /* v11.6: 懒加载键也一并还原（旧版导入会丢 星标/复习/错题/活动）；v11.7fix 补 recite */
+      ['starred','review','notebook','activity','dayStats','recite'].forEach(k=>{ if(obj[k]!==undefined) s[k]=obj[k]; });
       if(typeof s.daily!=='object' || s.daily===null) s.daily={date:'',count:0};
       if(typeof s.stats!=='object' || s.stats===null) s.stats={};
       state = s; saveState(); renderHeaderStats(); renderStats();

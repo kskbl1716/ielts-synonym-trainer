@@ -254,6 +254,18 @@
     });
     return out;
   }
+  /* v11.7fix: 背诵进度合并——每本书按 last 日期较新者胜（幂等，避免丢弃本机背诵累计） */
+  function mergeRecite(a, b){
+    var out = { books: {} };
+    var ba = (a && a.books) || {}, bb = (b && b.books) || {};
+    Object.keys(ba).concat(Object.keys(bb)).forEach(function(id){
+      var av = ba[id], bv = bb[id];
+      if(!av){ out.books[id] = bv; return; }
+      if(!bv){ out.books[id] = av; return; }
+      out.books[id] = (String(bv.last || '') > String(av.last || '')) ? bv : av;
+    });
+    return out;
+  }
   function mergeState(cloud, local){
     var base = JSON.parse(JSON.stringify(cloud && typeof cloud === 'object' ? cloud : {}));
     var out = Object.assign(defaultState(), base);
@@ -261,8 +273,12 @@
     Object.keys(base.stats || {}).forEach(function(w){ st[w] = base.stats[w]; });
     Object.keys(local.stats || {}).forEach(function(w){
       var l = local.stats[w], b = st[w];
-      if(!b){ st[w] = l; }
-      else if((l && (l.seen || 0)) > (b && (b.seen || 0))){ st[w] = l; }
+      if(!b){ st[w] = l; return; }
+      /* v11.7fix: correct/wrong 分别取 max（不丢错题、保持幂等），seen=correct+wrong 保底不小于原值 */
+      var correct = Math.max((l && l.correct) || 0, (b && b.correct) || 0);
+      var wrong = Math.max((l && l.wrong) || 0, (b && b.wrong) || 0);
+      var seen = Math.max(correct + wrong, (l && l.seen) || 0, (b && b.seen) || 0);
+      st[w] = { seen: seen, correct: correct, wrong: wrong };
     });
     out.stats = st;
     out.wordbook = Array.from(new Set((base.wordbook || []).concat(local.wordbook || [])));
@@ -270,7 +286,8 @@
     out.checkins = Array.from(new Set((base.checkins || []).concat(local.checkins || []))).sort();
     var lLast = local.lastDate || '', bLast = base.lastDate || '';
     if(lLast > bLast){
-      out.streak = local.streak || 0;
+      /* v11.7fix: 本机日期更新时连续天数取 max，避免小值覆盖云端大 streak */
+      out.streak = Math.max(local.streak || 0, base.streak || 0);
       out.lastDate = local.lastDate;
       out.daily = Object.assign({ date: '', count: 0 }, local.daily || {});
     } else if(lLast === bLast && lLast){
@@ -290,6 +307,7 @@
     out.notebook = mergeByLast(base.notebook, local.notebook);
     out.activity = mergeActivity(base.activity, local.activity);
     out.dayStats = mergeDayStats(base.dayStats, local.dayStats);
+    out.recite = mergeRecite(base.recite, local.recite);
     return out;
   }
   async function loadFromCloud(){
