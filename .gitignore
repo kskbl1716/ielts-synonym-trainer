@@ -11,3 +11,19 @@ work/.e2e-profile/
 work/.push-gh-tmp/
 # V10 批次校验中间产物（不入库）
 work/_archive/.m5-*
+
+# ---- 2026-08-21 补：本地状态/依赖/备份，不入库 ----
+# 备份目录（构建前/回滚前的手动快照，体积大且本地留痕即可）
+backups/
+# 本地依赖（独立 node 装的包，源码不应含）
+work/node_modules/
+work/package-lock.json
+work/package.json
+# Edge 调试浏览器 profile（e2e 起 Edge 9223 的残留）
+work/_edge-dbg/
+# 各 agent / 工具的本地会话状态
+.dsh/
+.playwright-mcp/
+# 根目录截图（Claude 窗口截图等临时产物）
+/*.png
+
