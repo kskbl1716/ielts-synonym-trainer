@@ -100,9 +100,12 @@ let html = fs.readFileSync(OUT, 'utf8');
 const cut = (from, to, keepTo) => {
   const i = html.indexOf(from);
   if (i < 0) return false;
+  /* 向前跳过标记前的空白/换行，避免重复 build 时空白累积 */
+  let s = i;
+  while (s > 0 && ' \t\r\n'.includes(html[s-1])) s--;
   const j = to === null ? html.length : html.indexOf(to, i + from.length);
   if (j < 0) throw new Error('anchor missing: ' + to);
-  html = html.slice(0, i) + (keepTo ? html.slice(j) : html.slice(j + to.length));
+  html = html.slice(0, s) + (keepTo ? html.slice(j) : html.slice(j + to.length));
   return true;
 };
 while (cut(JS_MARK, '</script>', true)) {}
@@ -266,7 +269,7 @@ const styleBlocks = [];
   while ((mm = re.exec(html))) styleBlocks.push(mm[1]);
   html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/g, '');
 }
-let baseCss = styleBlocks.filter(s => !s.includes('/*===BOOT===*/')).join('\n');
+let baseCss = styleBlocks.filter(s => !s.includes('/*===BOOT===*/')).join('\n').replace(/\/\*===FULL===\*\//g, '');
 /* 去掉上一次注入的 features.css（CSS_START .. CSS_END 标记之间），保证幂等 */
 const cssStart = baseCss.indexOf('/*@CSS_START@*/');
 if (cssStart >= 0){
@@ -276,8 +279,8 @@ if (cssStart >= 0){
 /* 兼容旧格式：base 里若还残留 CSS_MARK 注释（旧 features.css 头部），只保留其前部分 */
 const markAt = baseCss.indexOf(CSS_MARK);
 if (markAt >= 0) baseCss = baseCss.slice(0, markAt);
-const minifiedCss = minify(fs.readFileSync('work/features.css', 'utf8').replace(/^﻿/, ''));
-const fullCss = baseCss + '\n/*@CSS_START@*/\n' + minifiedCss + '\n/*@CSS_END@*/';
+const minifiedCss = minify(fs.readFileSync('work/features.css', 'utf8').replace(/^﻿/, '')).trim();
+const fullCss = baseCss.trim() + '\n/*@CSS_START@*/\n' + minifiedCss + '\n/*@CSS_END@*/';
 const bootStyle = '<style>/*===BOOT===*/html,body{margin:0}.view{display:none}.view.active{display:block}.modal-mask.hidden{display:none}</style>';
 const headEnd = html.indexOf('</head>');
 if (headEnd < 0) throw new Error('</head> not found');

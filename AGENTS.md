@@ -3,6 +3,87 @@
 > 本文件由维护会话生成，用于在会话上下文丢失后快速恢复项目状态。
 > 任何在此目录下工作的 Codex 或 Kimi Code 会话都会自动加载本文件。阅读顺序：先读本文件 → 再读 DEPLOY.md → 需要时看 work/_archive/ 里的历史脚本。
 
+---
+
+## ⭐ 雅思站项目维护知识（核心速查 · 改代码前先读这一节再动手）
+
+> 本节是维护提示词的沉淀，标记为「雅思站项目维护知识」。下面列的是**最关键、最容易踩坑**的事实；详细版本记录与展开说明见下方各节。
+
+### 一、项目是什么
+- 单文件静态雅思词汇网站，线上 https://kskbl1716.github.io/ielts-synonym-trainer/ ，词库 **6533 词 / 13 本词书**。
+- GitHub 仓库 `kskbl1716/ielts-synonym-trainer`，本地目录 `C:\Users\哈哈哈\Documents\Codex\2026-08-04\zu`。
+
+### 二、最关键架构事实（防幻觉，改代码前必读）
+- `work/app.js` 是**过期快照**，build.js 不注入它！真实状态核心（`defaultState`/`loadState`/`recordAnswer`/`isMastered`）**内联在 `outputs/index.html`**。
+- 一切新功能走 `work/features.js` 的 **monkey-patch**（`const _vN = 原函数; 原函数 = function(){...}` 保存引用再重赋值）；**改基础功能才改 `outputs/index.html`**。
+- 弹窗 HTML 在 `work/modal.html`（build 注入 `</main>` 前），**不是** outputs/index.html 里的旧弹窗。
+- 词库是紧凑元组序列化：`WORDS_K`（字段名数组）+ `WORDS_RAW`（元组）+ `map` 映射回对象。**改词要改源文件**（work/ 下 v4~v10 词表、rootdata、synnote 等）再由 build.js 重生成，**别直接改 outputs 里的 WORDS**。
+- `recordAnswer(w, ok)` 是**唯一收口**（所有练习/闪卡/背诵都经过它），统计/SRS/打卡/错题都挂这里一次全覆盖。
+- state 懒加载键：`review/notebook/starred/activity/dayStats/recite`（不在 defaultState，用 `xxxStore()` 懒加载）。
+- build.js 幂等标记：`JS_MARK/CSS_MARK/*===WORDS_START===*//*@CSS_START@*/` 等；minify 会剥掉 features.js 首行注释，注入时重新补标记头，保证重复构建不双注入。
+
+### 三、构建与推送流程
+1. 改 `work/` 下源码
+2. `node work/build.js`          # 构建到 outputs/index.html，无报错
+3. `cp outputs/index.html index.html`   # 根目录是 Pages 部署的
+4. `git add -A && git commit -m "说明"`
+5. `node work/push-gh.js`        # 推送（**不是 git push！**）
+6. `node work/check-site.js`     # 线上体检（词数断言 6533）
+
+### 四、各种坑（务必避开）
+- **GitHub 主域被墙**，禁止 `git push/git pull`，推送一律 `node work/push-gh.js`（走 GitHub API）。
+- **GH_TOKEN 位置**：`~/.codex/config.toml`（明文）+ Windows 系统环境变量。**严禁打印/回显它的值**，验证只判断存在（`process.env.GH_TOKEN` 是否为空），代码和对话不得出现真实密钥。
+- 中文/emoji 不要经 PowerShell 管道传给 node（编码坑），用文件或 heredoc 传参。
+- 词条格式：`k` 必须逐字出现在例句 `e` 里（多词动词用实际时态形式，如 grow→grew）；`t` 用 10 个标准主题 id；`z` 用 l/w；一次加词 ≤500 条。
+- 云合并 `mergeState`（cloud.js）只保留认识的 key → **新增 state 键必须加合并分支**，否则登录丢数据；合并要幂等（用 max/last 取新，求和会翻倍）。
+- 导入 `importProgress` 只还原 defaultState 键 + 懒加载清单 → **新增懒加载键要补进清单**（recite 就是漏了才补的）。
+- 变量名冲突：`rt` 曾与设置语速控件冲突改 `rmt`；用 `var` 不用 `let`（base init 先于 features 执行，let 会 TDZ 崩溃）。
+- 每批改动跑校验 + e2e + 截图；新脚本入 `work/.push-filelist.txt`；不动 `backups/`。
+- e2e 依赖：本地 `python -m http.server 8000` + Edge `--remote-debugging-port=9223` 打开 localhost:8000，再 `node work/e2e-*.js`。
+
+### 五、更新协议
+- 推送权限：除重大更新（大功能/风险改动/涉及数据）需先确认，小更新/补丁可直接推送。
+- 每次更新同步日志：`work/features.js` 的 `UPDATES` 数组 + `AGENTS.md` 版本记录 + `DEPLOY.md` 当前状态 + 设置页「功能说明」（`FEATURES`/`FEATURE_LOG`）。
+- bug 修复**不标版本号**（保持当前版本，仅 AGENTS.md 记维护日志）。
+
+### 六、验证清单（一键 `node work/qa-all.js`）
+- `node work/qa-all.js`：语法 + 词数 6533 + 构建幂等 + e2e 全套（e2e 需先起 `http.server 8000` + Edge `9223`）
+- `node work/sync-logs.js`：确认 AGENTS/DEPLOY/UPDATES/FEATURE_LOG 四处日志版本一致
+- 推送后 `node work/check-site.js` 15 项全绿
+
+### 七、会话启动协议（新会话 5 分钟内做）
+1. 读本文件「核心速查」一节（架构事实 + 坑）
+2. 读 `DEPLOY.md` 当前状态
+3. `node work/sync-logs.js` 确认日志同步
+4. `node work/qa-all.js` 对基线（语法/词数/构建幂等；有 e2e 环境则全跑）
+5. 确认线上版本：curl 首页 grep `vX.Y` 标记
+
+### 八、范围复盘 checklist（改代码前强制过一遍）
+1. **做/不做清单**：明确这次动什么、绝不动什么
+2. **涉及文件清单**：列全要改的文件
+3. **风险分级**（决定「直接推」还是「先确认」）：
+   - 涉及 `recordAnswer` / `mergeState` / `importProgress` / `defaultState` / 懒加载清单 → **自动升为「重大更新，需确认」**
+   - 涉及 features.js monkey-patch / cloud.js → 中风险，测试后直接推
+   - 只改 CSS / 文案 / 元描述 → 低风险，直接推
+4. **挂接点**：要改的函数在哪、现有模式（monkey-patch 链 / DOM 结构 / 数据源）
+
+### 九、回滚 SOP
+1. 回滚前先把当前版本备份到 `backups/`（如 `backups/vX.Y-回滚前-YYYYMMDD/`）
+2. 找旧 commit：`git log --oneline -- outputs/index.html`
+3. 恢复旧产物：`git checkout <旧commit> -- outputs/index.html index.html`（或恢复旧源码后重新 `node work/build.js`）
+4. 重新构建确认：`node work/qa-all.js`
+5. 推送：`node work/push-gh.js`
+6. 验证：`node work/check-site.js`
+
+### 十、禁区清单（绝不碰，除非明确要求）
+- 本机网络组件：WireGuard 隧道 / 分流路由 / hosts / DNS（改前想清是否影响三条 agent 链路连通性）
+- 各 agent 配置：`~/.codex/config.toml`、`~/.kimi-code/config.toml`、`~/.claude/settings.json`
+- 3P 桌面版配置
+- 站点发布机制（`.github/workflows/pages.yml`、push-gh.js 的 token 机制）
+- `backups/` 目录
+
+---
+
 ## 项目路径与使用方式
 - 工作目录：`C:\Users\哈哈哈\Documents\Codex\2026-08-04\zu`
 - 在 Codex 中把该目录添加为「项目」即可，本手册会自动加载，无需其他配置
@@ -83,6 +164,7 @@ Copy-Item outputs\index.html index.html -Force
 - ⚠️ **HTML/CSS/JS 源码文件绝不能带 BOM**：v9 曾因模板 `outputs/index.html` 的 CSS_MARK 行首混入 U+FEFF，注入的 features.css 第一条规则 `.modal-mask` 选择器被污染成「不存在元素+后代选择器」整条失效，导致详情弹窗失去 fixed 定位/遮罩/居中（手机端卡住、电脑端显示不全）。build.js 已加防御（读取 features.css 时剥掉开头 BOM），但写 `outputs/index.html` 时仍要用无 BOM 的 UTF-8 写入。
 
 ## 版本记录
+- 非版本更新（2026-08-13，bug 修复批次，不升版本号）：**排查修复数据正确性 + 交互 + 性能**（换 pro 模型全面排查三 agent 并行 + 亲自交叉验证）。① **云同步丢数据**：`mergeState` 补 `mergeRecite`（背诵进度 `recite.books` 按 last 取新——此前完全未合并，离线背完联网被云端旧值覆盖且写坏云端）；streak 合并改 `Math.max`（此前 lastDate 较新时用本机小 streak 覆盖云端大值）；stats 逐词合并改 correct/wrong 分别取 max（此前 seen 大者整条胜→错题被洗白、掌握度失真；保持 seen=correct+wrong 幂等不翻倍）；② **导入漏键**：`importProgress` 懒加载清单补 `recite`；③ **交互 bug**：词库/词书同义词 chip 去 `data-speak`（消除基座/features 双监听「又发声又弹窗」）；复习/错题闪卡「再练一组」持久 `flashSessionMode`（此前 reviewMode 复位后二次刷全库；普通闪卡入口 `#flash-start` 显式清会话）；词书标签点击后 `closeWordDetail()`；④ **性能缓存**：建 `WORDS_BY_W` 索引 + `_bookWordsCache` + `_zoneCount/_lvCount` 计数缓存（消除加载期约 190 次 × 6533 全量遍历，~80% 重复劳动）；⑤ **兼容**：conic-gradient 降级（先 `background:var(--line-2)` 兜底）+ ydayStr 改 `setDate(-1)`（DST 安全）。**注意：activity/dayStats 合并保持取 max（求和会翻倍，属正确幂等方案，非 bug）**。e2e 六套全绿 + 合并逻辑单测 10/10 + 浏览器实测。
 - v11.7（2026-08-12，大更新）：**同义替换专项 + 学习深度**（纯代码无内容批次）。① **同义替换挑战**：新练习类型 `syn`（`#p-types` 加 type-card radio value="syn"），`renderQuestion` 加 `syn` 分派 → `renderSyn(word)` 构建 `prac.q={type:'syn',fwd,correct,opts,shown,w,cn,e,k,s}`——shown=基础词或随机同义词，correct=对应另一侧，opts=correct+3 干扰（`synDistractors` 从全库其他词 s 抽，去重）；出题带 k 高亮例句（`highlight` 输出 `<mark>`）+ 方向提示 + 4 `.opt`；判题/recordAnswer 复用 base `answer()`（渲染后自调 `bindOptionClicks()`）；连击 `synCombo/synBest`（包装 `answer` +1/清零，`endPractice` 包装把最佳连击写入 `#res-sub`）；首页 tools-grid 加「同义替换」入口卡。② **键盘快捷键**：document keydown——练习 WASD/方向键选 4 选项（W↑=1 A←=2 S↓=3 D→=4，`map` 查表 + `.click()`）、空格=下一题；闪卡 空格=翻转、A←/W↑=认识、D→/S↓=不认识；背诵同认识/不认识；守卫：INPUT/TEXTAREA/contentEditable、`.modal-mask:not(.hidden)`、**练习需 `#view-practice.active`**（否则残留练习状态会拦截切走后的按键——实测踩过）、`#flash-game`/`#book-recite` 可见性。③ **错题自动入复习队列**：recordAnswer 包装器改 `r.next = ok ? addDays(r.int) : todayStr()`（答错立即进今日待复习，答对维持 1/3/7/15/30）。④ **词书完成度环形**：`renderBooksShelf` 卡片加 `.bk-ring`（conic-gradient `--p` + 内层 `.in`，复用 goal-ring 模式；`.book-card{position:relative}` 在 features.css）。⑤ **每日一词改高级词汇**：base renderHome `#home-daily-word` 改从 `WORDS.filter(w=>String(w.lv)==='3')` 取（日期哈希种子不变，兜底全库）。⑥ 练习/闪卡加 `.shortcut-hint` 快捷键提示。页面版本号 v11.6→v11.7；e2e-v7/m2/m3/m4/v11-srs 全绿 + CDP 实测（syn 出题/连击/结算、键盘各模式、错题入队、环形、每日一词 3 天全 lv3）。
 - v11.6（2026-08-12，大更新）：**体验完善批处理**（纯代码无内容批次）。① **发音设置补全**：`defaultSettings` 加 `voiceName`；`speak` 优先精确匹配具体语音；`renderVoiceInfo()` 设置页检测本机英文语音（英/美计数+无英音提示）+ 具体语音下拉 `#voice-name` + 🔊试听；`voiceschanged` 时重渲染；② **闪卡修正**：`renderFlashCard` forward 正面去掉 `e.c` 中文（只剩单词+「点击卡片翻转查看释义」）；③ **新手引导**：modal.html 加 `#onboard-modal`，`maybeShowOnboard()` 首次访问 3 步引导（localStorage `ielts-onboard-v1`）；④ **今日学习报告**：`state.dayStats`（按日 {n,c,w}）在 recordAnswer 包装器累加；`renderReportPanel()` 统计页显示今日练习/正确率/连续打卡/明日待复习/薄弱主题/一句话总结；云合并加 `mergeDayStats`；⑤ **技术体验**：搜索过滤补 d/note/mn/pos（learn+book 两处）；`exportImage()`（canvas 小结 PNG）+ `exportPDF()`（打印窗口）+ 数据管理两按钮；`importProgress` 额外还原 starred/review/notebook/activity/dayStats；云同步 `renderCloudCard` 加「上次同步」+「立即同步」+ `visibilitychange` 自动拉取（30s 节流）；⑥ **SEO**：品牌改 `<h1>`（含关键词）、meta 描述词量更新 6500+/13本、build.js 把 `<style>` 移到 body 末尾（head 只留 ~1KB boot 样式）、词库改紧凑元组序列化（`WORDS_K`+`WORDS_RAW`+`map`，尾部空 rt/af/mn/note 省略）+ 注入段压缩，2.11MB→**1.71MB**。⚠️ **build.js 注意**：JS_MARK/CSS_MARK 是 features.js:1 / features.css:1 的注释，minify 会剥掉 → 注入时 JS 重新补 JS_MARK 头、CSS 用 `/*@CSS_START@*/../*@CSS_END@*/` 包裹（幂等）；词库块用 `/*===WORDS_START===*/../*===WORDS_END===*/` 包裹。e2e-v7/m2/m3/m4/v11-srs 全绿 + 浏览器实测（引导/闪卡/发音/报告/搜索/导出）。
 - v11.5（2026-08-11，大更新）：**增强**（P5，v11 收官，纯代码无内容批次）。① **单词星标**：`state.starred` 懒加载（仿 notebookStore），词卡 `.wc-top` ⭐ 按钮 + 弹窗脚部 `#wm-star` + 词库「⭐ 已收藏」筛选（learnStar 最外层 learnPool + `#learn-stars` chips）；云合并 `out.starred` 并集（cloud.js:242 后，仿 wordbook）；② **每日提醒**：`defaultSettings` 加 `remindOn/remindTime`，设置页「🔔 每日提醒」面板（开关 chips + `<input type="time">`），`scheduleReminder()` 前台 Notification（到点提醒今日待复习 N 词，递归次日）；**诚实限制：GitHub Pages 静态站无 SW/push，提醒在页面打开时生效，浏览器会节流后台标签页定时器**；③ **错题主题分析**：`wrongTopicPanel()` 统计页按 TOPICS 统计错题 + 建议薄弱主题词书（bookMap）。④ 修复 `rt` 变量与设置页语速控件冲突（改 `rmt`）；弹窗 HTML 在 `work/modal.html`（build 注入，勿改 outputs/index.html 里的旧弹窗）。页面版本号 v11.4→v11.5；e2e-v7/m2/m3/m4/v11-srs 全绿 + 浏览器实测（星标/筛选/主题分析/提醒设置）。⚠️ 惯例：**每次版本更新都要同步更新本版本记录 + features.js `UPDATES` 数组 + DEPLOY.md 当前状态 + 设置页「📖 网站功能说明」（`FEATURES`/`FEATURE_LOG` 数组，新功能/词书/题型往里加）**。

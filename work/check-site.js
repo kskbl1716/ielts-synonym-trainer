@@ -5,16 +5,48 @@
    只读，不改任何东西。
 */
 const https = require('https');
+const net = require('net');
 const fs = require('fs');
 const path = require('path');
 
 const SITE = 'https://kskbl1716.github.io/ielts-synonym-trainer/';
 const REPO_API = 'https://api.github.com/repos/kskbl1716/ielts-synonym-trainer';
 
+/* 可选：直连 api.github.com 不通时走 HTTP 代理（GH_PROXY=http://127.0.0.1:10808），CONNECT 隧道，与 push-gh.js 一致 */
+function proxyTunnel(proxy, hostname, port) {
+  return new Promise((resolve, reject) => {
+    let ph = proxy, pp = 80;
+    try { const u = new URL(proxy); ph = u.hostname; pp = u.port || 80; }
+    catch (e) { const i = proxy.indexOf('://'); const rest = (i >= 0 ? proxy.slice(i + 3) : proxy); const j = rest.lastIndexOf(':'); if (j > 0){ ph = rest.slice(0, j); pp = +rest.slice(j + 1); } }
+    const conn = net.connect(pp, ph, () => {
+      conn.write('CONNECT ' + hostname + ':' + port + ' HTTP/1.1\r\nHost: ' + hostname + ':' + port + '\r\nProxy-Connection: keep-alive\r\n\r\n');
+    });
+    let buf = '';
+    conn.on('data', function onData(d){
+      buf += d.toString('latin1');
+      if (buf.includes('\r\n\r\n')){
+        if (/HTTP\/1\.[01] 200/.test(buf)){ conn.removeListener('data', onData); resolve(conn); }
+        else { conn.destroy(); reject(new Error('CONNECT failed: ' + buf.slice(0, 80))); }
+      }
+    });
+    conn.on('error', reject);
+  });
+}
+
 const get = (url, headers) => new Promise((res) => {
-  https.get(url, { headers: Object.assign({ 'User-Agent': 'check-site.js' }, headers || {}) }, (r) => {
+  const u = new URL(url);
+  const opts = { headers: Object.assign({ 'User-Agent': 'check-site.js' }, headers || {}) };
+  /* 只有被墙的 api.github.com 走代理，github.io / Supabase 国内可直连（走代理反而慢） */
+  if (process.env.GH_PROXY && u.hostname === 'api.github.com'){
+    opts.createConnection = (o, cb) => {
+      proxyTunnel(process.env.GH_PROXY, o.hostname || o.host, o.port || 443).then(s => cb(null, s)).catch(cb);
+    };
+  }
+  const req = https.request(u, opts, (r) => {
     let d = ''; r.on('data', c => d += c); r.on('end', () => res({ status: r.statusCode, body: d }));
-  }).on('error', () => res({ status: 0, body: '' }));
+  });
+  req.on('error', () => res({ status: 0, body: '' }));
+  req.end();
 });
 
 (async () => {
