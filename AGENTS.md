@@ -24,17 +24,18 @@
 
 ### 三、构建与推送流程
 1. 改 `work/` 下源码
-2. `node work/build.js`          # 构建到 outputs/index.html，无报错
-3. `cp outputs/index.html index.html`   # 根目录是 Pages 部署的
+2. `node work/build.js`          # 构建到 outputs/（index.html + words.js + supabase.js），无报错
+3. `cp outputs/index.html index.html && cp outputs/words.js words.js && cp outputs/supabase.js supabase.js`   # 根目录是 Pages 部署的（三个文件都要复制）
 4. `git add -A && git commit -m "说明"`
 5. `node work/push-gh.js`        # 推送（**不是 git push！**）
-6. `node work/check-site.js`     # 线上体检（词数断言 6533）
+6. `node work/check-site.js`     # 线上体检（词数断言 6533 + words.js 可达）
 
 ### 四、各种坑（务必避开）
 - **GitHub 主域被墙**，禁止 `git push/git pull`，推送一律 `node work/push-gh.js`（走 GitHub API）。
 - **GH_TOKEN 位置**：`~/.codex/config.toml`（明文）+ Windows 系统环境变量。**严禁打印/回显它的值**，验证只判断存在（`process.env.GH_TOKEN` 是否为空），代码和对话不得出现真实密钥。
 - **DSH 进程可能不继承用户环境变量的 GH_TOKEN**：跑 push-gh.js / check-site.js 若报 `GH_TOKEN not set`，先注入 `$env:GH_TOKEN = [Environment]::GetEnvironmentVariable('GH_TOKEN','User')`（只判断存在，不回显值）。
 - 中文/emoji 不要经 PowerShell 管道传给 node（编码坑），用文件或 heredoc 传参。
+- （2026-08-21）dsh 的 pwsh 工具已升级为 PowerShell 7：管道默认 UTF-8，此坑在 PS7 下已缓解；PS5.1 或其他 shell 仍按原文处理。
 - 词条格式：`k` 必须逐字出现在例句 `e` 里（多词动词用实际时态形式，如 grow→grew）；`t` 用 10 个标准主题 id；`z` 用 l/w；一次加词 ≤500 条。
 - 云合并 `mergeState`（cloud.js）只保留认识的 key → **新增 state 键必须加合并分支**，否则登录丢数据；合并要幂等（用 max/last 取新，求和会翻倍）。
 - 导入 `importProgress` 只还原 defaultState 键 + 懒加载清单 → **新增懒加载键要补进清单**（recite 就是漏了才补的）。
@@ -112,8 +113,10 @@
 
 ## 目录结构与职责
 - `outputs/index.html`：**构建产物 + v1 基础模板**。v1 的 HTML/JS 只存在于这个文件里（work/ 没有独立的基础 HTML 源码）。改基础页面/基础 JS → 直接改这里，再跑构建。
-- `index.html`（仓库根）：部署用的副本，**构建后复制 outputs/index.html 覆盖它**，再提交推送。
-- `work/build.js`：构建脚本（幂等）。作用：清理上次注入 → 用 work/app.js + 各词库文件重写 WORDS 数组 → 注入 DICT、features.css、modal.html、features.js、cloud.js。
+- `outputs/words.js`：**词库（6533 词）外置产物**，由 build.js 生成（`WORDS_K`/`WORDS_RAW`/`WORDS`），占站点 86% 体积且极少随 UI 变动。index.html 以 `<script src="words.js">` 同步外链引入（拆分的 script 已显式补回 `'use strict'`）。
+- `outputs/supabase.js`：**Supabase JS 自托管副本**（钉死 2.112.3 UMD），由 build.js 从 `work/supabase.js` 复制。原走 `cdn.jsdelivr.net/npm/@supabase/supabase-js@2` 浮动版，改自托管避免 CDN 国内不稳 + 无发布时偷偷升级。
+- `index.html` / `words.js` / `supabase.js`（仓库根）：部署副本，**构建后复制 outputs/ 同名文件覆盖**，再提交推送（三个都要）。
+- `work/build.js`：构建脚本（幂等）。作用：清理上次注入 → 用 work/app.js + 各词库文件生成 words.js → 注入 DICT、features.css、modal.html、features.js、cloud.js → 复制 work/supabase.js 到 outputs/supabase.js。
 - `work/app.js`：v1 页面 JS 快照，build.js 只从中提取**原始 173 词**（改 app.js 不影响构建出的词库，只影响词条提取）。
 - 词库文件：`work/dict-data.js`（DICT 音标表 + NEW）、`work/v4-words.js`、`work/v5-words.js`（汇总 v5-a~f）、`work/v6-words.js`、`work/v7-words.js`（532 词，已接入 build.js）、`work/v8-words.js`（400 词，已接入 build.js）。
 - V10 词书系统：`work/books.js`（BOOKS 词书定义，build.js 注入页面并校验 `b` 字段 id）；词条 `b` 字段 = 词书 id 数组（一词多书、库里只有一条数据；老词 b=['default']，新书词不含 default）。M5 新词批次建议命名为 `work/v10-book-*.js`，接入 build.js 前先跑 validate 脚本。
@@ -158,13 +161,16 @@ Copy-Item outputs\index.html index.html -Force
 
 ## Windows 编码注意事项（踩过的坑，务必遵守）
 - **PowerShell 管道把中文/emoji 传给 node 会变 `?`**：中文内容一律先写文件（如 `[IO.File]::WriteAllText` UTF-8）再让 node 读文件，不要用管道传中文。
+- （2026-08-21）dsh 的 pwsh 工具已升级为 PowerShell 7：管道传中文/emoji 默认 UTF-8 正常，此条在 PS7 下已缓解；写文件传参仍是稳妥做法。
 - here-string 内容里若行首出现 `'@` 会提前截断外层 here-string，避免嵌套 here-string。
 - 改含中文/emoji 的文件：用 PowerShell `Set-Content -Encoding UTF8` 或 `[IO.File]::WriteAllText(path, text, UTF8)`。
 - `apply_patch` 曾在此环境报"拒绝访问"，必要时改用 PowerShell 写文件。
 - ps1 脚本务必保留 UTF-8 BOM（e2e-v5/fix 曾因缺 BOM 在 PS5.1 下中文乱码，已补）。
+- （2026-08-21）dsh 的 pwsh 工具已升级为 PowerShell 7：读取无 BOM 的 UTF-8 正常，此条在 PS7 下已缓解；PS5.1 仍按原文需 BOM。
 - ⚠️ **HTML/CSS/JS 源码文件绝不能带 BOM**：v9 曾因模板 `outputs/index.html` 的 CSS_MARK 行首混入 U+FEFF，注入的 features.css 第一条规则 `.modal-mask` 选择器被污染成「不存在元素+后代选择器」整条失效，导致详情弹窗失去 fixed 定位/遮罩/居中（手机端卡住、电脑端显示不全）。build.js 已加防御（读取 features.css 时剥掉开头 BOM），但写 `outputs/index.html` 时仍要用无 BOM 的 UTF-8 写入。
 
 ## 版本记录
+- 非版本更新（2026-08-21，架构优化，不升版本号）：**词库外置 + Supabase 自托管**。① **词库抽离**：`WORDS` 三元组从 index.html 内联改为独立 `outputs/words.js`（占页面 86% 体积且几乎不随 UI 变），index.html 用 `<script src="words.js"></script>` 同步外链——改 UI/修 bug 时用户不再重下整个词库（词库靠 ETag 304）。拆分点在原巨型 script 的 `WORDS_START` 标记处，**拆分后显式补回 `'use strict'`**（原 script 顶部有严格模式，不补则后半段退化为非严格）。index.html 1.72MB→247KB，words.js 1.48MB。② **Supabase 自托管**：`cdn.jsdelivr.net/npm/@supabase/supabase-js@2`（浮动版）→ 本地 `supabase.js`（钉死 2.112.3 UMD），build.js 从 `work/supabase.js` 复制到 outputs/。③ **工具链同步**：qa-all.js 词数断言/语法改读 words.js 并加「外链存在 + use strict 已补回」两项；check-site.js 加 words.js 可达/词数/线上本地一致性；release.js 多复制 words.js+supabase.js；push-filelist 加 4 条。验证：qa-all 7/7 绿（词数 6533、三连 build 哈希一致）+ e2e-v11-srs 12/12 + CDP 运行时实测（WORDS=6533、supabase.createClient 函数、7 个 view、首页 active）。
 - 非版本更新（2026-08-13，bug 修复批次，不升版本号）：**排查修复数据正确性 + 交互 + 性能**（换 pro 模型全面排查三 agent 并行 + 亲自交叉验证）。① **云同步丢数据**：`mergeState` 补 `mergeRecite`（背诵进度 `recite.books` 按 last 取新——此前完全未合并，离线背完联网被云端旧值覆盖且写坏云端）；streak 合并改 `Math.max`（此前 lastDate 较新时用本机小 streak 覆盖云端大值）；stats 逐词合并改 correct/wrong 分别取 max（此前 seen 大者整条胜→错题被洗白、掌握度失真；保持 seen=correct+wrong 幂等不翻倍）；② **导入漏键**：`importProgress` 懒加载清单补 `recite`；③ **交互 bug**：词库/词书同义词 chip 去 `data-speak`（消除基座/features 双监听「又发声又弹窗」）；复习/错题闪卡「再练一组」持久 `flashSessionMode`（此前 reviewMode 复位后二次刷全库；普通闪卡入口 `#flash-start` 显式清会话）；词书标签点击后 `closeWordDetail()`；④ **性能缓存**：建 `WORDS_BY_W` 索引 + `_bookWordsCache` + `_zoneCount/_lvCount` 计数缓存（消除加载期约 190 次 × 6533 全量遍历，~80% 重复劳动）；⑤ **兼容**：conic-gradient 降级（先 `background:var(--line-2)` 兜底）+ ydayStr 改 `setDate(-1)`（DST 安全）。**注意：activity/dayStats 合并保持取 max（求和会翻倍，属正确幂等方案，非 bug）**。e2e 六套全绿 + 合并逻辑单测 10/10 + 浏览器实测。
 - v11.7（2026-08-12，大更新）：**同义替换专项 + 学习深度**（纯代码无内容批次）。① **同义替换挑战**：新练习类型 `syn`（`#p-types` 加 type-card radio value="syn"），`renderQuestion` 加 `syn` 分派 → `renderSyn(word)` 构建 `prac.q={type:'syn',fwd,correct,opts,shown,w,cn,e,k,s}`——shown=基础词或随机同义词，correct=对应另一侧，opts=correct+3 干扰（`synDistractors` 从全库其他词 s 抽，去重）；出题带 k 高亮例句（`highlight` 输出 `<mark>`）+ 方向提示 + 4 `.opt`；判题/recordAnswer 复用 base `answer()`（渲染后自调 `bindOptionClicks()`）；连击 `synCombo/synBest`（包装 `answer` +1/清零，`endPractice` 包装把最佳连击写入 `#res-sub`）；首页 tools-grid 加「同义替换」入口卡。② **键盘快捷键**：document keydown——练习 WASD/方向键选 4 选项（W↑=1 A←=2 S↓=3 D→=4，`map` 查表 + `.click()`）、空格=下一题；闪卡 空格=翻转、A←/W↑=认识、D→/S↓=不认识；背诵同认识/不认识；守卫：INPUT/TEXTAREA/contentEditable、`.modal-mask:not(.hidden)`、**练习需 `#view-practice.active`**（否则残留练习状态会拦截切走后的按键——实测踩过）、`#flash-game`/`#book-recite` 可见性。③ **错题自动入复习队列**：recordAnswer 包装器改 `r.next = ok ? addDays(r.int) : todayStr()`（答错立即进今日待复习，答对维持 1/3/7/15/30）。④ **词书完成度环形**：`renderBooksShelf` 卡片加 `.bk-ring`（conic-gradient `--p` + 内层 `.in`，复用 goal-ring 模式；`.book-card{position:relative}` 在 features.css）。⑤ **每日一词改高级词汇**：base renderHome `#home-daily-word` 改从 `WORDS.filter(w=>String(w.lv)==='3')` 取（日期哈希种子不变，兜底全库）。⑥ 练习/闪卡加 `.shortcut-hint` 快捷键提示。页面版本号 v11.6→v11.7；e2e-v7/m2/m3/m4/v11-srs 全绿 + CDP 实测（syn 出题/连击/结算、键盘各模式、错题入队、环形、每日一词 3 天全 lv3）。
 - v11.6（2026-08-12，大更新）：**体验完善批处理**（纯代码无内容批次）。① **发音设置补全**：`defaultSettings` 加 `voiceName`；`speak` 优先精确匹配具体语音；`renderVoiceInfo()` 设置页检测本机英文语音（英/美计数+无英音提示）+ 具体语音下拉 `#voice-name` + 🔊试听；`voiceschanged` 时重渲染；② **闪卡修正**：`renderFlashCard` forward 正面去掉 `e.c` 中文（只剩单词+「点击卡片翻转查看释义」）；③ **新手引导**：modal.html 加 `#onboard-modal`，`maybeShowOnboard()` 首次访问 3 步引导（localStorage `ielts-onboard-v1`）；④ **今日学习报告**：`state.dayStats`（按日 {n,c,w}）在 recordAnswer 包装器累加；`renderReportPanel()` 统计页显示今日练习/正确率/连续打卡/明日待复习/薄弱主题/一句话总结；云合并加 `mergeDayStats`；⑤ **技术体验**：搜索过滤补 d/note/mn/pos（learn+book 两处）；`exportImage()`（canvas 小结 PNG）+ `exportPDF()`（打印窗口）+ 数据管理两按钮；`importProgress` 额外还原 starred/review/notebook/activity/dayStats；云同步 `renderCloudCard` 加「上次同步」+「立即同步」+ `visibilitychange` 自动拉取（30s 节流）；⑥ **SEO**：品牌改 `<h1>`（含关键词）、meta 描述词量更新 6500+/13本、build.js 把 `<style>` 移到 body 末尾（head 只留 ~1KB boot 样式）、词库改紧凑元组序列化（`WORDS_K`+`WORDS_RAW`+`map`，尾部空 rt/af/mn/note 省略）+ 注入段压缩，2.11MB→**1.71MB**。⚠️ **build.js 注意**：JS_MARK/CSS_MARK 是 features.js:1 / features.css:1 的注释，minify 会剥掉 → 注入时 JS 重新补 JS_MARK 头、CSS 用 `/*@CSS_START@*/../*@CSS_END@*/` 包裹（幂等）；词库块用 `/*===WORDS_START===*/../*===WORDS_END===*/` 包裹。e2e-v7/m2/m3/m4/v11-srs 全绿 + 浏览器实测（引导/闪卡/发音/报告/搜索/导出）。

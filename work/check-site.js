@@ -68,8 +68,12 @@ const get = (url, headers) => new Promise((res) => {
   ];
   for (const [name, ok] of markers) T('标记:' + name, ok200 && ok, ok ? '存在' : '缺失');
 
-  /* 词数：数 WORDS_RAW 元组条目（v11.6 起词库为紧凑元组序列化，每行一个 [ 开头元组） */
-  const ws = home.body.match(/const WORDS_RAW=\[([\s\S]*?)\n\];/);
+  /* 词数：词库已外置为独立 words.js，改从该文件抓取元组条目（每行一个 [ 开头元组）。
+     首页只需断言外链存在——它若丢失，页面拿不到词库会整站白屏。 */
+  T('标记:words.js 外链', ok200 && home.body.includes('<script src="words.js"></script>'), '外链存在');
+  const wjs = await get(SITE + 'words.js?_t=' + Date.now());
+  T('words.js 可达 HTTP 200', wjs.status === 200, 'status=' + wjs.status + ' size=' + Buffer.byteLength(wjs.body || ''));
+  const ws = (wjs.body || '').match(/const WORDS_RAW=\[([\s\S]*?)\n\];/);
   const wordCount = ws ? (ws[1].match(/\n\[/g) || []).length : 0;
   T('词库 WORDS 计数', wordCount === 6533, 'count=' + wordCount);
 
@@ -95,7 +99,12 @@ const get = (url, headers) => new Promise((res) => {
   const liveLen = Buffer.byteLength(home.body);
   const localLen = Buffer.byteLength(local);
   const diff = Math.abs(liveLen - localLen);
-  T('线上/本地一致性', diff < 100, '线上=' + liveLen + ' 本地=' + localLen + (diff === 0 ? '（逐字节一致）' : '（差异 ' + diff + 'B，容差内）'));
+  T('线上/本地一致性(index)', diff < 100, '线上=' + liveLen + ' 本地=' + localLen + (diff === 0 ? '（逐字节一致）' : '（差异 ' + diff + 'B，容差内）'));
+  if (fs.existsSync('outputs/words.js') && wjs.body){
+    const localW = fs.readFileSync('outputs/words.js', 'utf8');
+    const diffW = Math.abs(Buffer.byteLength(wjs.body) - Buffer.byteLength(localW));
+    T('线上/本地一致性(words.js)', diffW < 100, '线上=' + Buffer.byteLength(wjs.body) + ' 本地=' + Buffer.byteLength(localW) + (diffW === 0 ? '（逐字节一致）' : '（差异 ' + diffW + 'B，容差内）'));
+  }
 
   /* 5. Supabase 连通（用 anon key，只发只读请求） */
   try {

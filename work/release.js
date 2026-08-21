@@ -25,10 +25,12 @@ if (!process.env.GH_TOKEN){ console.error('GH_TOKEN 未设置，无法推送'); 
 const run = (cmd, opts) => { console.log('\n▶', cmd); execSync(cmd, Object.assign({ stdio: 'inherit' }, opts || {})); };
 const up = (url) => { try { const o = execSync('curl -s -o /dev/null -w %{http_code} ' + url, { encoding: 'utf8' }); return String(o).trim() === '200'; } catch(e){ return false; } };
 
-/* 1. 构建 + 复制根文件 */
+/* 1. 构建 + 复制根文件（词库已外置 words.js，同样复制到根） */
 run('node work/build.js');
 fs.copyFileSync('outputs/index.html', 'index.html');
 console.log('▶ copy outputs/index.html → index.html');
+fs.copyFileSync('outputs/words.js', 'words.js');
+console.log('▶ copy outputs/words.js → words.js');
 
 /* 2. 可选 e2e（需 server+browser 在跑） */
 if (doE2E){
@@ -41,6 +43,7 @@ if (doE2E){
 
 /* 3. git commit（本地留痕） */
 run('git add -u');
+run('git add outputs/words.js words.js');
 if (extraFiles.length) run('git add ' + extraFiles.map(f => '"' + f.replace(/"/g, '\\"') + '"').join(' '));
 run('git commit -m "' + msg.replace(/"/g, '\\"') + '"');
 

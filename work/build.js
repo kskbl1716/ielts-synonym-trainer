@@ -251,7 +251,17 @@ function entryStr(o){
   return '[' + fields.slice(0, last + 1).map(v => Array.isArray(v) ? '[' + v.map(jsStr).join(',') + ']' : jsStr(v)).join(',') + ']';
 }
 const WORDS_RAW_LIT = 'const WORDS_K=' + JSON.stringify(WORDS_K) + ';\nconst WORDS_RAW=[\n' + all.map(entryStr).join(',\n') + '\n];\nconst WORDS=WORDS_RAW.map(function(r){var o={},i;for(i=0;i<r.length;i++)o[WORDS_K[i]]=r[i];o.rt=o.rt||"";o.af=o.af||"";o.mn=o.mn||"";o.note=o.note||"";return o;});';
-const newBlock = WORDS_START + '\n' + WORDS_RAW_LIT + '\n' + WORDS_END;
+
+/* 词库外置为独立文件 words.js（占页面 86% 体积且极少随 UI 变动）。
+   收益：改 UI/修 bug 时用户不再重下整个词库，词库靠 ETag 命中 304。
+   注意：外链是同步阻塞 script，执行顺序仍严格早于下方内联代码，WORDS 的
+   顶层 const 在全局词法环境中对后续 script 可见，行为与内联时一致。 */
+fs.writeFileSync('outputs/words.js', WORDS_RAW_LIT, 'utf8');
+console.log('words.js written, size:', Buffer.byteLength(WORDS_RAW_LIT));
+/* 标记必须落在 script 内部（它们是 JS 注释，裸露在 HTML 里会显示成正文）：
+   WORDS_START 收尾上半段 script → 外链 → 重开 script 并补回 'use strict'
+   （原巨型 script 顶部声明了严格模式，拆分后必须显式恢复，否则后半段语义改变）。 */
+const newBlock = WORDS_START + '\n</script>\n<script src="words.js"></script>\n<script>\n\'use strict\';\n' + WORDS_END;
 html = html.slice(0, wordsIns) + newBlock + html.slice(wordsIns);
 
 /* ---------- 3. 注入 BOOKS + DICT ---------- */
@@ -308,6 +318,8 @@ if (fs.existsSync('work/cloud.js')){
 }
 html = html.slice(0, scriptEnd) + '\n' + jsAll + '\n' + html.slice(scriptEnd);
 
-/* ---------- 7. 写回 ---------- */
+/* ---------- 7. 静态资源落盘 + 写回 ---------- */
+/* supabase 从 jsdelivr CDN 改自托管（钉死 2.112.3，避免 @2 浮动版本在无发布时偷偷升级登录功能） */
+fs.copyFileSync('work/supabase.js', 'outputs/supabase.js');
 fs.writeFileSync(OUT, html, 'utf8');
 console.log('build OK, size:', Buffer.byteLength(html));
