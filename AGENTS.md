@@ -33,6 +33,7 @@
 ### 四、各种坑（务必避开）
 - **GitHub 主域被墙**，禁止 `git push/git pull`，推送一律 `node work/push-gh.js`（走 GitHub API）。
 - **GH_TOKEN 位置**：`~/.codex/config.toml`（明文）+ Windows 系统环境变量。**严禁打印/回显它的值**，验证只判断存在（`process.env.GH_TOKEN` 是否为空），代码和对话不得出现真实密钥。
+- **DSH 进程可能不继承用户环境变量的 GH_TOKEN**：跑 push-gh.js / check-site.js 若报 `GH_TOKEN not set`，先注入 `$env:GH_TOKEN = [Environment]::GetEnvironmentVariable('GH_TOKEN','User')`（只判断存在，不回显值）。
 - 中文/emoji 不要经 PowerShell 管道传给 node（编码坑），用文件或 heredoc 传参。
 - 词条格式：`k` 必须逐字出现在例句 `e` 里（多词动词用实际时态形式，如 grow→grew）；`t` 用 10 个标准主题 id；`z` 用 l/w；一次加词 ≤500 条。
 - 云合并 `mergeState`（cloud.js）只保留认识的 key → **新增 state 键必须加合并分支**，否则登录丢数据；合并要幂等（用 max/last 取新，求和会翻倍）。
