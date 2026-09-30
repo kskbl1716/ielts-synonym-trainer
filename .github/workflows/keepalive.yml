@@ -1,0 +1,73 @@
+name: Keep-alive (Supabase + site)
+
+# 目的：Supabase 免费套餐「长期无访问会被自动暂停」——2026-09-30 就因此挂过一次，
+# 表现为线上登录/注册/云同步全部失败（项目域名 NXDOMAIN），用户只看到「网络异常」。
+# 这个 workflow 每 3 天打一次后端与站点，保证项目始终被判定为活跃，并在异常时
+# 由 GitHub 发失败通知（默认会邮件通知 workflow 的失败）。
+#
+# 说明：不需要任何 Secret —— 站点用的 anon key 本来就公开在页面里，
+# 这里直接从 work/cloud.js 读，避免再维护一份密钥。
+
+on:
+  schedule:
+    - cron: '17 3 */3 * *' # 每 3 天 03:17 UTC（北京时间 11:17），远小于 7 天暂停阈值
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keepalive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ping Supabase（防免费套餐被暂停）
+        run: |
+          set -euo pipefail
+          URL=$(grep -oP "SUPABASE_URL = '\K[^']+" work/cloud.js | head -1)
+          KEY=$(grep -oP "SUPABASE_ANON_KEY = '\K[^']+" work/cloud.js | head -1)
+          if [ -z "$URL" ] || [ -z "$KEY" ]; then
+            echo "::error::未能从 work/cloud.js 解析出 Supabase 地址或 anon key"
+            exit 1
+          fi
+          echo "target: $URL"
+
+          code=$(curl -sS -o /tmp/rest.json -w '%{http_code}' --max-time 30 \
+            -H "apikey: $KEY" "$URL/rest/v1/user_data?select=user_id&limit=1")
+          echo "rest  status=$code body=$(cat /tmp/rest.json 2>/dev/null | head -c 200)"
+          if [ "$code" != "200" ]; then
+            echo "::error::Supabase REST 异常（$code）——项目可能又被暂停或 key 失效"
+            exit 1
+          fi
+
+          code2=$(curl -sS -o /tmp/auth.json -w '%{http_code}' --max-time 30 \
+            -H "apikey: $KEY" "$URL/auth/v1/settings")
+          echo "auth  status=$code2"
+          if [ "$code2" != "200" ]; then
+            echo "::error::Supabase Auth 异常（$code2）"
+            exit 1
+          fi
+
+      - name: Ping 线上站点（主站 + 版本标记）
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /tmp/site.html -w '%{http_code}' --max-time 30 \
+            "https://kskbl1716.github.io/ielts-synonym-trainer/?_t=$(date +%s)")
+          echo "site  status=$code bytes=$(wc -c < /tmp/site.html)"
+          if [ "$code" != "200" ]; then
+            echo "::error::主站不可达（$code）"
+            exit 1
+          fi
+          if ! grep -q 'v11\.' /tmp/site.html; then
+            echo "::error::页面里找不到版本标记 v11.x"
+            exit 1
+          fi
+          echo "版本标记 OK"
+
+      - name: 汇总
+        run: echo "✅ 后端与站点均正常（本次 keep-alive 已刷新项目活跃度）"

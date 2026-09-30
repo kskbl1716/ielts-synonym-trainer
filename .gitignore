@@ -1,0 +1,51 @@
+# Chrome 测试临时目录（不上传）
+work/chrome-*/
+work/.chrome-profile/
+work/.edge-profile/
+# 测试截图
+work/*.png
+
+work/.push-filelist.txt
+work/.existing-words.txt
+work/.e2e-profile/
+work/.push-gh-tmp/
+# V10 批次校验中间产物（不入库）
+work/_archive/.m5-*
+
+# ---- 2026-08-21 补：本地状态/依赖/备份，不入库 ----
+# 备份目录（构建前/回滚前的手动快照，体积大且本地留痕即可）
+backups/
+# 本地依赖（独立 node 装的包，源码不应含）
+work/node_modules/
+work/package-lock.json
+work/package.json
+# Edge 调试浏览器 profile（e2e 起 Edge 9223 的残留）
+work/_edge-dbg/
+# 各 agent / 工具的本地会话状态
+.dsh/
+.playwright-mcp/
+# 根目录截图（Claude 窗口截图等临时产物）
+/*.png
+
+# ---- 2026-09-20 补：agent 环境文档，⚠️ 绝不入库 ----
+# 本仓库是 PUBLIC 的（GitHub Pages 站点源）。以下文件含 VPS IP/端口、
+# 服务清单、接口路径、操作手册等基础设施信息，一旦提交并公开即为信息泄露。
+# 2026-09-20 已从历史中剔除 SHARED-AGENT-MEMORY.md（当时尚未推送到远端）。
+SHARED-AGENT-MEMORY.md
+AGENT-OPS.md
+SHARED-AGENT-MEMORY.md.bak-*
+# 含 VPS IP / 端口 / vless 凭据，绝不入库（本地留档即可）
+VPN部署指南.md
+
+# ---- 2026-09-30 补：安全审计后的发布边界 ----
+# 维护/环境文档：本地保留，但不再进仓库、不再进 Pages/Vercel 产物
+AGENTS.md
+DEPLOY.md
+TROUBLESHOOTING.md
+V9-PLAN.md
+V9-RELEASE.md
+V10-PLAN.md
+# 手工备份一律不入库（含本次安全加固的回滚点）
+*.bak-*
+
+

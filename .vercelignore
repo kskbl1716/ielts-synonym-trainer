@@ -1,0 +1,11 @@
+# Vercel 镜像站（ielts-trainer-liard.vercel.app）从仓库根目录直接发布静态站点。
+# 2026-09-30 安全加固：下面这些内容与站点无关，但以前会被镜像一起公开
+# （AGENTS.md / TROUBLESHOOTING.md 里有本机路径、GH_TOKEN 存放位置、代理端口等）。
+# GitHub Pages 侧已在 pages.yml 改成白名单；这里让 Vercel 侧对齐。
+work/
+backups/
+outputs/
+.github/
+*.md
+.gitignore
+*.bak-*

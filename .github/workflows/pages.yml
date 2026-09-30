@@ -1,0 +1,51 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 2026-09-30 安全加固：以前是 path: .（整个仓库根都进产物），
+      # 结果 AGENTS.md / DEPLOY.md / TROUBLESHOOTING.md / V9-* / work/ / backups/
+      # 全部可以被匿名下载（含本机路径、GH_TOKEN 存放位置、代理与端口信息）。
+      # 改成白名单：只有下面这些文件会被发布，以后新增文档也不会漏出去。
+      - name: 只保留站点文件（白名单，防止维护文档/源码被发布）
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          for f in index.html words.js supabase.js robots.txt sitemap.xml BingSiteAuth.xml .nojekyll; do
+            if [ -f "$f" ]; then cp "$f" _site/; else echo "::warning::缺少 $f"; fi
+          done
+          if [ ! -f _site/index.html ]; then
+            echo "::error::_site/index.html 不存在，停止部署"
+            exit 1
+          fi
+          echo "将发布的文件："
+          ls -la _site
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
